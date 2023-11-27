@@ -9,7 +9,6 @@ export default function Login() {
   useEffect(() => {
     if (status === "authenticated") {
       router.push('/'); // Rediriger vers la même page pour mettre à jour le status
-      console.log(session);
     }
   }, [session, status, router]);
 
@@ -18,10 +17,11 @@ export default function Login() {
   }
 
   if (session) {
+    console.log('session: ', session);
     return (
       <div className="flex justify-center items-center h-screen">
         <p>Connecté en tant que {session.user.name}</p>
-        
+
         
       </div>
     )
