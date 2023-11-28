@@ -2,6 +2,7 @@ import { signIn, useSession } from "next-auth/react";
 import { useEffect } from "react";
 import { useRouter } from "next/router";
 import OwaGif from "C/owaGif";
+import Header from "C/header";
 
 export default function Login() {
   const { data: session, status } = useSession();
@@ -14,14 +15,14 @@ export default function Login() {
   }, [session, status, router]);
 
   if (status === "loading") {
-    return <div>Chargement...</div>; // ajouter un spinner
+    return <div className="flex-col content-center items-center h-screen">Chargement...</div>; // ajouter un spinner
   }
 
   if (session) {
     console.log('session: ', session);
     return (
       <div className="flex-col content-center items-center h-screen">
-      
+        <Header />
         <OwaGif />
         <p>Connecté en tant que {session.user.name}</p>
 
