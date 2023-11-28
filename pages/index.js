@@ -1,6 +1,7 @@
 import { signIn, useSession } from "next-auth/react";
 import { useEffect } from "react";
 import { useRouter } from "next/router";
+import OwaGif from "C/owaGif";
 
 export default function Login() {
   const { data: session, status } = useSession();
@@ -19,7 +20,9 @@ export default function Login() {
   if (session) {
     console.log('session: ', session);
     return (
-      <div className="flex justify-center items-center h-screen">
+      <div className="flex-col content-center items-center h-screen">
+      
+        <OwaGif />
         <p>Connecté en tant que {session.user.name}</p>
 
         
