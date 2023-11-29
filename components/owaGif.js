@@ -2,7 +2,7 @@ import Image from "next/legacy/image";
 
 export default function OwaGif() {
     return (
-        <div className="relative w-auto h-60 content-center">
+        <div className="relative w-full h-1/2 content-center">
         <Image
             src="/images/owa.gif"
             alt="OWA"
@@ -13,4 +13,4 @@ export default function OwaGif() {
         />
         </div>
     );
-    }
+}

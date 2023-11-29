@@ -9,12 +9,6 @@ export default function Login() {
   const { data: session, status } = useSession();
   const router = useRouter();
 
-  // useEffect(() => {
-  //   if (status === "authenticated") {
-  //     router.push('/'); // Rediriger vers la même page pour mettre à jour le status
-  //   }
-  // }, [session, status, router]);
-
   if (status === "loading") {
     return <div className="flex-col content-center items-center h-screen">Chargement...</div>; // ajouter un spinner
   }
@@ -24,22 +18,23 @@ export default function Login() {
     return (
       <div className="flex-col content-center items-center h-screen">
         <Header />
-        <OwaGif />
         <p>Connecté en tant que {session.user.name}</p>
-
-        
       </div>
     )
   }
 
   return (
-    <div className="flex justify-center items-center h-screen">
+    <div className="flex flex-col content-center items-center h-screen">
+      <Header />
+    <div className="flex flex-col h-full w-full justify-center items-center ">
+      <OwaGif />
       <button
-        className="bg-blue-500 text-white font-bold py-2 px-4 rounded"
+        className="bg-blue-500 text-white font-bold py-2 px-4 rounded mt-12"
         onClick={() => signIn('twitch')}
       >
         Se connecter avec Twitch
       </button>
+    </div>
     </div>
   );
 }
