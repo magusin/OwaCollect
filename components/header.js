@@ -7,11 +7,11 @@ export default function Header() {
     <>
       {session && (
         <header className="bg-gray-800 text-white p-4">
-          <div class="container mx-auto flex justify-between items-center">
+          <div className="container mx-auto flex justify-between items-center">
             <div className="flex items-center">
               <span className="mr-4">{session.user.name}</span>
             </div>
-            <nav class="hidden md:flex space-x-16">
+            <nav className="hidden md:flex space-x-16">
               <Link href="#" className="hover:text-gray-300">Ma collection</Link>
               <Link href="/shop" className="hover:text-gray-300">Shop</Link>
             </nav>

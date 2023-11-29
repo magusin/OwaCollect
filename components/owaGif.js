@@ -1,4 +1,4 @@
-import Image from "next/image";
+import Image from "next/legacy/image";
 
 export default function OwaGif() {
     return (
@@ -6,7 +6,7 @@ export default function OwaGif() {
         <Image
             src="/images/owa.gif"
             alt="OWA"
-            
+            priority={true}
             objectFit="contain"
             objectPosition="center"
             layout="fill"
