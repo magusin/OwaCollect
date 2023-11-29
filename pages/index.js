@@ -3,16 +3,17 @@ import { useEffect } from "react";
 import { useRouter } from "next/router";
 import OwaGif from "C/owaGif";
 import Header from "C/header";
+import Link from "next/link";
 
 export default function Login() {
   const { data: session, status } = useSession();
   const router = useRouter();
 
-  useEffect(() => {
-    if (status === "authenticated") {
-      router.push('/'); // Rediriger vers la même page pour mettre à jour le status
-    }
-  }, [session, status, router]);
+  // useEffect(() => {
+  //   if (status === "authenticated") {
+  //     router.push('/'); // Rediriger vers la même page pour mettre à jour le status
+  //   }
+  // }, [session, status, router]);
 
   if (status === "loading") {
     return <div className="flex-col content-center items-center h-screen">Chargement...</div>; // ajouter un spinner
