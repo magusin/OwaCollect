@@ -59,7 +59,7 @@ const Shop = () => {
                         <div className="mt-2">
                             <h2 className="text-xl font-semibold">{product.name}</h2>
                             <p className="mt-1">{product.name}</p>
-                            <div className="mt-2 font-bold">{product.price}</div>
+                            <div className="mt-2 font-bold">Prix : {product.price} OC</div>
                             <button className="mt-4 bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600">Acheter</button>
                         </div>
                     </div>
