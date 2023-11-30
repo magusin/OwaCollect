@@ -47,3 +47,10 @@ model user_achievements {
   @@id([user_id, achievement_id])
   @@index([achievement_id], map: "achievement_id")
 }
+
+model product {
+  id      Int    @id @default(autoincrement())
+  name    String @db.VarChar(255)
+  price   Float  @db.Float
+  picture String @db.VarChar(255)
+}
