@@ -1,0 +1,49 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model achievements {
+  id                Int                 @id @default(autoincrement())
+  name              String?             @db.VarChar(255)
+  description       String?             @db.Text
+  required_level    Int                 @default(0)
+  required_subs     Int                 @default(0)
+  required_gifts    Int                 @default(0)
+  required_quiz     Int                 @default(0)
+  required_messages Int                 @default(0)
+  required_bits     Int                 @default(0)
+  required_guess    Int                 @default(0)
+  img               String              @db.VarChar(255)
+  user_achievements user_achievements[]
+}
+
+model pets {
+  id                Int                 @id @default(autoincrement())
+  userId            String              @unique(map: "userId") @db.VarChar(255)
+  name              String              @db.VarChar(255)
+  imageUrl          String              @db.VarChar(1024)
+  xp                Int?                @default(0)
+  level             Int?                @default(1)
+  subs              Int                 @default(0)
+  gifts             Int                 @default(0)
+  messages          Int                 @default(0)
+  bits              Int                 @default(0)
+  guess             Int                 @default(0)
+  quiz              Int                 @default(0)
+  user_achievements user_achievements[]
+}
+
+model user_achievements {
+  user_id        String       @db.VarChar(255)
+  achievement_id Int
+  pets           pets         @relation(fields: [user_id], references: [userId], onUpdate: Restrict, map: "user_achievements_ibfk_1")
+  achievements   achievements @relation(fields: [achievement_id], references: [id], onUpdate: Restrict, map: "user_achievements_ibfk_2")
+
+  @@id([user_id, achievement_id])
+  @@index([achievement_id], map: "achievement_id")
+}

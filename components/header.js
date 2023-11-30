@@ -4,10 +4,10 @@ import Image from "next/image";
 
 export default function Header() {
   const { data: session, status } = useSession();
-  console.log(session)
   return (
     <>
       {session ? (
+        // if session
         <header className="bg-gray-800 text-white p-4">
           <div className="container mx-auto flex justify-between items-center">
             <div className="flex items-center">
@@ -26,14 +26,13 @@ export default function Header() {
           </div>
         </header>
       ) : (
+        // if user haven't session
         <header className="bg-gray-800 text-white w-full">
           <div className="container mx-auto flex justify-center items-center  h-full">
             <Image
               src={"/images/owaCollect.png"}
               alt="banner owaCollect"
               priority={true}
-              objectFit="contain"
-              objectPosition="center"
               width={300}
               height={300}
             />

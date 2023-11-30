@@ -10,11 +10,16 @@ const Shop = () => {
     const router = useRouter();
 
     useEffect(() => {
-    if (status != "authenticated") {
-      router.push('/'); // Rediriger vers la même page pour mettre à jour le status
+        // Rediriger seulement si l'état de la session est déterminé et qu'il n'y a pas de session
+        if (status === "unauthenticated") {
+            router.push('/');
+        }
+    }, [status, router]);
+    console.log('session: ', session);
+    if (status === "loading") {
+        return <div>Chargement...</div>;
     }
-  }, [session, status, router]);
-    console.log(status)
+
     return (
         <>
         <Header />
@@ -24,7 +29,7 @@ const Shop = () => {
                 {/*  itérer sur produit */}
                 {Array.from({ length: 6 }).map((_, index) => (
                     <div key={index} className="border rounded-lg p-4 shadow hover:shadow-lg transition">
-                        <Image className="w-full h-64 object-cover rounded-t-lg" src={`https://via.placeholder.com/300?text=Produit+${index + 1}`} alt={`Produit ${index + 1}`} width={300} height={300} />
+                        <Image className="w-full h-64 object-cover rounded-t-lg" src={`https://via.placeholder.com/300?text=Produit+${index + 1}`} alt={`Produit ${index + 1}`} width={300} height={300}/>
                         
                         <div className="mt-2">
                             <h2 className="text-xl font-semibold">Produit {index + 1}</h2>
