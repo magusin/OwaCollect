@@ -39,7 +39,6 @@ export default async function handler(req, res) {
         switch (req.method) {
             case 'GET':
                 const products = await prisma.product.findMany()
-                console.log('products: ', products)
                 res.status(200).json(products)
                 break
             default:

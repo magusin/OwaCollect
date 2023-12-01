@@ -25,10 +25,8 @@ const Shop = () => {
                 const response = await axios.get('/api/product');
                 const data = await response.data;
                 setProducts(data);
-                console.log('data: ', data);
             } catch (error) {
                 setError(error);
-                console.log(error)
             } finally {
                 setLoading(false);
             }
@@ -37,16 +35,28 @@ const Shop = () => {
     }, [status, router]);
 
     if (status === "loading" || loading) {
-        return <div>Chargement...</div>;
+        return ( 
+        <div className="flex-col content-center items-center h-screen">
+            <Header />
+            {/* ajouter spinner */}
+            <p>Chargement...</p>
+            </div> 
+        )
     }
   
     if (error) {
-        return <div>Erreur lors du chargement des produits</div>;
+        return (
+        <div className="flex-col content-center items-center h-screen">
+            <Header />
+            <p>Erreur lors du chargement des produits</p>
+        </div>
+        )
     }
 
 
     return (
         <>
+        <div className="flex-col h-screen w-full items-center ">
         <Header />
         <div className="container mx-auto px-4">
 
@@ -65,6 +75,7 @@ const Shop = () => {
                     </div>
                 ))}
             </div>
+        </div>
         </div>
         </>
     );
