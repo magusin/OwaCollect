@@ -10,37 +10,27 @@ import Link from "next/link";
 export default function Login() {
   const { data: session, status } = useSession();
   const router = useRouter();
-  const [subscriptions, setSubscriptions] = React.useState([]);
-  const [loading, setLoading] = React.useState(true);
+  const [user, setUser] = React.useState(null);
+  const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState(null);
-  console.log(session);
-  //   useEffect(() => {
-  //     if (session) {
-  //   const subscriptions = async () => {
-  //     try {
-  //       const response = await axios.get('https://api.twitch.tv/helix/subscriptions', {
-  //         headers: {
-  //           'Authorization': `Bearer ${session.accessToken}`,
-  //           'Client-Id': "jmq642olignuzl4a51lgwmavf5yhcs"
-  //         },
-  //         params: {
-  //           'broadcaster_id': '75524984',
-  //           'user_id': session.user.id
-  //         }
-  //       });
-  //       const data = await response.data;
-  //       console.log(data);
-  //       setSubscriptions(data);
-  //     } catch (error) {
-  //       console.error('Erreur lors de la récupération des abonnements Twitch:', error);
-  //       setError(error);
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   }
-  //   subscriptions()
-  // }
-  // }, [status, router, session]);
+  console.log('user:', user)
+    useEffect(() => {
+      if (session) {
+        const getUser = async () => {
+          try {
+              const response = await axios.get('/api/user/' + session.user.id);
+              const data = await response.data;
+              setUser(data);
+          } catch (error) {
+              setError(error);
+          } finally {
+              setLoading(false);
+          }
+      };
+      getUser();
+  }
+  }, [status, router, session]);
+
   if (status === "loading" || loading) {
     return (
       <div className="flex-col content-center items-center h-screen">
@@ -55,7 +45,7 @@ export default function Login() {
     return (
       <div className="flex-col content-center items-center h-screen">
         <Header />
-        <p>Erreur lors du chargement des produits</p>
+        <p>Erreur lors du chargement des informations utilisateur</p>
       </div>
     )
   }

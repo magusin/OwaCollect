@@ -54,3 +54,17 @@ model product {
   price   Float  @db.Float
   picture String @db.VarChar(255)
 }
+
+model card {
+  id         Int     @id @default(autoincrement())
+  name       String  @db.VarChar(255)
+  picture    String  @db.VarChar(255)
+  isDraw     Boolean
+  evolvedId  Int?
+  evolveCost Int?
+  category   String  @db.VarChar(55)
+  card       card?   @relation("cardTocard", fields: [evolvedId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "card_ibfk_1")
+  other_card card[]  @relation("cardTocard")
+
+  @@index([evolvedId], map: "evolvedId")
+}
