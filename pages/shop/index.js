@@ -87,14 +87,14 @@ const Shop = () => {
 
     return (
         <>
-        <div className="flex-col h-screen w-full items-center ">
+        <div className="flex-col h-screen w-full items-center justify-center min-h-screen">
         <Header points={points}/>
-        <div className="container mx-auto px-4">
+        <div className="container mx-auto px-4 mt-8">
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {/*  itérer sur produit */}
                 {products.map((product, index) => (
-                    <div key={index} className="border rounded-lg p-4 shadow hover:shadow-lg transition">
+                    <div key={index} className="border rounded-lg p-4 shadow hover:shadow-lg transition bg-white">
                         <Image className="w-full h-128 object-cover rounded-t-lg" src={`${product.picture}.png`} alt={`${product.name} pack picture`} width={300} height={300} priority/>
                         
                         <div className="mt-2">

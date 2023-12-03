@@ -9,7 +9,7 @@ export default function OwaGif() {
             priority={true}
             objectFit="contain"
             objectPosition="center"
-            layout="fill"
+            layout="fill"        
         />
         </div>
     );
