@@ -5,7 +5,7 @@ import { useEffect } from "react";
 import { useRouter } from "next/router";
 import OwaGif from "C/owaGif";
 import Header from "C/header";
-import calculatePoints from "@/utils/calculatePoints.js";
+import calculatePoints from "@/utils/calculatePoints";
 
 export default function Login() {
   const { data: session, status } = useSession();
@@ -14,16 +14,17 @@ export default function Login() {
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState(null);
   const [points, setPoints] = React.useState(0);
+  const [isFetching, setIsFetching] = React.useState(false);
 
   useEffect(() => {
-
-    if (session) {
+    if (session && !isFetching) {
+      setIsFetching(true);
+      //  add flag if create user for cancel multiple call
       const getUser = async () => {
         try {
           const response = await axios.get('/api/user/' + session.user.id);
           const data = await response.data;
           localStorage.setItem('userOC', JSON.stringify(data));
-          console.log(localStorage)
           setUser(data);
           const calculatedPoints = calculatePoints(data);
           const totalPoints = calculatedPoints - data.pointsUsed;
@@ -33,6 +34,7 @@ export default function Login() {
           setError(error);
         } finally {
           setLoading(false);
+          setIsFetching(false);
         }
       };
       getUser();

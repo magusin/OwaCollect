@@ -5,6 +5,7 @@ import { useRouter } from "next/router";
 import { useEffect } from "react";
 import Image from 'next/image';
 import axios from 'axios'
+import calculatePoints from '@/utils/calculatePoints';
 
 const Shop = () => {
     const { data: session, status } = useSession();
@@ -13,7 +14,7 @@ const Shop = () => {
     const  [loading, setLoading] = React.useState(true);
     const  [error, setError] = React.useState(null);
     const [points, setPoints] = React.useState(0);
-    console.log(points)
+
     useEffect(() => {
         // Rediriger seulement si l'état de la session est déterminé et qu'il n'y a pas de session
         if (status === "unauthenticated") {
@@ -22,6 +23,31 @@ const Shop = () => {
 
         if (localStorage.getItem('points') != null) {
             setPoints(localStorage.getItem('points'))
+        }
+
+        if (localStorage.getItem('points') === null && localStorage.getItem('userOC') != null) {
+            const user = JSON.parse(localStorage.getItem('userOC'));
+            const calculatedPoints = calculatePoints(user);
+            const totalPoints = calculatedPoints - user.pointsUsed;
+            localStorage.setItem('points', totalPoints);
+            setPoints(totalPoints);
+        }
+
+        if (localStorage.getItem('userOC') === null && localStorage.getItem('points') === null && session) {
+            const getUser = async () => {
+                try {
+                    const response = await axios.get('/api/user/' + session.user.id);
+                    const data = await response.data;
+                    localStorage.setItem('userOC', JSON.stringify(data));
+                    const calculatedPoints = calculatePoints(data);
+                    const totalPoints = calculatedPoints - data.pointsUsed;
+                    localStorage.setItem('points', totalPoints);
+                    setPoints(totalPoints);
+                } catch (error) {
+                    setError(error);
+                }
+            };
+            getUser();
         }
 
         // Récupérer les produits
@@ -37,7 +63,7 @@ const Shop = () => {
             }
         };
         fetchProducts();
-    }, [status, router]);
+    }, [status, router, session]);
 
     if (status === "loading" || loading) {
         return ( 

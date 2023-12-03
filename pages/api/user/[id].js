@@ -40,10 +40,23 @@ export default async function handler(req, res) {
         await runMiddleware(req, res, cors)
         switch (req.method) {
             case 'GET':
-                const user = await prisma.pets.findUnique({
+                const user = await prisma.pets.upsert({
                     where: {
                         userId: id
-                    }
+                    },
+                    create: {
+                        userId: id,
+                        name: session.user.name,
+                        imageUrl: session.user.image,
+                        subs: 0,
+                        guess: 0,
+                        bits: 0,
+                        quiz: 0,
+                        gifts: 0,
+                        messages: 0,
+                        guess: 0
+                    },
+                    update: {}
                 })
                 res.status(200).json(user)
                 break
