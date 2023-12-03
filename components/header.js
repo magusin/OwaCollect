@@ -3,7 +3,17 @@ import { signOut, useSession } from "next-auth/react";
 import Image from "next/image";
 
 export default function Header({points}) {
+  
   const { data: session, status } = useSession();
+
+  const handleSignOut = () => {
+    // Vider le localStorage
+    localStorage.removeItem('userOC');
+    localStorage.removeItem('points');
+  
+    // Se déconnecter avec NextAuth
+    signOut();
+  };
   
   return (
     <>
@@ -21,7 +31,7 @@ export default function Header({points}) {
             </nav>
           <button
             className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
-            onClick={() => signOut()}
+            onClick={handleSignOut}
           >
             Déconnexion
           </button>
