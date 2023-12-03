@@ -12,11 +12,16 @@ const Shop = () => {
     const  [products, setProducts] = React.useState([]);
     const  [loading, setLoading] = React.useState(true);
     const  [error, setError] = React.useState(null);
-
+    const [points, setPoints] = React.useState(0);
+    console.log(points)
     useEffect(() => {
         // Rediriger seulement si l'état de la session est déterminé et qu'il n'y a pas de session
         if (status === "unauthenticated") {
             router.push('/');
+        }
+
+        if (localStorage.getItem('points') != null) {
+            setPoints(localStorage.getItem('points'))
         }
 
         // Récupérer les produits
@@ -57,7 +62,7 @@ const Shop = () => {
     return (
         <>
         <div className="flex-col h-screen w-full items-center ">
-        <Header />
+        <Header points={points}/>
         <div className="container mx-auto px-4">
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -70,7 +75,7 @@ const Shop = () => {
                             <h2 className="text-xl font-semibold">{product.name}</h2>
                             <p className="mt-1">{product.name}</p>
                             <div className="mt-2 font-bold">Prix : {product.price} OC</div>
-                            <button className="mt-4 bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600">Acheter</button>
+                            <button className={`mt-4 bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 ${points < product.price ? "opacity-50 cursor-not-allowed" : ""}`} disabled={points < product.price}>Acheter</button>
                         </div>
                     </div>
                 ))}

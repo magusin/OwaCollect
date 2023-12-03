@@ -4,6 +4,7 @@ import Image from "next/image";
 
 export default function Header({points}) {
   const { data: session, status } = useSession();
+  
   return (
     <>
       {session ? (
@@ -12,7 +13,7 @@ export default function Header({points}) {
           <div className="container mx-auto flex justify-between items-center">
             <div className="flex items-center">
               <span className="mr-4 border-r-2 pr-2">{session.user.name}</span>
-              <span className="mr-4">{points ? points : 0} CP</span>
+              <span className="mr-4">{points ? points : 0} OC</span>
             </div>
             <nav className="hidden md:flex space-x-16">
               <Link href="#" className="hover:text-gray-300">Ma collection</Link>
