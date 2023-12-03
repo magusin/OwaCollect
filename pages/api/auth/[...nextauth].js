@@ -9,7 +9,7 @@ export default NextAuth({
       clientSecret: process.env.TWITCH_CLIENT_SECRET,
       authorization: {
         params: {
-          scope: 'openid user:read:email channel:read:subscriptions'
+          scope: 'openid user:read:email'
         },
       },
     }),
@@ -24,7 +24,7 @@ export default NextAuth({
         return token
       },
     async session({ session, token, user }) {
-      // Send properties to the client, like an access_token and user id from a provider.
+      // Send properties to the client
       session.accessToken = token.accessToken
       session.user.id = token.sub
       

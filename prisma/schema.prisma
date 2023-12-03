@@ -35,6 +35,7 @@ model pets {
   bits              Int                 @default(0)
   guess             Int                 @default(0)
   quiz              Int                 @default(0)
+  pointsUsed        Int?                @default(0)
   user_achievements user_achievements[]
 }
 

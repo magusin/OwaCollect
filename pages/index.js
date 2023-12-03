@@ -6,6 +6,7 @@ import { useRouter } from "next/router";
 import OwaGif from "C/owaGif";
 import Header from "C/header";
 import Link from "next/link";
+import calculatePoints from "@/utils/calculatePoints.js";
 
 export default function Login() {
   const { data: session, status } = useSession();
@@ -13,14 +14,19 @@ export default function Login() {
   const [user, setUser] = React.useState(null);
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState(null);
-  console.log('user:', user)
+  const [points, setPoints] = React.useState(0);
+ 
     useEffect(() => {
+    
       if (session) {
         const getUser = async () => {
           try {
               const response = await axios.get('/api/user/' + session.user.id);
               const data = await response.data;
               setUser(data);
+              const calculatedPoints = calculatePoints(data); 
+              const totalPoints = calculatedPoints - data.pointsUsed;
+              setPoints(totalPoints); 
           } catch (error) {
               setError(error);
           } finally {
@@ -29,9 +35,9 @@ export default function Login() {
       };
       getUser();
   }
-  }, [status, router, session]);
+  }, [session]);
 
-  if (status === "loading" || loading) {
+  if (status === "loading" || loading || !user) {
     return (
       <div className="flex-col content-center items-center h-screen">
         <Header />
@@ -53,8 +59,9 @@ export default function Login() {
   if (session) {
     return (
       <div className="flex-col content-center items-center h-screen">
-        <Header />
+        <Header points={points}/>
         <p>Connecté en tant que {session.user.name}</p>
+        <p>Points: {points}</p>
       </div>
     )
   }
