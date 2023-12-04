@@ -1,5 +1,5 @@
 /* eslint-disable react/no-unescaped-entities */
-export default function Modal ({ setShowModal, product }) {
+export default function Modal ({ setShowModal, product, handleConfirmPurchase }) {
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
             <div className="bg-white p-4 rounded-lg shadow-xl">
@@ -7,7 +7,7 @@ export default function Modal ({ setShowModal, product }) {
                 <p>Êtes-vous sûr de vouloir acheter <b>{product.name}</b> pack pour <b>{product.price} OC</b> ?</p>
                 <div className="flex justify-center mt-4">
                     <button
-
+                        onClick={handleConfirmPurchase}
                         className="bg-green-500 text-white py-2 px-4 rounded mr-4"
                     >
                         Confirmer

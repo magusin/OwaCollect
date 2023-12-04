@@ -27,10 +27,9 @@ async function runMiddleware(req, res, fn) {
     })
 }
 
-// GET /api/user/[id]
+// GET /api/user
 
 export default async function handler(req, res) {
-    const { id } = req.query;
     const session = await getSession({ req });
     if (!session) {
         res.status(401).json({ error: "Unauthorized" });
@@ -42,10 +41,10 @@ export default async function handler(req, res) {
             case 'GET':
                 const user = await prisma.pets.upsert({
                     where: {
-                        userId: id
+                        userId: session.user.id
                     },
                     create: {
-                        userId: id,
+                        userId: session.user.id,
                         name: session.user.name,
                         imageUrl: session.user.image,
                         subs: 0,

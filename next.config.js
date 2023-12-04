@@ -11,6 +11,10 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'imgur.com',
       },
+      {
+        protocol: 'https',
+        hostname: 'static-cdn.jtvnw.net',
+      },
     ],
   },
 }

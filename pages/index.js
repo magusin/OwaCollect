@@ -6,6 +6,8 @@ import { useRouter } from "next/router";
 import OwaGif from "C/owaGif";
 import Header from "C/header";
 import calculatePoints from "@/utils/calculatePoints";
+import TwitchUserInfo from "@/components/twitchUserInfo";
+import Image from "next/legacy/image";
 
 export default function Login() {
   const { data: session, status } = useSession();
@@ -15,14 +17,14 @@ export default function Login() {
   const [error, setError] = React.useState(null);
   const [points, setPoints] = React.useState(0);
   const [isFetching, setIsFetching] = React.useState(false);
-
+  console.log(user)
   useEffect(() => {
     if (session && !isFetching) {
       setIsFetching(true);
       //  add flag if create user for cancel multiple call
       const getUser = async () => {
         try {
-          const response = await axios.get('/api/user/' + session.user.id);
+          const response = await axios.get('/api/user');
           const data = await response.data;
           localStorage.setItem('userOC', JSON.stringify(data));
           setUser(data);
@@ -41,7 +43,7 @@ export default function Login() {
     } else {
       setLoading(false);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session]);
 
   if (status === "loading" || loading) {
@@ -63,15 +65,26 @@ export default function Login() {
     )
   }
 
-  if (session) {
+  if (session && user) {
     return (
-      <div className="flex-col content-center items-center h-screen">
+      <div className="flex-col content-center items-center justify-center h-screen">
         <Header points={points} />
-        <p>Connecté en tant que {session.user.name}</p>
-        <p>Points: {points}</p>
+        <div className="relative w-full h-screen flex justify-center items-center">
+        <Image 
+            src="/images/twitchuser.png" 
+            alt="Fond" 
+            layout="fill" 
+            objectFit="cover" 
+            priority={true} 
+          />            
+          <div className="absolute" style={{ width: 'calc(100% - 4rem)', top: 'calc(50%)', left: 'calc(50% + 2rem)', transform: 'translate(-50%, -50%)' }}>
+            <TwitchUserInfo userData={user} />
+            </div>
+          </div>
       </div>
     )
   }
+  
   if (!session) {
     return (
       <div className="flex flex-col content-center items-center h-screen">

@@ -22,6 +22,17 @@ const Shop = () => {
         setShowModal(true);
     };
 
+    const handleConfirmPurchase = (selectedProduct) => {
+        setLoading(true);
+        setShowModal(false);
+        if (points >= selectedProduct.price) {
+            console.log('activated')
+        } else {
+            error = "Vous n'avez pas assez de points pour acheter ce pack";
+        }
+        
+    };
+
     useEffect(() => {
         // Rediriger seulement si l'état de la session est déterminé et qu'il n'y a pas de session
         if (status === "unauthenticated") {
@@ -43,7 +54,7 @@ const Shop = () => {
         if (localStorage.getItem('userOC') === null && localStorage.getItem('points') === null && session) {
             const getUser = async () => {
                 try {
-                    const response = await axios.get('/api/user/' + session.user.id);
+                    const response = await axios.get('/api/user');
                     const data = await response.data;
                     localStorage.setItem('userOC', JSON.stringify(data));
                     const calculatedPoints = calculatePoints(data);
@@ -110,13 +121,13 @@ const Shop = () => {
                                     <div className="mt-2 font-bold">Prix : {product.price} OC</div>
                                     <button onClick={handleBuyPack} className={`mt-4 bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 ${points < product.price ? "opacity-50 cursor-not-allowed" : ""}`} disabled={points < product.price}>Acheter</button>
                                 </div>
+                                {showModal && (
+                                    <Modal setShowModal={setShowModal} product={product} handleConfirmPurchase={() => handleConfirmPurchase(product)} />
+                                )}
                             </div>
                         ))}
                     </div>
                 </div>
-                {showModal && (
-                    <Modal setShowModal={setShowModal} product={products[0]} />
-                )}
             </div>
         </>
     );
