@@ -17,10 +17,9 @@ export default function Login() {
   const [error, setError] = React.useState(null);
   const [points, setPoints] = React.useState(0);
   const [isFetching, setIsFetching] = React.useState(false);
-  
+
   useEffect(() => {
     if (session && !isFetching) {
-      console.log(session)
       setIsFetching(true);
       //  add flag if create user for cancel multiple call
       const getUser = async () => {
@@ -38,7 +37,7 @@ export default function Login() {
           localStorage.setItem('points', totalPoints);
           setPoints(totalPoints);
         } catch (error) {
-          setError(error);
+          setError('Erreur lors de la récupération des données utilisateur');
         } finally {
           setLoading(false);
           setIsFetching(false);
@@ -63,55 +62,53 @@ export default function Login() {
 
   if (error) {
     return (
-      <div className="flex-col content-center items-center h-screen">
-        <Header />
-        <p>Erreur lors du chargement des informations utilisateur</p>
-      </div>
-    )
-  }
+        <div className="flex flex-col h-screen">
+            <Header /> 
+            <div className="flex-grow flex justify-center items-center">
+                <span className="text-center text-red-500">⚠ {error}</span>
+            </div>
+        </div>
+    );
+}
 
   if (session && user) {
-    // console.log(JSON.parse(localStorage.getItem('nextauth.message')))
-    const point = 500
-    const editUser = async () => {
+    const allCards = async () => {
       try {
-          const response = await fetch('/api/user', { 
-              method: 'PUT',
-              headers: {
-                  'Content-Type': 'application/json',
-                  Authorization: `Bearer ${session.customJwt}`,
-              },
-              body: JSON.stringify({ 
-                  pointsUsed: point
-              })
-          })
-          // console.log('response:', response)
-          const data = await response.json();
-          // console.log('data:', data)
+        const response = await fetch('/api/card/Elden Ring', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${session.customJwt}`,
+          }
+        })
+        console.log('response:', response)
+        const data = await response.json();
+        console.log('data:', data)
       } catch (error) {
-          setError(error);
+        setError(error);
       }
-  };
-  // editUser();
+    };
+    allCards();
+
     return (
       <div className="flex-col content-center items-center justify-center h-screen">
         <Header points={points} />
         <div className="relative w-full h-screen flex justify-center items-center">
-        <Image 
-            src="/images/twitchuser.png" 
-            alt="Fond" 
-            layout="fill" 
-            objectFit="cover" 
-            priority={true} 
-          />            
+          <Image
+            src="/images/twitchuser.png"
+            alt="Fond"
+            layout="fill"
+            objectFit="cover"
+            priority={true}
+          />
           <div className="absolute" style={{ width: 'calc(100% - 4rem)', top: 'calc(50%)', left: 'calc(50% + 2rem)', transform: 'translate(-50%, -50%)' }}>
             <TwitchUserInfo userData={user} />
-            </div>
           </div>
+        </div>
       </div>
     )
   }
-  
+
   if (!session) {
     return (
       <div className="flex flex-col content-center items-center h-screen">

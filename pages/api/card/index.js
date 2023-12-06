@@ -26,7 +26,7 @@ async function runMiddleware(req, res, fn) {
     })
 }
 
-// GET /api/product
+// GET /api/card
 export default async function handler(req, res) {
     const token = req.headers.authorization?.split(' ')[1];
     if (!token) {
@@ -34,14 +34,14 @@ export default async function handler(req, res) {
     }
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     if (!decoded) {
-        return res.status(401).json({ message: 'Token invalide' });
+        return res.status(401).json({ message: 'Token invalide ou expiré' });
     }
     try {
         await runMiddleware(req, res, cors)
         switch (req.method) {
             case 'GET':
-                const products = await prisma.product.findMany()
-                res.status(200).json(products)
+                const cards = await prisma.card.findMany()
+                res.status(200).json(cards)
                 break
             default:
                 res.status(405).end(`Method ${req.method} Not Allowed`)

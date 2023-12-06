@@ -30,7 +30,6 @@ export default NextAuth({
           const expiresIn = account.expires_at - Math.floor(Date.now() / 1000);
           const customJwt = jwt.sign(userPayload, process.env.JWT_SECRET, { expiresIn });
           token.customJwt = customJwt;
-          console.log('account:', account)
         }
         return token
       },

@@ -11,6 +11,7 @@ import Modal from 'C/modal';
 
 const Shop = () => {
     const { data: session, status } = useSession();
+    console.log('session:', session.customJwt)
     const router = useRouter();
     const [products, setProducts] = React.useState([]);
     const [loading, setLoading] = React.useState(true);
@@ -25,41 +26,38 @@ const Shop = () => {
     const handleConfirmPurchase = (selectedProduct) => {
         setLoading(true);
         setShowModal(false);
-        if (points >= selectedProduct.price) {
+        if (points >= selectedProduct.price && session) {
             console.log('activated')
             const user = JSON.parse(localStorage.getItem('userOC'));
             const calculatedPoints = JSON.parse(localStorage.getItem('points'));
             const totalPoints = calculatedPoints - selectedProduct.price;
-            localStorage.setItem('points', totalPoints);
-            setPoints(totalPoints);
             const updatedUser = {
                 ...user,
                 pointsUsed: user.pointsUsed + selectedProduct.price
             };
-            const editUser = async () => {
+            const editUserPoints = async () => {
+                console.log('editstart')
                 try {
-                    const response = await fetch('/api/user', { 
-                        method: 'PUT',
+                    const response = await axios.put('/api/user',
+                    { pointsUsed: updatedUser.pointsUsed }, 
+                    { 
                         headers: {
                             'Content-Type': 'application/json',
                             Authorization: `Bearer ${session.customJwt}`,
-                        },
-                        body: JSON.stringify({ 
-                            pointsUsed: updatedUser.pointsUsed 
-                        })
+                        }
                     })
-                    
-                    const data = await response.json();
+                    console.log('response:', response)
+                    const data = await response.data;
                     localStorage.setItem('userOC', JSON.stringify(data));
-                    const calculatedPoints = calculatePoints(data);
-                    const totalPoints = calculatedPoints - data.pointsUsed;
                     localStorage.setItem('points', totalPoints);
                     setPoints(totalPoints);
                 } catch (error) {
-                    setError(error);
+                    setError("Erreur lors de l'achat du pack");
+                } finally {
+                    setLoading(false);
                 }
             };
-            editUser();
+            editUserPoints();
             localStorage.setItem('userOC', JSON.stringify(updatedUser));
         } else {
             setError("Vous n'avez pas assez de points pour acheter ce pack");
@@ -88,7 +86,11 @@ const Shop = () => {
         if (localStorage.getItem('userOC') === null && localStorage.getItem('points') === null && session) {
             const getUser = async () => {
                 try {
-                    const response = await axios.get('/api/user');
+                    const response = await axios.get('/api/user', {
+                        headers: {
+                            Authorization: `Bearer ${session.customJwt}`,
+                        },
+                    });
                     const data = await response.data;
                     localStorage.setItem('userOC', JSON.stringify(data));
                     const calculatedPoints = calculatePoints(data);
@@ -102,40 +104,47 @@ const Shop = () => {
             getUser();
         }
 
+        if (session && localStorage.getItem('userOC') != null) {
         // Récupérer les produits
         const fetchProducts = async () => {
             try {
-                const response = await axios.get('/api/product');
+                const response = await axios.get('/api/product', {
+                    headers: {
+                        Authorization: `Bearer ${session.customJwt}`,
+                    },
+                });
                 const data = await response.data;
                 setProducts(data);
             } catch (error) {
-                setError(error);
+                setError('Erreur lors de la récupération des produits');
             } finally {
                 setLoading(false);
             }
         };
         fetchProducts();
+    }
     }, [status, router, session]);
-
-    console.log('session:', session)
 
     if (status === "loading" || loading) {
         return (
-            <div className="flex-col content-center items-center h-screen">
-                <Header />
-                {/* ajouter spinner */}
-                <p>Chargement...</p>
+            <div className="flex flex-col h-screen">
+                <Header /> 
+                <div className="flex-grow flex justify-center items-center">
+                    <span className="text-center">Chargement ...</span>
+                </div>
             </div>
         )
     }
 
     if (error) {
         return (
-            <div className="flex-col content-center items-center h-screen">
-                <Header />
-                <p>Erreur lors du chargement des produits</p>
+            <div className="flex flex-col h-screen">
+                <Header /> 
+                <div className="flex-grow flex justify-center items-center">
+                    <span className="text-center text-red-500">⚠ {error}</span>
+                </div>
             </div>
-        )
+        );
     }
 
 

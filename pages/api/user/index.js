@@ -1,5 +1,4 @@
 import Cors from 'cors'
-// import { getSession } from "next-auth/react";
 import { PrismaClient } from '@prisma/client'
 import jwt from 'jsonwebtoken';
 
@@ -28,23 +27,17 @@ async function runMiddleware(req, res, fn) {
     })
 }
 
-// GET /api/user
+// GET || PUT /api/user
 
 export default async function handler(req, res) {
-    // const session = await getSession({ req });
     const token = req.headers.authorization?.split(' ')[1]; // JWT envoyé dans le header Authorization
     if (!token) {
         return res.status(401).json({ message: 'Token non fourni' });
     }
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    console.log('decoded:', decoded)
     if (!decoded) {
         return res.status(401).json({ message: 'Token invalide' });
     }
-    // if (!session) {
-    //     res.status(401).json({ error: "Unauthorized" });
-    //     return;
-    // }
     try {
         await runMiddleware(req, res, cors)
         switch (req.method) {
@@ -71,6 +64,9 @@ export default async function handler(req, res) {
                 break
             case 'PUT':
                 const { pointsUsed } = req.body
+                if (!pointsUsed) {
+                    return res.status(400).json({ message: "Points utilisés non fournis" });
+                }
                 const updatedUser = await prisma.pets.update({
                     where: {
                         userId: decoded.id
