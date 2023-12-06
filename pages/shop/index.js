@@ -27,10 +27,44 @@ const Shop = () => {
         setShowModal(false);
         if (points >= selectedProduct.price) {
             console.log('activated')
+            const user = JSON.parse(localStorage.getItem('userOC'));
+            const calculatedPoints = JSON.parse(localStorage.getItem('points'));
+            const totalPoints = calculatedPoints - selectedProduct.price;
+            localStorage.setItem('points', totalPoints);
+            setPoints(totalPoints);
+            const updatedUser = {
+                ...user,
+                pointsUsed: user.pointsUsed + selectedProduct.price
+            };
+            const editUser = async () => {
+                try {
+                    const response = await fetch('/api/user', { 
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            Authorization: `Bearer ${session.customJwt}`,
+                        },
+                        body: JSON.stringify({ 
+                            pointsUsed: updatedUser.pointsUsed 
+                        })
+                    })
+                    
+                    const data = await response.json();
+                    localStorage.setItem('userOC', JSON.stringify(data));
+                    const calculatedPoints = calculatePoints(data);
+                    const totalPoints = calculatedPoints - data.pointsUsed;
+                    localStorage.setItem('points', totalPoints);
+                    setPoints(totalPoints);
+                } catch (error) {
+                    setError(error);
+                }
+            };
+            editUser();
+            localStorage.setItem('userOC', JSON.stringify(updatedUser));
         } else {
-            error = "Vous n'avez pas assez de points pour acheter ce pack";
+            setError("Vous n'avez pas assez de points pour acheter ce pack");
         }
-        
+        setLoading(false);
     };
 
     useEffect(() => {
@@ -82,6 +116,8 @@ const Shop = () => {
         };
         fetchProducts();
     }, [status, router, session]);
+
+    console.log('session:', session)
 
     if (status === "loading" || loading) {
         return (

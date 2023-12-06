@@ -17,14 +17,19 @@ export default function Login() {
   const [error, setError] = React.useState(null);
   const [points, setPoints] = React.useState(0);
   const [isFetching, setIsFetching] = React.useState(false);
-  console.log(user)
+  
   useEffect(() => {
     if (session && !isFetching) {
+      console.log(session)
       setIsFetching(true);
       //  add flag if create user for cancel multiple call
       const getUser = async () => {
         try {
-          const response = await axios.get('/api/user');
+          const response = await axios.get(`/api/user`, {
+            headers: {
+              Authorization: `Bearer ${session.customJwt}`,
+            },
+          });
           const data = await response.data;
           localStorage.setItem('userOC', JSON.stringify(data));
           setUser(data);
@@ -66,6 +71,28 @@ export default function Login() {
   }
 
   if (session && user) {
+    // console.log(JSON.parse(localStorage.getItem('nextauth.message')))
+    const point = 500
+    const editUser = async () => {
+      try {
+          const response = await fetch('/api/user', { 
+              method: 'PUT',
+              headers: {
+                  'Content-Type': 'application/json',
+                  Authorization: `Bearer ${session.customJwt}`,
+              },
+              body: JSON.stringify({ 
+                  pointsUsed: point
+              })
+          })
+          // console.log('response:', response)
+          const data = await response.json();
+          // console.log('data:', data)
+      } catch (error) {
+          setError(error);
+      }
+  };
+  // editUser();
     return (
       <div className="flex-col content-center items-center justify-center h-screen">
         <Header points={points} />
