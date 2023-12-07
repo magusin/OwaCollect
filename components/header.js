@@ -25,7 +25,7 @@ export default function Header({points}) {
               <span className="mr-4 border-r-2 pr-2">{session.user.name}</span>
               <span className="mr-4">{points ? points : 0} OC</span>
             </Link>
-            <nav className="hidden md:flex space-x-16">
+            <nav className="space-x-16">
               <Link href="#" className="hover:text-gray-300">Ma collection</Link>
               <Link href="/shop" className="hover:text-gray-300">Shop</Link>
             </nav>

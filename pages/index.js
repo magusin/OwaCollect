@@ -88,7 +88,7 @@ export default function Login() {
         setError(error);
       }
     };
-    allCards();
+    // allCards();
 
     return (
       <div className="flex flex-col h-screen">
