@@ -11,7 +11,13 @@ const prisma = new PrismaClient()
 
 // Gestion des erreurs
 function onError(err, res) {
-    console.log(err)
+    if (err.name === 'JsonWebTokenError') {
+        return res.status(401).json({ message: 'Token invalide' });
+    }
+    if (err.name === 'TokenExpiredError') {
+        return res.status(401).json({ message: 'Token expiré' });
+    }
+    
     res.status(500).json({ error: err.message })
 }
 
@@ -30,6 +36,7 @@ async function runMiddleware(req, res, fn) {
 // GET || PUT /api/user
 
 export default async function handler(req, res) {
+    try {
     const token = req.headers.authorization?.split(' ')[1]; // JWT envoyé dans le header Authorization
     if (!token) {
         return res.status(401).json({ message: 'Token non fourni' });
@@ -38,7 +45,6 @@ export default async function handler(req, res) {
     if (!decoded) {
         return res.status(401).json({ message: 'Token invalide' });
     }
-    try {
         await runMiddleware(req, res, cors)
         switch (req.method) {
             case 'GET':
@@ -75,12 +81,13 @@ export default async function handler(req, res) {
                         pointsUsed: pointsUsed,
                     }
                 })
-                console.log('updatedUser:', updatedUser)
                 res.status(200).json(updatedUser)
                 break
             default:
                 res.status(405).end(`Method ${req.method} Not Allowed`)
         }
-    } catch (err) { onError(err, res) }
+    } catch (err) { 
+        onError(err, res) 
+    }
     finally { await prisma.$disconnect() }
 }

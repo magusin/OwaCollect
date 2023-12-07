@@ -11,7 +11,6 @@ import Modal from 'C/modal';
 
 const Shop = () => {
     const { data: session, status } = useSession();
-    console.log('session:', session.customJwt)
     const router = useRouter();
     const [products, setProducts] = React.useState([]);
     const [loading, setLoading] = React.useState(true);
@@ -19,15 +18,32 @@ const Shop = () => {
     const [points, setPoints] = React.useState(0);
     const [showModal, setShowModal] = React.useState(false);
 
+    // draw cards
+  async function drawCards(category) {
+    try {
+      const response = await axios.get(`/api/card/draw/${category}`, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session.customJwt}`,
+        }
+      })
+      console.log('response:', response)
+      const data = await response.data;
+      console.log('data:', data)
+    } catch (error) {
+      setError(error);
+    }
+  };
+
     const handleBuyPack = () => {
         setShowModal(true);
     };
 
     const handleConfirmPurchase = (selectedProduct) => {
+        console.log('selectedProduct:', selectedProduct)
         setLoading(true);
         setShowModal(false);
         if (points >= selectedProduct.price && session) {
-            console.log('activated')
             const user = JSON.parse(localStorage.getItem('userOC'));
             const calculatedPoints = JSON.parse(localStorage.getItem('points'));
             const totalPoints = calculatedPoints - selectedProduct.price;
@@ -36,7 +52,6 @@ const Shop = () => {
                 pointsUsed: user.pointsUsed + selectedProduct.price
             };
             const editUserPoints = async () => {
-                console.log('editstart')
                 try {
                     const response = await axios.put('/api/user',
                     { pointsUsed: updatedUser.pointsUsed }, 
@@ -46,13 +61,25 @@ const Shop = () => {
                             Authorization: `Bearer ${session.customJwt}`,
                         }
                     })
-                    console.log('response:', response)
-                    const data = await response.data;
-                    localStorage.setItem('userOC', JSON.stringify(data));
-                    localStorage.setItem('points', totalPoints);
-                    setPoints(totalPoints);
+
+                    if (response.status === 200) {
+                        console.log('response.data:', response.data)
+                        const data = await response.data;
+                        localStorage.setItem('userOC', JSON.stringify(data));
+                        localStorage.setItem('points', totalPoints);
+                        setPoints(totalPoints);
+                        await drawCards(selectedProduct.name);
+                    }
                 } catch (error) {
-                    setError("Erreur lors de l'achat du pack");
+                    if (error.response.status === 401) {
+                        setError('Erreur avec votre Token ou il est expiré. Veuillez vous reconnecter.')
+                        setTimeout(() => {
+                          signOut()
+                          window.location.href = '/';
+                        }, 3000);
+                      } else {
+                        setError("Erreur lors de l'achat du pack");
+                      }
                 } finally {
                     setLoading(false);
                 }
@@ -61,6 +88,10 @@ const Shop = () => {
             localStorage.setItem('userOC', JSON.stringify(updatedUser));
         } else {
             setError("Vous n'avez pas assez de points pour acheter ce pack");
+            setTimeout(() => {
+                signOut()
+                window.location.href = '/shop';
+              }, 3000);
         }
         setLoading(false);
     };
@@ -128,7 +159,7 @@ const Shop = () => {
     if (status === "loading" || loading) {
         return (
             <div className="flex flex-col h-screen">
-                <Header /> 
+                <Header points={points} /> 
                 <div className="flex-grow flex justify-center items-center">
                     <span className="text-center">Chargement ...</span>
                 </div>
@@ -139,7 +170,7 @@ const Shop = () => {
     if (error) {
         return (
             <div className="flex flex-col h-screen">
-                <Header /> 
+                <Header points={points} /> 
                 <div className="flex-grow flex justify-center items-center">
                     <span className="text-center text-red-500">⚠ {error}</span>
                 </div>

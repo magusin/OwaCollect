@@ -11,6 +11,13 @@ const prisma = new PrismaClient()
 
 // Gestion des erreurs
 function onError(err, res) {
+    if (err.name === 'JsonWebTokenError') {
+        return res.status(401).json({ message: 'Token invalide' });
+    }
+    if (err.name === 'TokenExpiredError') {
+        return res.status(401).json({ message: 'Token expiré' });
+    }
+    
     res.status(500).json({ error: err.message })
 }
 
@@ -29,6 +36,7 @@ async function runMiddleware(req, res, fn) {
 // GET /api/card/draw/[category]
 
 export default async function handler(req, res) {
+    try {
     const token = req.headers.authorization?.split(' ')[1];
     if (!token) {
         return res.status(401).json({ message: 'Token non fourni' });
@@ -37,7 +45,6 @@ export default async function handler(req, res) {
     if (!decoded) {
         return res.status(401).json({ message: 'Token invalide ou expiré' });
     }
-    try {
         await runMiddleware(req, res, cors)
         switch (req.method) {
             case 'GET':

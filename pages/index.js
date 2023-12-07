@@ -1,6 +1,6 @@
 import axios from "axios";
 import React from 'react';
-import { signIn, useSession } from "next-auth/react";
+import { signIn, signOut, useSession } from "next-auth/react";
 import { useEffect } from "react";
 import { useRouter } from "next/router";
 import OwaGif from "C/owaGif";
@@ -37,7 +37,15 @@ export default function Login() {
           localStorage.setItem('points', totalPoints);
           setPoints(totalPoints);
         } catch (error) {
-          setError('Erreur lors de la récupération des données utilisateur');
+          if (error.response.status === 401) {
+            setError('Erreur avec votre Token ou il est expiré. Veuillez vous reconnecter.')
+            setTimeout(() => {
+              signOut()
+              window.location.href = '/';
+            }, 3000);
+          } else {
+          setError('Erreur lors de la récupération des données utilisateur. ' + error);
+          }
         } finally {
           setLoading(false);
           setIsFetching(false);
@@ -52,18 +60,19 @@ export default function Login() {
 
   if (status === "loading" || loading) {
     return (
-      <div className="flex-col content-center items-center h-screen">
-        <Header />
-        {/* ajouter spinner */}
-        <p>Chargement...</p>
-      </div>
+        <div className="flex flex-col h-screen">
+            <Header points={points} /> 
+            <div className="flex-grow flex justify-center items-center">
+                <span className="text-center">Chargement ...</span>
+            </div>
+        </div>
     )
-  }
+}
 
   if (error) {
     return (
         <div className="flex flex-col h-screen">
-            <Header /> 
+            <Header points={points} /> 
             <div className="flex-grow flex justify-center items-center">
                 <span className="text-center text-red-500">⚠ {error}</span>
             </div>
@@ -72,23 +81,6 @@ export default function Login() {
 }
 
   if (session && user) {
-    const allCards = async () => {
-      try {
-        const response = await fetch('/api/card/draw/Elden Ring', {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${session.customJwt}`,
-          }
-        })
-        console.log('response:', response)
-        const data = await response.json();
-        console.log('data:', data)
-      } catch (error) {
-        setError(error);
-      }
-    };
-    // allCards();
 
     return (
       <div className="flex flex-col h-screen">
