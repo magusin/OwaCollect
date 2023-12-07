@@ -36,6 +36,7 @@ model pets {
   guess             Int                 @default(0)
   quiz              Int                 @default(0)
   pointsUsed        Int?                @default(0)
+  playercards       playercards[]
   user_achievements user_achievements[]
 }
 
@@ -57,15 +58,27 @@ model product {
 }
 
 model card {
-  id         Int     @id @default(autoincrement())
-  name       String  @db.VarChar(255)
-  picture    String  @db.VarChar(255)
-  isDraw     Boolean
-  evolvedId  Int?
-  evolveCost Int?
-  category   String  @db.VarChar(55)
-  card       card?   @relation("cardTocard", fields: [evolvedId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "card_ibfk_1")
-  other_card card[]  @relation("cardTocard")
+  id          Int           @id @default(autoincrement())
+  name        String        @db.VarChar(255)
+  picture     String        @db.VarChar(255)
+  isDraw      Boolean
+  evolvedId   Int?
+  evolveCost  Int?
+  category    String        @db.VarChar(55)
+  card        card?         @relation("cardTocard", fields: [evolvedId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "card_ibfk_1")
+  other_card  card[]        @relation("cardTocard")
+  playercards playercards[]
 
   @@index([evolvedId], map: "evolvedId")
+}
+
+model playercards {
+  petId  String @db.VarChar(255)
+  cardId Int
+  count  Int
+  card   card   @relation(fields: [cardId], references: [id], onUpdate: Restrict, map: "playercards_ibfk_1")
+  pets   pets   @relation(fields: [petId], references: [userId], onUpdate: Restrict, map: "playercards_ibfk_2")
+
+  @@id([petId, cardId])
+  @@index([cardId], map: "cardId")
 }

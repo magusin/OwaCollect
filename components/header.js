@@ -19,12 +19,12 @@ export default function Header({points}) {
     <>
       {session ? (
         // if session
-        <header className="bg-gray-800 text-white p-4">
+        <header className="bg-gray-800 text-white p-4 w-full">
           <div className="container mx-auto flex justify-between items-center">
-            <div className="flex items-center">
+            <Link href='/' className="flex items-center">
               <span className="mr-4 border-r-2 pr-2">{session.user.name}</span>
               <span className="mr-4">{points ? points : 0} OC</span>
-            </div>
+            </Link>
             <nav className="hidden md:flex space-x-16">
               <Link href="#" className="hover:text-gray-300">Ma collection</Link>
               <Link href="/shop" className="hover:text-gray-300">Shop</Link>
@@ -39,7 +39,7 @@ export default function Header({points}) {
         </header>
       ) : (
         // if user haven't session
-        <header className="bg-gray-800 text-white w-full">
+        <header className="bg-gray-800 text-white w-full p-4">
           <div className="container mx-auto flex justify-center items-center  h-full">
             <Image
               src={"/images/owaCollect.png"}

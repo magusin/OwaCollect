@@ -74,7 +74,7 @@ export default function Login() {
   if (session && user) {
     const allCards = async () => {
       try {
-        const response = await fetch('/api/card/Elden Ring', {
+        const response = await fetch('/api/card/draw/Elden Ring', {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -91,9 +91,9 @@ export default function Login() {
     allCards();
 
     return (
-      <div className="flex-col content-center items-center justify-center h-screen">
+      <div className="flex flex-col h-screen">
         <Header points={points} />
-        <div className="relative w-full h-screen flex justify-center items-center">
+        <div className="relative flex-grow flex justify-center items-center">
           <Image
             src="/images/twitchuser.png"
             alt="Fond"
@@ -118,6 +118,7 @@ export default function Login() {
           <button
             className="bg-blue-500 text-white font-bold py-2 px-4 rounded mt-12"
             onClick={() => signIn('twitch')}
+            
           >
             Se connecter avec Twitch
           </button>

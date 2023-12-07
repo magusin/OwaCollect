@@ -3,11 +3,11 @@ import Image from "next/legacy/image";
 
 const TwitchUserInfo = ({ userData }) => {
     return (
-        <div className="flex flex-col max-w-md mx-auto my-auto rounded overflow-hidden shadow-lg justify-around" style={{ height: '50vh' }}>
+        <div className="flex flex-col max-w-md mx-auto my-auto rounded overflow-hidden shadow-lg justify-center" style={{ height: '50vh' }}>
             <div className="text-center py-2">
-                <span className="font-bold md:text-xl xl:text-3xl inline-block rounded px-4 py-1 bg-white">{userData.name}</span>
+                <span className="font-bold md:text-2xl xl:text-3xl inline-block rounded px-4 py-1 bg-white">{userData.name}</span>
             </div>
-            <div className='flex flex-row items-center'>
+            <div className='xl:my-12 flex flex-row items-center'>
                 <div className="w-1/2 h-full relative">
                     <Image
                         className='rounded-full'
