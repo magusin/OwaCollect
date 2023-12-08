@@ -1,13 +1,14 @@
 /* eslint-disable react/no-unescaped-entities */
 import React from 'react';
-import { signIn, useSession } from "next-auth/react";
-import Header from '@/components/header';
+import { signIn, signOut, useSession } from "next-auth/react";
+import Header from 'C/header';
 import { useRouter } from "next/router";
 import { useEffect } from "react";
 import Image from 'next/image';
 import axios from 'axios'
 import calculatePoints from '@/utils/calculatePoints';
 import Modal from 'C/modal';
+import CardsModal from 'C/cardsModal';
 
 const Shop = () => {
     const { data: session, status } = useSession();
@@ -17,6 +18,8 @@ const Shop = () => {
     const [error, setError] = React.useState(null);
     const [points, setPoints] = React.useState(0);
     const [showModal, setShowModal] = React.useState(false);
+    const [drawnCards, setDrawnCards] = React.useState([]);
+    const [showModalCards, setShowModalCards] = React.useState(false);
 
     // draw cards
   async function drawCards(category) {
@@ -28,10 +31,15 @@ const Shop = () => {
         }
       })
       console.log('response:', response)
-      const data = await response.data;
-      console.log('data:', data)
+      // if response status is 200 then set cards in state and show modal
+      if (response.status === 200) {
+        const data = await response.data;
+        console.log('data:', data)
+        setDrawnCards(data);
+        setShowModalCards(true);
+      }
     } catch (error) {
-      setError(error);
+      setError('Erreur lors du tirage des cartes');
     }
   };
 
@@ -40,7 +48,6 @@ const Shop = () => {
     };
 
     const handleConfirmPurchase = (selectedProduct) => {
-        console.log('selectedProduct:', selectedProduct)
         setLoading(true);
         setShowModal(false);
         if (points >= selectedProduct.price && session) {
@@ -63,7 +70,6 @@ const Shop = () => {
                     })
 
                     if (response.status === 200) {
-                        console.log('response.data:', response.data)
                         const data = await response.data;
                         localStorage.setItem('userOC', JSON.stringify(data));
                         localStorage.setItem('points', totalPoints);
@@ -75,7 +81,7 @@ const Shop = () => {
                         setError('Erreur avec votre Token ou il est expiré. Veuillez vous reconnecter.')
                         setTimeout(() => {
                           signOut()
-                          window.location.href = '/';
+                          router.push('/');
                         }, 3000);
                       } else {
                         setError("Erreur lors de l'achat du pack");
@@ -90,8 +96,8 @@ const Shop = () => {
             setError("Vous n'avez pas assez de points pour acheter ce pack");
             setTimeout(() => {
                 signOut()
-                window.location.href = '/shop';
-              }, 3000);
+                router.push('/shop');
+              }, 2000);
         }
         setLoading(false);
     };
@@ -129,7 +135,15 @@ const Shop = () => {
                     localStorage.setItem('points', totalPoints);
                     setPoints(totalPoints);
                 } catch (error) {
+                    if (error.response.status === 401) {
+                        setError('Erreur avec votre Token ou il est expiré. Veuillez vous reconnecter.')
+                        setTimeout(() => {
+                          signOut()
+                          router.push('/');
+                        }, 2000);
+                      } else {
                     setError(error);
+                      }
                 }
             };
             getUser();
@@ -147,7 +161,15 @@ const Shop = () => {
                 const data = await response.data;
                 setProducts(data);
             } catch (error) {
+                if (error.response.status === 401) {
+                    setError('Erreur avec votre Token ou il est expiré. Veuillez vous reconnecter.')
+                    setTimeout(() => {
+                      signOut()
+                      router.push('/');
+                    }, 2000);
+                  } else {
                 setError('Erreur lors de la récupération des produits');
+                  }
             } finally {
                 setLoading(false);
             }
@@ -199,6 +221,9 @@ const Shop = () => {
                                 </div>
                                 {showModal && (
                                     <Modal setShowModal={setShowModal} product={product} handleConfirmPurchase={() => handleConfirmPurchase(product)} />
+                                )}
+                                {showModalCards && ( 
+                                    <CardsModal cards={drawnCards} onClose={() => setShowModalCards(false)} />
                                 )}
                             </div>
                         ))}

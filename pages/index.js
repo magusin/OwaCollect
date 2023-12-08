@@ -41,8 +41,8 @@ export default function Login() {
             setError('Erreur avec votre Token ou il est expiré. Veuillez vous reconnecter.')
             setTimeout(() => {
               signOut()
-              window.location.href = '/';
-            }, 3000);
+              router.push('/');
+            }, 2000);
           } else {
           setError('Erreur lors de la récupération des données utilisateur. ' + error);
           }
