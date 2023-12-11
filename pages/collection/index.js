@@ -90,7 +90,7 @@ export async function getServerSideProps(context) {
 
     if (!session) {
         return {
-            props: { error: 'Session expiré reconnectez vous' },
+            props: { errorServer: 'Session expirée reconnectez-vous' },
         };
     }
 

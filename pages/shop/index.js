@@ -9,13 +9,15 @@ import axios from 'axios'
 import calculatePoints from '@/utils/calculatePoints';
 import Modal from 'C/modal';
 import CardsModal from 'C/cardsModal';
+import { getServerSession } from "next-auth";
+import nextAuthOptions from "../../config/nextAuthOptions";
 
-const Shop = () => {
+export default function Shop({productsData, errorServer}) {
     const { data: session, status } = useSession();
     const router = useRouter();
-    const [products, setProducts] = React.useState([]);
+    const [products, setProducts] = React.useState(productsData);
     const [loading, setLoading] = React.useState(true);
-    const [error, setError] = React.useState(null);
+    const [error, setError] = React.useState(errorServer || null);
     const [points, setPoints] = React.useState(0);
     const [showModal, setShowModal] = React.useState(false);
     const [drawnCards, setDrawnCards] = React.useState([]);
@@ -234,4 +236,39 @@ const Shop = () => {
     );
 }
 
-export default Shop;
+export async function getServerSideProps(context) {
+    const session = await getServerSession(
+        context?.req,
+        context?.res,
+        nextAuthOptions
+    );
+    
+    if (!session) {
+        return {
+            props: { errorServer: 'Session expirée reconnectez-vous' },
+        };
+    }
+
+    try {
+        const response = await axios.get(`${process.env.NEXTAUTH_URL}/api/product`, {
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${session.customJwt}`,
+            }
+        })
+        const productsData = await response.data;
+        return {
+            props: { productsData },
+        };
+    } catch (error) {
+        if (error.response.status === 401) {
+            return {
+                props: { errorServer: 'Erreur avec votre Token ou il est expiré. Veuillez vous reconnecter.' },
+            };
+        }
+
+        return {
+            props: { errorServer: error.message },
+        };
+    }
+}

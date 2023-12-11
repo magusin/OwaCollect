@@ -35,11 +35,12 @@ export default function CardsModal({ cards, onClose }) {
 }
 
 function Card({ card, index, flipped, onClick }) {
+    console.log('card:', card)
     return (
         <div className="card relative mx-auto cursor-pointer" onClick={onClick} >
             <div className={`card-inner ${flipped ? 'flipped' : ''}`}>
                 <div className="absolute inset-0 bg-blue-500 rounded-lg card-front">
-                    <Image src='https://imgur.com/8fHomkd.png' alt={`Dos de la carte ${index}`} layout="fill" objectFit="contain" className="rounded-lg" priority={true} />
+                    <Image src={`${card.picture_back}.png`} alt={`Dos de la carte ${index}`} layout="fill" objectFit="contain" className="rounded-lg" priority={true} />
                 </div>
                 <div className={`card-back absolute inset-0 transform ${flipped ? 'rotate-y-180' : ''}`}>
                     <Image src={`${card.picture}.png`} alt={`Carte ${index}`} layout="fill" objectFit="contain" className="rounded-lg" priority={true} />
