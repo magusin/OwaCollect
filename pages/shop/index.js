@@ -1,6 +1,6 @@
 /* eslint-disable react/no-unescaped-entities */
 import React from 'react';
-import { signIn, signOut, useSession } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import Header from 'C/header';
 import { useRouter } from "next/router";
 import { useEffect } from "react";
@@ -120,7 +120,7 @@ const Shop = () => {
             setPoints(totalPoints);
         }
 
-        if (localStorage.getItem('userOC') === null && localStorage.getItem('points') === null && session) {
+        if (localStorage.getItem('userOC') === null && session) {
             const getUser = async () => {
                 try {
                     const response = await axios.get('/api/user', {

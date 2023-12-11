@@ -26,8 +26,8 @@ export default function Header({points}) {
               <span className="mr-4">{points ? points : 0} OC</span>
             </Link>
             <nav className="space-x-16">
-              <Link href="#" className="hover:text-gray-300">Ma collection</Link>
-              <Link href="/shop" className="hover:text-gray-300">Shop</Link>
+              <Link href="/collection" className="hover:text-gray-300">Ma collection</Link>
+              <Link href="/shop" className="hover:text-gray-300">Boutique</Link>
             </nav>
           <button
             className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
