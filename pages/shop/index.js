@@ -12,17 +12,16 @@ import CardsModal from 'C/cardsModal';
 import { getServerSession } from "next-auth";
 import nextAuthOptions from "../../config/nextAuthOptions";
 
-export default function Shop({productsData, errorServer}) {
+export default function Shop({ productsData, errorServer }) {
     const { data: session, status } = useSession();
     const router = useRouter();
     const [products, setProducts] = React.useState(productsData);
-    const [loading, setLoading] = React.useState(true);
+    const [loading, setLoading] = React.useState(false);
     const [error, setError] = React.useState(errorServer || null);
     const [points, setPoints] = React.useState(0);
     const [showModal, setShowModal] = React.useState(false);
     const [drawnCards, setDrawnCards] = React.useState([]);
     const [showModalCards, setShowModalCards] = React.useState(false);
-
     // draw cards
     async function editUserPoints(selectedProduct) {
         try {
@@ -34,13 +33,13 @@ export default function Shop({productsData, errorServer}) {
                 pointsUsed: user.pointsUsed + selectedProduct.price
             };
             const response = await axios.put('/api/user',
-            { pointsUsed: updatedUser.pointsUsed }, 
-            { 
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${session.customJwt}`,
-                }
-            })
+                { pointsUsed: updatedUser.pointsUsed },
+                {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${session.customJwt}`,
+                    }
+                })
 
             if (response.status === 200) {
                 const data = await response.data;
@@ -52,12 +51,12 @@ export default function Shop({productsData, errorServer}) {
             if (error.response.status === 401) {
                 setError('Erreur avec votre Token ou il est expiré. Veuillez vous reconnecter.')
                 setTimeout(() => {
-                  signOut()
-                  router.push('/');
+                    signOut()
+                    router.push('/');
                 }, 3000);
-              } else {
+            } else {
                 setError("Erreur lors de l'achat du pack");
-              }
+            }
         } finally {
             setLoading(false);
         }
@@ -73,33 +72,33 @@ export default function Shop({productsData, errorServer}) {
         if (points >= selectedProduct.price && session) {
             const drawCards = async (category) => {
                 try {
-                  const response = await axios.get(`/api/card/draw/${category}`, {
-                    headers: {
-                      'Content-Type': 'application/json',
-                      Authorization: `Bearer ${session.customJwt}`,
+                    const response = await axios.get(`/api/card/draw/${category}`, {
+                        headers: {
+                            'Content-Type': 'application/json',
+                            Authorization: `Bearer ${session.customJwt}`,
+                        }
+                    })
+
+                    // if response status is 200 then set cards in state and show modal
+                    if (response.status === 200) {
+                        const data = await response.data;
+                        await editUserPoints(selectedProduct);
+                        setDrawnCards(data);
+                        setShowModalCards(true);
                     }
-                  })
-               
-                  // if response status is 200 then set cards in state and show modal
-                  if (response.status === 200) {
-                    const data = await response.data;
-                    await editUserPoints(selectedProduct);
-                    setDrawnCards(data);
-                    setShowModalCards(true);
-                  }
                 } catch (error) {
-                  setError('Erreur lors du tirage des cartes');
+                    setError('Erreur lors du tirage des cartes');
                 }
-              }
-            
-              drawCards(selectedProduct.name);
-            
+            }
+
+            drawCards(selectedProduct.name);
+
         } else {
             setError("Vous n'avez pas assez de points pour acheter ce pack");
             setTimeout(() => {
                 signOut()
                 router.push('/shop');
-              }, 2000);
+            }, 2000);
         }
         setLoading(false);
     };
@@ -140,50 +139,50 @@ export default function Shop({productsData, errorServer}) {
                     if (error.response.status === 401) {
                         setError('Erreur avec votre Token ou il est expiré. Veuillez vous reconnecter.')
                         setTimeout(() => {
-                          signOut()
-                          router.push('/');
+                            signOut()
+                            router.push('/');
                         }, 2000);
-                      } else {
-                    setError(error);
-                      }
+                    } else {
+                        setError(error);
+                    }
                 }
             };
             getUser();
         }
 
-        if (session && localStorage.getItem('userOC') != null) {
-        // Récupérer les produits
-        const fetchProducts = async () => {
-            try {
-                const response = await axios.get('/api/product', {
-                    headers: {
-                        Authorization: `Bearer ${session.customJwt}`,
-                    },
-                });
-                const data = await response.data;
-                setProducts(data);
-            } catch (error) {
-                if (error.response.status === 401) {
-                    setError('Erreur avec votre Token ou il est expiré. Veuillez vous reconnecter.')
-                    setTimeout(() => {
-                      signOut()
-                      router.push('/');
-                    }, 2000);
-                  } else {
-                setError('Erreur lors de la récupération des produits');
-                  }
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchProducts();
-    }
+        // if (session && localStorage.getItem('userOC') != null) {
+        //     // Récupérer les produits
+        //     const fetchProducts = async () => {
+        //         try {
+        //             const response = await axios.get('/api/product', {
+        //                 headers: {
+        //                     Authorization: `Bearer ${session.customJwt}`,
+        //                 },
+        //             });
+        //             const data = await response.data;
+        //             setProducts(data);
+        //         } catch (error) {
+        //             if (error.response.status === 401) {
+        //                 setError('Erreur avec votre Token ou il est expiré. Veuillez vous reconnecter.')
+        //                 setTimeout(() => {
+        //                     signOut()
+        //                     router.push('/');
+        //                 }, 2000);
+        //             } else {
+        //                 setError('Erreur lors de la récupération des produits');
+        //             }
+        //         } finally {
+        //             setLoading(false);
+        //         }
+        //     };
+        //     fetchProducts();
+        // }
     }, [status, router, session]);
 
     if (status === "loading" || loading) {
         return (
             <div className="flex flex-col h-screen">
-                <Header points={points} /> 
+                <Header points={points} />
                 <div className="flex-grow flex justify-center items-center">
                     <span className="text-center">Chargement ...</span>
                 </div>
@@ -194,7 +193,7 @@ export default function Shop({productsData, errorServer}) {
     if (error) {
         return (
             <div className="flex flex-col h-screen">
-                <Header points={points} /> 
+                <Header points={points} />
                 <div className="flex-grow flex justify-center items-center">
                     <span className="text-center text-red-500">⚠ {error}</span>
                 </div>
@@ -224,7 +223,7 @@ export default function Shop({productsData, errorServer}) {
                                 {showModal && (
                                     <Modal setShowModal={setShowModal} product={product} handleConfirmPurchase={() => handleConfirmPurchase(product)} />
                                 )}
-                                {showModalCards && ( 
+                                {showModalCards && (
                                     <CardsModal cards={drawnCards} onClose={() => setShowModalCards(false)} />
                                 )}
                             </div>
@@ -242,7 +241,7 @@ export async function getServerSideProps(context) {
         context?.res,
         nextAuthOptions
     );
-    
+
     if (!session) {
         return {
             props: { errorServer: 'Session expirée reconnectez-vous' },

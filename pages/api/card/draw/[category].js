@@ -67,8 +67,6 @@ export default async function handler(req, res) {
                     acc[card.id].count += 1;
                     return acc;
                 }, {});
-
-                console.log('selectedCardsMap:', selectedCardsMap)
                 
                 const transactionPromises = Object.values(selectedCardsMap).map(card => 
                     prisma.playercards.upsert({

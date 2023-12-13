@@ -75,9 +75,30 @@ export default function Collection({ cards, errorServer }) {
             </div>
         );
     }
-    console.log('cards:', cards)
 
-
+    if (session) {
+        const ownedCardIds = new Set(cards.playerCards.map(card => card.cardId));
+        return (
+            <div className="flex flex-col h-screen">
+                <Header points={points}/>
+                <div className="flex-grow flex flex-col items-center">
+                    <div className="flex flex-wrap justify-center">
+                        {cards.cards.map((card) => (
+                            <div key={card.id} className="flex flex-col items-center justify-center m-4">
+                                <Image
+                                fill
+                                src={ownedCardIds.has(card.id) ? `${card.picture}.png` : `${card.picture_back}.png`}
+                                alt={ownedCardIds.has(card.id) ? card.name : 'Dos de la carte numéro ' + card.id}
+                                sizes="(max-width: 768px) 250px, (max-width: 1200px) 300px, 300px"
+                            />
+                                <span className="text-center">{ownedCardIds.has(card.id) ? card.name : '?'}</span>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
+        );
+    }
 }
 
 export async function getServerSideProps(context) {
@@ -110,7 +131,7 @@ export async function getServerSideProps(context) {
                 props: { errorServer: 'Erreur avec votre Token ou il est expiré. Veuillez vous reconnecter.' },
             };
         }
-        console.log('error:', error)
+
         return {
             props: { errorServer: error.message },
         };
