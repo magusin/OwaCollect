@@ -15,7 +15,18 @@ export default function Collection({ cards, errorServer }) {
     const router = useRouter();
     const [loading, setLoading] = React.useState(true);
     const [points, setPoints] = React.useState(0);
-    console.log(cards)
+    const [selectedCard, setSelectedCard] = React.useState(null);
+
+    // Gestionnaire de clic pour sélectionner une carte
+    const handleCardClick = (card) => {
+        setSelectedCard(card);
+    };
+
+    // Pour fermer la vue agrandie
+    const closeEnlargeView = () => {
+        setSelectedCard(null);
+    };
+
     useEffect(() => {
 
         if (status === 'unauthenticated') {
@@ -63,15 +74,17 @@ export default function Collection({ cards, errorServer }) {
             getUser();
         }
 
-    }, [status]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [status, session]);
 
     if (error) {
-        {
-            error === 'Erreur avec votre Token ou il est expiré. Veuillez vous reconnecter.' && setTimeout(() => {
+        if (error === 'Erreur avec votre Token ou il est expiré. Veuillez vous reconnecter.') {
+            setTimeout(() => {
                 signOut()
                 router.push('/');
-            }, 2000)
+            }, 2000);
         }
+        
         return (
             <div className="flex flex-col h-screen">
                 <Header points={points} />
@@ -84,7 +97,6 @@ export default function Collection({ cards, errorServer }) {
 
     if (session) {
         const ownedCardIds = new Set(cards.playerCards.map(card => card.cardId));
-
         // Créer un objet pour le suivi du count pour chaque cardId
         const cardCounts = cards.playerCards.reduce((acc, card) => {
             acc[card.cardId] = card.count;
@@ -99,16 +111,16 @@ export default function Collection({ cards, errorServer }) {
                     <div className="flex flex-wrap justify-center">
                         {cards.cards.map((card) => (
 
-                            <div key={card.id} className="relative flex flex-col items-center justify-center m-4">
-                                <Image
-                                    priority={true}
-                                    src={ownedCardIds.has(card.id) ? `${card.picture}.png` : `${card.picture_back}.png`}
-                                    alt={ownedCardIds.has(card.id) ? card.name : 'Dos de la carte numéro ' + card.id}
-                                    layout="responsive"
-                                    width={350}
-                                    height={350}
-                                    sizes="(max-width: 768px) 200px, (max-width: 1200px) 250px, (max-width: 1599px) 300px, 350px"
-                                />
+                            <div key={card.id} onClick={() => handleCardClick(card)} className="relative flex flex-col items-center justify-center m-4 cursor-pointer">
+                                <div className="relative w-[100px] h-[100px] sm:w-[150px] sm:h-[150px] md:w-[200px] md:h-[200px] lg:w-[250px] lg:h-[250px] xl:w-[300px] xl:h-[300px] 2xl:w-[350px] 2xl:h-[350px]">
+                                    <Image
+                                        priority={true}
+                                        src={ownedCardIds.has(card.id) ? `${card.picture}.png` : `${card.picture_back}.png`}
+                                        alt={ownedCardIds.has(card.id) ? card.name : 'Dos de la carte numéro ' + card.id}
+                                        layout="fill"
+                                        objectFit="contain"
+                                    />
+                                </div>
                                 <div className={`absolute inset-0 flex items-center justify-center rounded-full ${ownedCardIds.has(card.id) ? "hidden" : ""}`}>
                                     <div className="bg-white/80 backdrop-blur-sm rounded-full px-4 py-2 text-lg font-semibold shadow-xl border border-gray-300">
                                         {card.id}
@@ -122,6 +134,28 @@ export default function Collection({ cards, errorServer }) {
                             </div>
                         ))}
                     </div>
+                    {selectedCard && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 px-4 py-6">
+                            <div className="bg-white p-8 rounded-lg max-w-4xl">
+                                <div className="flex justify-center items-center h-full">
+                                    <Image
+                                        priority={true}
+                                        src={`${selectedCard.picture}.png`}
+                                        alt={selectedCard.name}
+                                        layout="fill"
+                                        objectFit="contain"
+                                        className="max-h-full max-w-full"
+                                    />
+                                </div>
+                                <button
+                                    onClick={closeEnlargeView}
+                                    className="absolute top-2 right-2 bg-red-500 text-white py-2 px-4 rounded"
+                                >
+                                    Fermer
+                                </button>
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
         );
