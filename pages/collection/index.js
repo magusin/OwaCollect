@@ -52,12 +52,12 @@ export default function Collection({ cards, errorServer }) {
                     if (error.response.status === 401) {
                         setError('Erreur avec votre Token ou il est expiré. Veuillez vous reconnecter.')
                         setTimeout(() => {
-                          signOut()
-                          router.push('/');
+                            signOut()
+                            router.push('/');
                         }, 2000);
-                      } else {
-                    setError(error);
-                      }
+                    } else {
+                        setError(error);
+                    }
                 }
             };
             getUser();
@@ -66,9 +66,15 @@ export default function Collection({ cards, errorServer }) {
     }, [status]);
 
     if (error) {
+        {
+            error === 'Erreur avec votre Token ou il est expiré. Veuillez vous reconnecter.' && setTimeout(() => {
+                signOut()
+                router.push('/');
+            }, 2000)
+        }
         return (
             <div className="flex flex-col h-screen">
-                <Header points={points}/>
+                <Header points={points} />
                 <div className="flex-grow flex justify-center items-center">
                     <span className="text-center text-red-500">⚠ {error}</span>
                 </div>
@@ -78,22 +84,41 @@ export default function Collection({ cards, errorServer }) {
 
     if (session) {
         const ownedCardIds = new Set(cards.playerCards.map(card => card.cardId));
+
+        // Créer un objet pour le suivi du count pour chaque cardId
+        const cardCounts = cards.playerCards.reduce((acc, card) => {
+            acc[card.cardId] = card.count;
+            return acc;
+        }, {});
+
+
         return (
             <div className="flex flex-col h-screen">
-                <Header points={points}/>
+                <Header points={points} />
                 <div className="flex-grow flex flex-col items-center">
                     <div className="flex flex-wrap justify-center">
                         {cards.cards.map((card) => (
-                            <div key={card.id} className="flex flex-col items-center justify-center m-4">
+
+                            <div key={card.id} className="relative flex flex-col items-center justify-center m-4">
                                 <Image
-                                priority={true}
-                                src={ownedCardIds.has(card.id) ? `${card.picture}.png` : `${card.picture_back}.png`}
-                                alt={ownedCardIds.has(card.id) ? card.name : 'Dos de la carte numéro ' + card.id}
-                                layout="responsive"
-                                width={350} 
-                                height={350} 
-                                sizes="(max-width: 768px) 200px, (max-width: 1200px) 250px, (max-width: 1599px) 300px, 350px"                            />
-                                <span className="text-center">{ownedCardIds.has(card.id) ? card.name : '?'}</span>
+                                    priority={true}
+                                    src={ownedCardIds.has(card.id) ? `${card.picture}.png` : `${card.picture_back}.png`}
+                                    alt={ownedCardIds.has(card.id) ? card.name : 'Dos de la carte numéro ' + card.id}
+                                    layout="responsive"
+                                    width={350}
+                                    height={350}
+                                    sizes="(max-width: 768px) 200px, (max-width: 1200px) 250px, (max-width: 1599px) 300px, 350px"
+                                />
+                                <div className={`absolute inset-0 flex items-center justify-center rounded-full ${ownedCardIds.has(card.id) ? "hidden" : ""}`}>
+                                    <div className="bg-white/80 backdrop-blur-sm rounded-full px-4 py-2 text-lg font-semibold shadow-xl border border-gray-300">
+                                        {card.id}
+                                    </div>
+                                </div>
+                                {cardCounts[card.id] > 1 && (
+                                    <div className="absolute bottom-2 right-2 bg-red-600 text-white rounded-full px-2 py-1 text-sm font-bold">
+                                        X {cardCounts[card.id]}
+                                    </div>
+                                )}
                             </div>
                         ))}
                     </div>

@@ -149,34 +149,6 @@ export default function Shop({ productsData, errorServer }) {
             };
             getUser();
         }
-
-        // if (session && localStorage.getItem('userOC') != null) {
-        //     // Récupérer les produits
-        //     const fetchProducts = async () => {
-        //         try {
-        //             const response = await axios.get('/api/product', {
-        //                 headers: {
-        //                     Authorization: `Bearer ${session.customJwt}`,
-        //                 },
-        //             });
-        //             const data = await response.data;
-        //             setProducts(data);
-        //         } catch (error) {
-        //             if (error.response.status === 401) {
-        //                 setError('Erreur avec votre Token ou il est expiré. Veuillez vous reconnecter.')
-        //                 setTimeout(() => {
-        //                     signOut()
-        //                     router.push('/');
-        //                 }, 2000);
-        //             } else {
-        //                 setError('Erreur lors de la récupération des produits');
-        //             }
-        //         } finally {
-        //             setLoading(false);
-        //         }
-        //     };
-        //     fetchProducts();
-        // }
     }, [status, router, session]);
 
     if (status === "loading" || loading) {
