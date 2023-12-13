@@ -81,5 +81,4 @@ model playercards {
   pets   pets   @relation(fields: [petId], references: [userId], onUpdate: Restrict, map: "playercards_ibfk_2")
 
   @@id([petId, cardId])
-  @@index([cardId], map: "cardId")
 }

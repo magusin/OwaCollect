@@ -24,26 +24,44 @@ export default function Shop({productsData, errorServer}) {
     const [showModalCards, setShowModalCards] = React.useState(false);
 
     // draw cards
-  async function drawCards(category) {
-    try {
-      const response = await axios.get(`/api/card/draw/${category}`, {
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${session.customJwt}`,
+    async function editUserPoints(selectedProduct) {
+        try {
+            const user = JSON.parse(localStorage.getItem('userOC'));
+            const calculatedPoints = JSON.parse(localStorage.getItem('points'));
+            const totalPoints = calculatedPoints - selectedProduct.price;
+            const updatedUser = {
+                ...user,
+                pointsUsed: user.pointsUsed + selectedProduct.price
+            };
+            const response = await axios.put('/api/user',
+            { pointsUsed: updatedUser.pointsUsed }, 
+            { 
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${session.customJwt}`,
+                }
+            })
+
+            if (response.status === 200) {
+                const data = await response.data;
+                localStorage.setItem('userOC', JSON.stringify(data));
+                localStorage.setItem('points', totalPoints);
+                setPoints(totalPoints);
+            }
+        } catch (error) {
+            if (error.response.status === 401) {
+                setError('Erreur avec votre Token ou il est expiré. Veuillez vous reconnecter.')
+                setTimeout(() => {
+                  signOut()
+                  router.push('/');
+                }, 3000);
+              } else {
+                setError("Erreur lors de l'achat du pack");
+              }
+        } finally {
+            setLoading(false);
         }
-      })
-      console.log('response:', response)
-      // if response status is 200 then set cards in state and show modal
-      if (response.status === 200) {
-        const data = await response.data;
-        console.log('data:', data)
-        setDrawnCards(data);
-        setShowModalCards(true);
-      }
-    } catch (error) {
-      setError('Erreur lors du tirage des cartes');
-    }
-  };
+    };
 
     const handleBuyPack = () => {
         setShowModal(true);
@@ -53,47 +71,29 @@ export default function Shop({productsData, errorServer}) {
         setLoading(true);
         setShowModal(false);
         if (points >= selectedProduct.price && session) {
-            const user = JSON.parse(localStorage.getItem('userOC'));
-            const calculatedPoints = JSON.parse(localStorage.getItem('points'));
-            const totalPoints = calculatedPoints - selectedProduct.price;
-            const updatedUser = {
-                ...user,
-                pointsUsed: user.pointsUsed + selectedProduct.price
-            };
-            const editUserPoints = async () => {
+            const drawCards = async (category) => {
                 try {
-                    const response = await axios.put('/api/user',
-                    { pointsUsed: updatedUser.pointsUsed }, 
-                    { 
-                        headers: {
-                            'Content-Type': 'application/json',
-                            Authorization: `Bearer ${session.customJwt}`,
-                        }
-                    })
-
-                    if (response.status === 200) {
-                        const data = await response.data;
-                        localStorage.setItem('userOC', JSON.stringify(data));
-                        localStorage.setItem('points', totalPoints);
-                        setPoints(totalPoints);
-                        await drawCards(selectedProduct.name);
+                  const response = await axios.get(`/api/card/draw/${category}`, {
+                    headers: {
+                      'Content-Type': 'application/json',
+                      Authorization: `Bearer ${session.customJwt}`,
                     }
+                  })
+               
+                  // if response status is 200 then set cards in state and show modal
+                  if (response.status === 200) {
+                    const data = await response.data;
+                    await editUserPoints(selectedProduct);
+                    setDrawnCards(data);
+                    setShowModalCards(true);
+                  }
                 } catch (error) {
-                    if (error.response.status === 401) {
-                        setError('Erreur avec votre Token ou il est expiré. Veuillez vous reconnecter.')
-                        setTimeout(() => {
-                          signOut()
-                          router.push('/');
-                        }, 3000);
-                      } else {
-                        setError("Erreur lors de l'achat du pack");
-                      }
-                } finally {
-                    setLoading(false);
+                  setError('Erreur lors du tirage des cartes');
                 }
-            };
-            editUserPoints();
-            localStorage.setItem('userOC', JSON.stringify(updatedUser));
+              }
+            
+              drawCards(selectedProduct.name);
+            
         } else {
             setError("Vous n'avez pas assez de points pour acheter ce pack");
             setTimeout(() => {

@@ -15,9 +15,8 @@ export default function Collection({ cards, errorServer }) {
     const router = useRouter();
     const [loading, setLoading] = React.useState(true);
     const [points, setPoints] = React.useState(0);
-
+    console.log(cards)
     useEffect(() => {
-        
 
         if (status === 'unauthenticated') {
             router.push('/');
@@ -95,7 +94,7 @@ export async function getServerSideProps(context) {
     }
 
     try {
-        const response = await axios.get(`${process.env.NEXTAUTH_URL}/api/card`, {
+        const response = await axios.get(`${process.env.NEXTAUTH_URL}/api/user/card`, {
             headers: {
                 'Content-Type': 'application/json',
                 Authorization: `Bearer ${session.customJwt}`,

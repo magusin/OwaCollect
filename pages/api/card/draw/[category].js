@@ -60,28 +60,38 @@ export default async function handler(req, res) {
                     selectedCards.push(randomCard);
                 }
 
-                await Promise.all(selectedCards.map(async (card) => {
-                    await prisma.playercards.upsert({
+                const selectedCardsMap = selectedCards.reduce((acc, card) => {
+                    if (!acc[card.id]) {
+                        acc[card.id] = { ...card, count: 0 };
+                    }
+                    acc[card.id].count += 1;
+                    return acc;
+                }, {});
+
+                console.log('selectedCardsMap:', selectedCardsMap)
+                
+                const transactionPromises = Object.values(selectedCardsMap).map(card => 
+                    prisma.playercards.upsert({
                         where: {
-                          petId_cardId: {
-                            petId: decoded.id,
-                            cardId: card.id
-                          }
+                            petId_cardId: {
+                                petId: decoded.id,
+                                cardId: card.id
+                            }
                         },
                         update: {
-                          // Mise à jour des champs si l'enregistrement existe déjà
-                          count: {
-                            increment: 1
-                          }
+                            count: {
+                                increment: card.count
+                            }
                         },
                         create: {
-                          // Création d'un nouvel enregistrement si celui-ci n'existe pas
-                          petId: decoded.id,
-                          cardId: card.id,
-                          count: 1
+                            petId: decoded.id,
+                            cardId: card.id,
+                            count: card.count
                         }
-                      });
-                }));
+                    })
+                );
+                
+                await prisma.$transaction(transactionPromises);
 
                 res.status(200).json(selectedCards)
                 break
