@@ -86,11 +86,13 @@ export default function Collection({ cards, errorServer }) {
                         {cards.cards.map((card) => (
                             <div key={card.id} className="flex flex-col items-center justify-center m-4">
                                 <Image
-                                fill
+                                priority={true}
                                 src={ownedCardIds.has(card.id) ? `${card.picture}.png` : `${card.picture_back}.png`}
                                 alt={ownedCardIds.has(card.id) ? card.name : 'Dos de la carte numéro ' + card.id}
-                                sizes="(max-width: 768px) 250px, (max-width: 1200px) 300px, 300px"
-                            />
+                                layout="responsive"
+                                width={350} 
+                                height={350} 
+                                sizes="(max-width: 768px) 200px, (max-width: 1200px) 250px, (max-width: 1599px) 300px, 350px"                            />
                                 <span className="text-center">{ownedCardIds.has(card.id) ? card.name : '?'}</span>
                             </div>
                         ))}
