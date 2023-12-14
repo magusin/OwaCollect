@@ -104,6 +104,12 @@ export default function Shop({ productsData, errorServer }) {
     };
 
     useEffect(() => {
+        if (error === 'Erreur avec votre Token ou il est expiré. Veuillez vous reconnecter.') {
+            setTimeout(() => {
+                signOut()
+                router.push('/');
+            }, 2000);
+        }
         // Rediriger seulement si l'état de la session est déterminé et qu'il n'y a pas de session
         if (status === "unauthenticated") {
             router.push('/');
@@ -149,7 +155,7 @@ export default function Shop({ productsData, errorServer }) {
             };
             getUser();
         }
-    }, [status, router, session]);
+    }, [status, router, session, error]);
 
     if (status === "loading" || loading) {
         return (

@@ -1,5 +1,5 @@
 import React from "react";
-import Image from 'next/image';
+import Image from 'next/legacy/image';
 import axios from 'axios'
 import calculatePoints from '@/utils/calculatePoints';
 import { signOut, useSession } from 'next-auth/react';
@@ -8,6 +8,7 @@ import { useRouter } from 'next/router';
 import Header from 'C/header';
 import { getServerSession } from "next-auth";
 import nextAuthOptions from "../../config/nextAuthOptions";
+
 
 export default function Collection({ cards, errorServer }) {
     const [error, setError] = React.useState(errorServer || null);
@@ -28,6 +29,13 @@ export default function Collection({ cards, errorServer }) {
     };
 
     useEffect(() => {
+
+        if (error === 'Erreur avec votre Token ou il est expiré. Veuillez vous reconnecter.') {
+            setTimeout(() => {
+                signOut()
+                router.push('/');
+            }, 3000);
+        }
 
         if (status === 'unauthenticated') {
             router.push('/');
@@ -75,16 +83,9 @@ export default function Collection({ cards, errorServer }) {
         }
 
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [status, session]);
+    }, [status, session, error]);
 
     if (error) {
-        if (error === 'Erreur avec votre Token ou il est expiré. Veuillez vous reconnecter.') {
-            setTimeout(() => {
-                signOut()
-                router.push('/');
-            }, 2000);
-        }
-        
         return (
             <div className="flex flex-col h-screen">
                 <Header points={points} />
@@ -119,6 +120,7 @@ export default function Collection({ cards, errorServer }) {
                                         alt={ownedCardIds.has(card.id) ? card.name : 'Dos de la carte numéro ' + card.id}
                                         layout="fill"
                                         objectFit="contain"
+                                        sizes="100%"
                                     />
                                 </div>
                                 <div className={`absolute inset-0 flex items-center justify-center rounded-full ${ownedCardIds.has(card.id) ? "hidden" : ""}`}>
@@ -135,22 +137,27 @@ export default function Collection({ cards, errorServer }) {
                         ))}
                     </div>
                     {selectedCard && (
-                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 px-4 py-6">
-                            <div className="bg-white p-8 rounded-lg max-w-4xl">
-                                <div className="flex justify-center items-center h-full">
-                                    <Image
-                                        priority={true}
-                                        src={`${selectedCard.picture}.png`}
-                                        alt={selectedCard.name}
-                                        layout="fill"
-                                        objectFit="contain"
-                                        className="max-h-full max-w-full"
-                                    />
+                        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 px-4 py-6 overflow-y-auto h-full w-full">
+                            <div className="flex flex-wrap flex-row space-x-0 p-4 h-full w-full items-center justify-center">
+                                <button className="w-full md:w-auto">
+                                    <Image src="/images/previous.png" alt="previous card" objectFit="contain" objectPosition="center" width={130} height={100} />
+                                </button>
+                                <div className="relative h-full" style={{ width: '100%', maxWidth: '100vh' }}>
+                                    <div className="aspect-w-1 aspect-h-1">
+                                        <Image
+                                            priority={true}
+                                            src={ownedCardIds.has(selectedCard.id) ? `${selectedCard.picture}.png` : `${selectedCard.picture_back}.png`}
+                                            alt={selectedCard.name}
+                                            layout="fill"
+                                            objectFit="contain"
+                                            sizes="100%"
+                                        />
+                                    </div>
                                 </div>
-                                <button
-                                    onClick={closeEnlargeView}
-                                    className="absolute top-2 right-2 bg-red-500 text-white py-2 px-4 rounded"
-                                >
+                                <button className="w-full md:w-auto">
+                                    <Image src="/images/next.png" alt="next card" objectFit="contain" objectPosition="center" width={130} height={100} />
+                                </button>
+                                <button onClick={closeEnlargeView} className="w-full md:w-auto bg-red-500 text-white py-2 px-4 rounded mt-4 md:mt-0 md:absolute md:top-2 md:right-2">
                                     Fermer
                                 </button>
                             </div>
