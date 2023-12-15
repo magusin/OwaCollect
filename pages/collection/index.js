@@ -18,9 +18,20 @@ export default function Collection({ cards, errorServer }) {
     const [points, setPoints] = React.useState(0);
     const [selectedCard, setSelectedCard] = React.useState(null);
 
+    const selectedCardIndex = cards.cards.findIndex(card => card.id === selectedCard?.id);
     // Gestionnaire de clic pour sélectionner une carte
     const handleCardClick = (card) => {
         setSelectedCard(card);
+    };
+
+    const nextCard = () => {
+        const prevCard = cards.cards[(selectedCardIndex  + 1) % cards.cards.length];
+        setSelectedCard(prevCard)
+    };
+
+    const previousCard = () => {
+        const prevCard = cards.cards[selectedCardIndex === 0 ? cards.cards.length - 1 : selectedCardIndex - 1];
+        setSelectedCard(prevCard)
     };
 
     // Pour fermer la vue agrandie
@@ -104,7 +115,6 @@ export default function Collection({ cards, errorServer }) {
             return acc;
         }, {});
 
-
         return (
             <div className="flex flex-col h-screen">
                 <Header points={points} />
@@ -117,7 +127,7 @@ export default function Collection({ cards, errorServer }) {
                                     <Image
                                         priority={true}
                                         src={ownedCardIds.has(card.id) ? `${card.picture}.png` : `${card.picture_back}.png`}
-                                        alt={ownedCardIds.has(card.id) ? card.name : 'Dos de la carte numéro ' + card.id}
+                                        alt={ownedCardIds.has(card.id) ? card.name : 'Dos de la carte ' + card.id}
                                         layout="fill"
                                         objectFit="contain"
                                         sizes="100%"
@@ -140,14 +150,14 @@ export default function Collection({ cards, errorServer }) {
                         <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 px-4 py-6 overflow-y-auto h-full w-full">
                             <div className="flex flex-wrap flex-row space-x-0 p-4 h-full w-full items-center justify-center">
                                 <button className="w-full md:w-auto">
-                                    <Image src="/images/previous.png" alt="previous card" objectFit="contain" objectPosition="center" width={130} height={100} />
+                                    <Image onClick={previousCard} src="/images/previous.png" alt="previous card" objectFit="contain" objectPosition="center" width={130} height={100} />
                                 </button>
                                 <div className="relative h-full" style={{ width: '100%', maxWidth: '100vh' }}>
-                                    <div className="aspect-w-1 aspect-h-1">
+                                    <div className="aspect-w-1 aspect-h-1 h-auto">
                                         <Image
                                             priority={true}
                                             src={ownedCardIds.has(selectedCard.id) ? `${selectedCard.picture}.png` : `${selectedCard.picture_back}.png`}
-                                            alt={selectedCard.name}
+                                            alt={ownedCardIds.has(selectedCard.id) ? selectedCard.name : 'Dos de la carte ' + selectedCard.id}
                                             layout="fill"
                                             objectFit="contain"
                                             sizes="100%"
@@ -155,7 +165,7 @@ export default function Collection({ cards, errorServer }) {
                                     </div>
                                 </div>
                                 <button className="w-full md:w-auto">
-                                    <Image src="/images/next.png" alt="next card" objectFit="contain" objectPosition="center" width={130} height={100} />
+                                    <Image onClick={nextCard} src="/images/next.png" alt="next card" objectFit="contain" objectPosition="center" width={130} height={100} />
                                 </button>
                                 <button onClick={closeEnlargeView} className="w-full md:w-auto bg-red-500 text-white py-2 px-4 rounded mt-4 md:mt-0 md:absolute md:top-2 md:right-2">
                                     Fermer
