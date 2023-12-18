@@ -114,7 +114,7 @@ export default function Collection({ cards, errorServer }) {
             acc[card.cardId] = card.count;
             return acc;
         }, {});
-
+        console.log(selectedCard)
         return (
             <div className="flex flex-col h-screen">
                 <Header points={points} />
@@ -146,6 +146,7 @@ export default function Collection({ cards, errorServer }) {
                             </div>
                         ))}
                     </div>
+                    
                     {selectedCard && (
                         <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 px-4 py-6 overflow-y-auto h-full w-full">
                             <div className="flex flex-wrap flex-row space-x-0 p-4 h-full w-full items-center justify-center">
@@ -167,6 +168,11 @@ export default function Collection({ cards, errorServer }) {
                                 <button className="w-full md:w-auto">
                                     <Image onClick={nextCard} src="/images/next.png" alt="next card" objectFit="contain" objectPosition="center" width={130} height={100} />
                                 </button>
+                                {ownedCardIds.has(selectedCard.id) && cardCounts[selectedCard.id] > 2 && (
+                                    <button className="md:absolute md:bottom-0 border border-yellow-500">
+                                    <Image src="/images/levelUp.png" alt="next card" objectFit="contain" objectPosition="center" width={120} height={120} />
+                                </button>
+                                )}
                                 <button onClick={closeEnlargeView} className="w-full md:w-auto bg-red-500 text-white py-2 px-4 rounded mt-4 md:mt-0 md:absolute md:top-2 md:right-2">
                                     Fermer
                                 </button>
