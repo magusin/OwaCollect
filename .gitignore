@@ -4,6 +4,7 @@ node_modules/
 .next/
 build/
 dist/
+dbCalls/
 
 # dependencies
 /node_modules
@@ -39,3 +40,5 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+

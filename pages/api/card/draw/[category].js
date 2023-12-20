@@ -54,9 +54,20 @@ export default async function handler(req, res) {
                         isDraw: true
                     }
                 })
+                const totalDropRate = cards[cards.length - 1].dropRate;
+
+                const selectRandomCard = () => {
+                    let randomNum = Math.random() * totalDropRate;
+                    for (const card of cards) {
+                        if (randomNum - card.dropRate <= 0) {
+                            return card;
+                        }
+                    }
+                };
+
                 const selectedCards = [];
                 for (let i = 0; i < 5; i++) {
-                    const randomCard = cards[Math.floor(Math.random() * cards.length)];
+                    const randomCard = selectRandomCard()
                     selectedCards.push(randomCard);
                 }
 

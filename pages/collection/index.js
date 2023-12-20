@@ -18,7 +18,7 @@ export default function Collection({ cards, errorServer }) {
     const [points, setPoints] = React.useState(0);
     const [selectedCard, setSelectedCard] = React.useState(null);
 
-    const selectedCardIndex = cards.cards.findIndex(card => card.id === selectedCard?.id);
+    const selectedCardIndex = cards?.cards.findIndex(card => card.id === selectedCard?.id);
     // Gestionnaire de clic pour sélectionner une carte
     const handleCardClick = (card) => {
         setSelectedCard(card);
@@ -94,7 +94,18 @@ export default function Collection({ cards, errorServer }) {
         }
 
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [status, session, error]);
+    }, [status, session, error, router]);
+
+    if (status === "loading") {
+        return (
+            <div className="flex flex-col h-screen">
+                <Header points={points} />
+                <div className="flex-grow flex justify-center items-center">
+                    <span className="text-center">Chargement ...</span>
+                </div>
+            </div>
+        )
+    }
 
     if (error) {
         return (
@@ -168,7 +179,7 @@ export default function Collection({ cards, errorServer }) {
                                 <button className="w-full md:w-auto">
                                     <Image onClick={nextCard} src="/images/next.png" alt="next card" objectFit="contain" objectPosition="center" width={130} height={100} />
                                 </button>
-                                {ownedCardIds.has(selectedCard.id) && cardCounts[selectedCard.id] > 2 && (
+                                {ownedCardIds.has(selectedCard.id) && (cardCounts[selectedCard.id] > 2) && (points >= selectedCard.evolveCost) && (
                                     <button className="md:absolute md:bottom-0 border border-yellow-500">
                                     <Image src="/images/levelUp.png" alt="next card" objectFit="contain" objectPosition="center" width={120} height={120} />
                                 </button>

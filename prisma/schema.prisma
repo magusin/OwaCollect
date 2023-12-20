@@ -66,6 +66,8 @@ model card {
   evolvedId    Int?
   evolveCost   Int?
   category     String        @db.VarChar(55)
+  rarety       String        @db.VarChar(55)
+  dropRate     Int           @default(0)
   card         card?         @relation("cardTocard", fields: [evolvedId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "card_ibfk_1")
   other_card   card[]        @relation("cardTocard")
   playercards  playercards[]
