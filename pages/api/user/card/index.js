@@ -4,7 +4,7 @@ import jwt from 'jsonwebtoken';
 
 // Initialiser le midleware Cors
 const cors = Cors({
-    methods: ['GET', 'HEAD'],
+    methods: ['GET', 'PUT', 'HEAD'],
 })
 
 const prisma = new PrismaClient()
@@ -61,6 +61,59 @@ export default async function handler(req, res) {
 
                 // Renvoyer les produits et les cartes du joueur
                 res.status(200).json({ cards, playerCards });
+                break
+            case 'PUT':
+                const { id } = req.body;
+                if (!id) {
+                    return res.status(400).json({ message: 'Id de la carte non fourni' });
+                }
+               
+                // Réduire le count de la carte actuelle de 2
+    await prisma.playercards.update({
+        where: {
+            petId_cardId: {
+                petId: decoded.id,
+                cardId: id
+            }
+        },
+        data: {
+            count: {
+                decrement: 2
+            }
+        }
+    });
+
+    // Augmenter le count de la carte suivante
+    const playerCardsEdit = await prisma.playercards.upsert({
+        where: {
+            petId_cardId: {
+                petId: decoded.id,
+                cardId: id + 1
+            }
+        },
+        update: {
+            count: {
+                increment: 1
+            }
+        },
+        create: {
+            petId: decoded.id,
+            cardId: id + 1,
+            count: 1
+        }
+    });
+
+    // Récupérer toutes les cartes du joueur
+    const allPlayerCards = await prisma.playercards.findMany({
+        where: {
+            petId: decoded.id
+        },
+        include: {
+            card: true
+        }
+    });
+
+    res.status(200).json({ updatedCard: playerCardsEdit, allPlayerCards });
                 break
             default:
                 res.status(405).end(`Method ${req.method} Not Allowed`)

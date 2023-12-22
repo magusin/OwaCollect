@@ -22,7 +22,7 @@ export default function Shop({ productsData, errorServer }) {
     const [showModal, setShowModal] = React.useState(false);
     const [drawnCards, setDrawnCards] = React.useState([]);
     const [showModalCards, setShowModalCards] = React.useState(false);
-    // draw cards
+    // Fonction pour calculer les points
     async function editUserPoints(selectedProduct) {
         try {
             const user = JSON.parse(localStorage.getItem('userOC'));
@@ -55,7 +55,7 @@ export default function Shop({ productsData, errorServer }) {
                     router.push('/');
                 }, 3000);
             } else {
-                setError("Erreur lors de l'achat du pack");
+                setError("Erreur lors de l'achat du pack " + error);
             }
         } finally {
             setLoading(false);
@@ -95,10 +95,6 @@ export default function Shop({ productsData, errorServer }) {
 
         } else {
             setError("Vous n'avez pas assez de points pour acheter ce pack");
-            setTimeout(() => {
-                signOut()
-                router.push('/shop');
-            }, 2000);
         }
         setLoading(false);
     };
@@ -199,7 +195,16 @@ export default function Shop({ productsData, errorServer }) {
                                     <button onClick={handleBuyPack} className={`mt-4 bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 ${points < product.price ? "opacity-50 cursor-not-allowed" : ""}`} disabled={points < product.price}>Acheter</button>
                                 </div>
                                 {showModal && (
-                                    <Modal setShowModal={setShowModal} product={product} handleConfirmPurchase={() => handleConfirmPurchase(product)} />
+                                    <Modal 
+                                        setShowModal={setShowModal} 
+                                        handleConfirm={() => handleConfirmPurchase(product)} 
+                                        title="Confirmation d'Achat"  
+                                        message={
+                                        <>
+                                          Êtes-vous sûr de vouloir acheter <b>{product.name}</b> pack pour <b>{product.price} OC</b> ?
+                                        </>
+                                      }
+                                    />
                                 )}
                                 {showModalCards && (
                                     <CardsModal cards={drawnCards} onClose={() => setShowModalCards(false)} />

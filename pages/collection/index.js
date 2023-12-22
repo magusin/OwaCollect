@@ -8,15 +8,100 @@ import { useRouter } from 'next/router';
 import Header from 'C/header';
 import { getServerSession } from "next-auth";
 import nextAuthOptions from "../../config/nextAuthOptions";
-
+import Modal from "C/modal";
 
 export default function Collection({ cards, errorServer }) {
     const [error, setError] = React.useState(errorServer || null);
     const { data: session, status } = useSession();
     const router = useRouter();
-    const [loading, setLoading] = React.useState(true);
+    const [loading, setLoading] = React.useState(false);
     const [points, setPoints] = React.useState(0);
     const [selectedCard, setSelectedCard] = React.useState(null);
+    const [showModal, setShowModal] = React.useState(false);
+    const [isFetching, setIsFetching] = React.useState(false);
+    const [allCard, setAllCard] = React.useState(cards.cards);
+    const [playerCards, setPlayerCards] = React.useState(cards.playerCards);
+
+    // Fonction pour calculer les points
+    async function editUserPoints(selectedCard) {
+        try {
+            const user = JSON.parse(localStorage.getItem('userOC'));
+            const calculatedPoints = JSON.parse(localStorage.getItem('points'));
+            const totalPoints = calculatedPoints - selectedCard.evolveCost;
+            const updatedUser = {
+                ...user,
+                pointsUsed: user.pointsUsed + selectedCard.evolveCost
+            };
+            const response = await axios.put('/api/user',
+                { pointsUsed: updatedUser.pointsUsed },
+                {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${session.customJwt}`,
+                    }
+                })
+
+            if (response.status === 200) {
+                const data = await response.data;
+                localStorage.setItem('userOC', JSON.stringify(data));
+                localStorage.setItem('points', totalPoints);
+                setPoints(totalPoints);
+            }
+        } catch (error) {
+            if (error.response.status === 401) {
+                setError('Erreur avec votre Token ou il est expiré. Veuillez vous reconnecter.')
+                setTimeout(() => {
+                    signOut()
+                    router.push('/');
+                }, 3000);
+            } else {
+                setError("Erreur lors de l'achat du pack " + error);
+            }
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    console.log('playerCards', playerCards)
+    // fonction de level up de la carte
+    const handleConfirmLevelUp = async (selectedCard) => {
+        setLoading(true);
+        setShowModal(false);
+        if (points >= selectedCard.evolveCost) {
+        try {
+          const response = await axios.put('/api/user/card', { id: selectedCard.id }, {
+            headers: {
+              Authorization: `Bearer ${session.customJwt}`,
+              'Content-Type': 'application/json'
+            },
+          });
+          if (response.status === 200) {
+          const data = await response.data;
+          await editUserPoints(selectedCard);
+          setPlayerCards(data.allPlayerCards);
+          nextCard();
+          }
+        } catch (error) {
+        if (error.response.status === 401) {
+          setError('Erreur avec votre Token ou il est expiré. Veuillez vous reconnecter.')
+          setTimeout(() => {
+            signOut()
+            router.push('/');
+          }, 3000);
+        } else {
+        setError('Erreur lors du levelUp de la carte. ' + error);
+        }
+      } finally {
+        setLoading(false);
+      }
+    } else {
+        setError('Vous n\'avez pas assez de points pour effectuer cette action.');
+    };
+    }
+
+    const handleLevelUp = () => {
+        setShowModal(true);
+    };
 
     const selectedCardIndex = cards?.cards.findIndex(card => card.id === selectedCard?.id);
     // Gestionnaire de clic pour sélectionner une carte
@@ -25,12 +110,12 @@ export default function Collection({ cards, errorServer }) {
     };
 
     const nextCard = () => {
-        const prevCard = cards.cards[(selectedCardIndex  + 1) % cards.cards.length];
+        const prevCard = allCard[(selectedCardIndex  + 1) % allCard.length];
         setSelectedCard(prevCard)
     };
 
     const previousCard = () => {
-        const prevCard = cards.cards[selectedCardIndex === 0 ? cards.cards.length - 1 : selectedCardIndex - 1];
+        const prevCard = allCard[selectedCardIndex === 0 ? allCard.length - 1 : selectedCardIndex - 1];
         setSelectedCard(prevCard)
     };
 
@@ -96,7 +181,7 @@ export default function Collection({ cards, errorServer }) {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [status, session, error, router]);
 
-    if (status === "loading") {
+    if (status === "loading" || loading) {
         return (
             <div className="flex flex-col h-screen">
                 <Header points={points} />
@@ -119,19 +204,19 @@ export default function Collection({ cards, errorServer }) {
     }
 
     if (session) {
-        const ownedCardIds = new Set(cards.playerCards.map(card => card.cardId));
+        const ownedCardIds = new Set(playerCards.map(card => card.cardId));
         // Créer un objet pour le suivi du count pour chaque cardId
-        const cardCounts = cards.playerCards.reduce((acc, card) => {
+        const cardCounts = playerCards.reduce((acc, card) => {
             acc[card.cardId] = card.count;
             return acc;
         }, {});
-        console.log(selectedCard)
+       
         return (
             <div className="flex flex-col h-screen">
                 <Header points={points} />
                 <div className="flex-grow flex flex-col items-center">
                     <div className="flex flex-wrap justify-center">
-                        {cards.cards.map((card) => (
+                        {allCard.map((card) => (
 
                             <div key={card.id} onClick={() => handleCardClick(card)} className="relative flex flex-col items-center justify-center m-4 cursor-pointer">
                                 <div className="relative w-[100px] h-[100px] sm:w-[150px] sm:h-[150px] md:w-[200px] md:h-[200px] lg:w-[250px] lg:h-[250px] xl:w-[300px] xl:h-[300px] 2xl:w-[350px] 2xl:h-[350px]">
@@ -179,8 +264,8 @@ export default function Collection({ cards, errorServer }) {
                                 <button className="w-full md:w-auto">
                                     <Image onClick={nextCard} src="/images/next.png" alt="next card" objectFit="contain" objectPosition="center" width={130} height={100} />
                                 </button>
-                                {ownedCardIds.has(selectedCard.id) && (cardCounts[selectedCard.id] > 2) && (points >= selectedCard.evolveCost) && (
-                                    <button className="md:absolute md:bottom-0 border border-yellow-500">
+                                {ownedCardIds.has(selectedCard.id) && (selectedCard.evolveCost) && (
+                                    <button onClick={handleLevelUp} disabled={!(cardCounts[selectedCard.id] > 2 && points >= selectedCard.evolveCost)} className="md:absolute md:bottom-0 border border-yellow-500">
                                     <Image src="/images/levelUp.png" alt="next card" objectFit="contain" objectPosition="center" width={120} height={120} />
                                 </button>
                                 )}
@@ -188,6 +273,18 @@ export default function Collection({ cards, errorServer }) {
                                     Fermer
                                 </button>
                             </div>
+                            {showModal && (
+                                <Modal 
+                                setShowModal={setShowModal} 
+                                handleConfirm={() => handleConfirmLevelUp(selectedCard)}
+                                title="Confirmation de Level Up"
+                                message={
+                                    <>
+                                      Êtes-vous sûr de vouloir dépensser 2 exemplaires de <b>{selectedCard.name}</b> ainsi que <b>{selectedCard.evolveCost} OC</b> ?
+                                    </>
+                                  }
+                                />
+                            )}
                         </div>
                     )}
                 </div>
