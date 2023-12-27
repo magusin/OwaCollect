@@ -147,9 +147,9 @@ export default function Shop({ productsData, errorServer }) {
 
     return (
         <>
-            <div className="flex-col h-screen w-full items-center justify-center min-h-screen">
+            <div className="flex-col min-h-screen ">
                 <Header points={points} />
-                <div className="container mx-auto px-4 mt-8">
+                <div className="container mx-auto px-4 md:my-8 my-4">
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         {/*  itérer sur produit */}
