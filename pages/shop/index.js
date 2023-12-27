@@ -155,7 +155,7 @@ export default function Shop({ productsData, errorServer }) {
                         {/*  itérer sur produit */}
                         {products.map((product, index) => (
                             <div key={index} className="border rounded-lg p-4 shadow hover:shadow-lg transition bg-white">
-                                <Image className="w-full h-128 object-cover rounded-t-lg" src={`${product.picture}.png`} alt={`${product.name} pack picture`} width={300} height={300} priority />
+                                <Image className="w-full h-auto object-cover rounded-t-lg" src={`${product.picture}.png`} alt={`${product.name} pack picture`} width={300} height={300} priority />
 
                                 <div className="mt-2">
                                     <h2 className="text-xl font-semibold">{product.name}</h2>

@@ -167,19 +167,33 @@ export default function Collection({ cards, errorServer }) {
 
     if (session) {
         const ownedCardIds = new Set(playerCards.map(card => card.cardId));
+        console.log('playerCards :', playerCards.length);
+
         // Créer un objet pour le suivi du count pour chaque cardId
         const cardCounts = playerCards.reduce((acc, card) => {
             acc[card.cardId] = card.count;
             return acc;
         }, {});
 
+
         return (
             <div className="flex flex-col h-screen">
                 <Header points={points} />
                 <div className="flex-grow flex flex-col items-center">
+                    <div className="relative w-full h-16 md:h-24 hl:h-28 2xl:h-32 my-4">
+                        <Image
+                            src="/images/elden-ring-banner.png"
+                            alt="Elden Ring Banner"
+                            layout="fill"
+                            objectFit="contain"
+                            priority={true}
+                        />
+                    </div>
+                    <div className="text-lg font-semibold my-4">
+                        {`Cartes de l'utilisateur : ${ownedCardIds.size} / ${allCard.length}`}
+                    </div>
                     <div className="flex flex-wrap justify-center">
                         {allCard.map((card) => (
-
                             <div key={card.id} onClick={() => handleCardClick(card)} className="relative flex flex-col items-center justify-center m-4 cursor-pointer">
                                 <div className="relative w-[100px] h-[100px] sm:w-[150px] sm:h-[150px] md:w-[200px] md:h-[200px] lg:w-[250px] lg:h-[250px] xl:w-[300px] xl:h-[300px] 2xl:w-[350px] 2xl:h-[350px]">
                                     <Image
