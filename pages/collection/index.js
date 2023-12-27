@@ -22,81 +22,43 @@ export default function Collection({ cards, errorServer }) {
     const [allCard, setAllCard] = React.useState(cards.cards);
     const [playerCards, setPlayerCards] = React.useState(cards.playerCards);
 
-    // Fonction pour calculer les points
-    async function editUserPoints(selectedCard) {
-        try {
-            const user = JSON.parse(localStorage.getItem('userOC'));
-            const calculatedPoints = JSON.parse(localStorage.getItem('points'));
-            const totalPoints = calculatedPoints - selectedCard.evolveCost;
-            const updatedUser = {
-                ...user,
-                pointsUsed: user.pointsUsed + selectedCard.evolveCost
-            };
-            const response = await axios.put('/api/user',
-                { pointsUsed: updatedUser.pointsUsed },
-                {
-                    headers: {
-                        'Content-Type': 'application/json',
-                        Authorization: `Bearer ${session.customJwt}`,
-                    }
-                })
-
-            if (response.status === 200) {
-                const data = await response.data;
-                localStorage.setItem('userOC', JSON.stringify(data));
-                localStorage.setItem('points', totalPoints);
-                setPoints(totalPoints);
-            }
-        } catch (error) {
-            if (error.response.status === 401) {
-                setError('Erreur avec votre Token ou il est expiré. Veuillez vous reconnecter.')
-                setTimeout(() => {
-                    signOut()
-                    router.push('/');
-                }, 3000);
-            } else {
-                setError("Erreur lors de l'achat du pack " + error);
-            }
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    console.log('playerCards', playerCards)
     // fonction de level up de la carte
     const handleConfirmLevelUp = async (selectedCard) => {
         setLoading(true);
         setShowModal(false);
         if (points >= selectedCard.evolveCost) {
-        try {
-          const response = await axios.put('/api/user/card', { id: selectedCard.id }, {
-            headers: {
-              Authorization: `Bearer ${session.customJwt}`,
-              'Content-Type': 'application/json'
-            },
-          });
-          if (response.status === 200) {
-          const data = await response.data;
-          await editUserPoints(selectedCard);
-          setPlayerCards(data.allPlayerCards);
-          nextCard();
-          }
-        } catch (error) {
-        if (error.response.status === 401) {
-          setError('Erreur avec votre Token ou il est expiré. Veuillez vous reconnecter.')
-          setTimeout(() => {
-            signOut()
-            router.push('/');
-          }, 3000);
+            try {
+                const response = await axios.put('/api/user/card', { id: selectedCard.id, cost: selectedCard.evolveCost }, {
+                    headers: {
+                        Authorization: `Bearer ${session.customJwt}`,
+                        'Content-Type': 'application/json'
+                    },
+                });
+                if (response.status === 200) {
+                    const data = await response.data;
+                    localStorage.setItem('userOC', JSON.stringify(data.userData));
+                    const totalPoints = calculatePoints(data.userData);
+                    localStorage.setItem('points', totalPoints);
+                    setPoints(totalPoints);
+                    setPlayerCards(data.allPlayerCards);
+                    nextCard();
+                }
+            } catch (error) {
+                if (error.response.status === 401) {
+                    setError('Erreur avec votre Token ou il est expiré. Veuillez vous reconnecter.')
+                    setTimeout(() => {
+                        signOut()
+                        router.push('/');
+                    }, 3000);
+                } else {
+                    setError('Erreur lors du levelUp de la carte. ' + error);
+                }
+            } finally {
+                setLoading(false);
+            }
         } else {
-        setError('Erreur lors du levelUp de la carte. ' + error);
-        }
-      } finally {
-        setLoading(false);
-      }
-    } else {
-        setError('Vous n\'avez pas assez de points pour effectuer cette action.');
-    };
+            setError('Vous n\'avez pas assez de points pour effectuer cette action.');
+        };
     }
 
     const handleLevelUp = () => {
@@ -110,7 +72,7 @@ export default function Collection({ cards, errorServer }) {
     };
 
     const nextCard = () => {
-        const prevCard = allCard[(selectedCardIndex  + 1) % allCard.length];
+        const prevCard = allCard[(selectedCardIndex + 1) % allCard.length];
         setSelectedCard(prevCard)
     };
 
@@ -210,7 +172,7 @@ export default function Collection({ cards, errorServer }) {
             acc[card.cardId] = card.count;
             return acc;
         }, {});
-       
+
         return (
             <div className="flex flex-col h-screen">
                 <Header points={points} />
@@ -242,7 +204,7 @@ export default function Collection({ cards, errorServer }) {
                             </div>
                         ))}
                     </div>
-                    
+
                     {selectedCard && (
                         <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 px-4 py-6 overflow-y-auto h-full w-full">
                             <div className="flex flex-wrap flex-row space-x-0 p-4 h-full w-full items-center justify-center">
@@ -266,23 +228,23 @@ export default function Collection({ cards, errorServer }) {
                                 </button>
                                 {ownedCardIds.has(selectedCard.id) && (selectedCard.evolveCost) && (
                                     <button onClick={handleLevelUp} disabled={!(cardCounts[selectedCard.id] > 2 && points >= selectedCard.evolveCost)} className="md:absolute md:bottom-0 border border-yellow-500">
-                                    <Image src="/images/levelUp.png" alt="next card" objectFit="contain" objectPosition="center" width={120} height={120} />
-                                </button>
+                                        <Image src="/images/levelUp.png" alt="next card" objectFit="contain" objectPosition="center" width={120} height={120} />
+                                    </button>
                                 )}
                                 <button onClick={closeEnlargeView} className="w-full md:w-auto bg-red-500 text-white py-2 px-4 rounded mt-4 md:mt-0 md:absolute md:top-2 md:right-2">
                                     Fermer
                                 </button>
                             </div>
                             {showModal && (
-                                <Modal 
-                                setShowModal={setShowModal} 
-                                handleConfirm={() => handleConfirmLevelUp(selectedCard)}
-                                title="Confirmation de Level Up"
-                                message={
-                                    <>
-                                      Êtes-vous sûr de vouloir dépensser 2 exemplaires de <b>{selectedCard.name}</b> ainsi que <b>{selectedCard.evolveCost} OC</b> ?
-                                    </>
-                                  }
+                                <Modal
+                                    setShowModal={setShowModal}
+                                    handleConfirm={() => handleConfirmLevelUp(selectedCard)}
+                                    title="Confirmation de Level Up"
+                                    message={
+                                        <>
+                                            Êtes-vous sûr de vouloir dépensser 2 exemplaires de <b>{selectedCard.name}</b> ainsi que <b>{selectedCard.evolveCost} OC</b> ?
+                                        </>
+                                    }
                                 />
                             )}
                         </div>

@@ -78,6 +78,18 @@ export default async function handler(req, res) {
                     acc[card.id].count += 1;
                     return acc;
                 }, {});
+
+                // Déduire les points du joueur
+                const userData = await prisma.pets.update({
+                    where: {
+                        userId: decoded.id
+                    },
+                    data: {
+                        pointsUsed: {
+                            increment: 500
+                        }
+                    }
+                });
                 
                 const transactionPromises = Object.values(selectedCardsMap).map(card => 
                     prisma.playercards.upsert({
@@ -102,7 +114,7 @@ export default async function handler(req, res) {
                 
                 await prisma.$transaction(transactionPromises);
 
-                res.status(200).json(selectedCards)
+                res.status(200).json({selectedCards, userData})
                 break
             default:
                 res.status(405).end(`Method ${req.method} Not Allowed`)

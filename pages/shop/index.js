@@ -22,81 +22,50 @@ export default function Shop({ productsData, errorServer }) {
     const [showModal, setShowModal] = React.useState(false);
     const [drawnCards, setDrawnCards] = React.useState([]);
     const [showModalCards, setShowModalCards] = React.useState(false);
-    // Fonction pour calculer les points
-    async function editUserPoints(selectedProduct) {
-        try {
-            const user = JSON.parse(localStorage.getItem('userOC'));
-            const calculatedPoints = JSON.parse(localStorage.getItem('points'));
-            const totalPoints = calculatedPoints - selectedProduct.price;
-            const updatedUser = {
-                ...user,
-                pointsUsed: user.pointsUsed + selectedProduct.price
-            };
-            const response = await axios.put('/api/user',
-                { pointsUsed: updatedUser.pointsUsed },
-                {
+
+    const handleBuyPack = () => {
+        setShowModal(true);
+    };
+
+    const handleConfirmPurchase = async (selectedProduct) => {
+        setLoading(true);
+        setShowModal(false);
+        if (points >= selectedProduct.price && session) {
+            try {
+                const response = await axios.get(`/api/card/draw/${selectedProduct.name}`, {
                     headers: {
                         'Content-Type': 'application/json',
                         Authorization: `Bearer ${session.customJwt}`,
                     }
                 })
 
-            if (response.status === 200) {
-                const data = await response.data;
-                localStorage.setItem('userOC', JSON.stringify(data));
-                localStorage.setItem('points', totalPoints);
-                setPoints(totalPoints);
-            }
-        } catch (error) {
-            if (error.response.status === 401) {
-                setError('Erreur avec votre Token ou il est expiré. Veuillez vous reconnecter.')
-                setTimeout(() => {
-                    signOut()
-                    router.push('/');
-                }, 3000);
-            } else {
-                setError("Erreur lors de l'achat du pack " + error);
-            }
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const handleBuyPack = () => {
-        setShowModal(true);
-    };
-
-    const handleConfirmPurchase = (selectedProduct) => {
-        setLoading(true);
-        setShowModal(false);
-        if (points >= selectedProduct.price && session) {
-            const drawCards = async (category) => {
-                try {
-                    const response = await axios.get(`/api/card/draw/${category}`, {
-                        headers: {
-                            'Content-Type': 'application/json',
-                            Authorization: `Bearer ${session.customJwt}`,
-                        }
-                    })
-
-                    // if response status is 200 then set cards in state and show modal
-                    if (response.status === 200) {
-                        const data = await response.data;
-                        await editUserPoints(selectedProduct);
-                        setDrawnCards(data);
-                        setShowModalCards(true);
-                    }
-                } catch (error) {
+                // if response status is 200 then set cards in state and show modal
+                if (response.status === 200) {
+                    const data = await response.data;
+                    // await editUserPoints(selectedProduct);
+                    localStorage.setItem('userOC', JSON.stringify(data.userData));
+                    const totalPoints = calculatePoints(data.userData);
+                    localStorage.setItem('points', totalPoints);
+                    setPoints(totalPoints);
+                    setDrawnCards(data.selectedCards);
+                    setShowModalCards(true);
+                }
+            } catch (error) {
+                if (error.response.status === 401) {
+                    setError('Erreur avec votre Token ou il est expiré. Veuillez vous reconnecter.')
+                    setTimeout(() => {
+                        signOut()
+                        router.push('/');
+                    }, 3000);
+                } else {
                     setError('Erreur lors du tirage des cartes');
                 }
+            } finally {
+                setLoading(false);
             }
-
-            drawCards(selectedProduct.name);
-
         } else {
             setError("Vous n'avez pas assez de points pour acheter ce pack");
         }
-        setLoading(false);
     };
 
     useEffect(() => {
@@ -195,15 +164,15 @@ export default function Shop({ productsData, errorServer }) {
                                     <button onClick={handleBuyPack} className={`mt-4 bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 ${points < product.price ? "opacity-50 cursor-not-allowed" : ""}`} disabled={points < product.price}>Acheter</button>
                                 </div>
                                 {showModal && (
-                                    <Modal 
-                                        setShowModal={setShowModal} 
-                                        handleConfirm={() => handleConfirmPurchase(product)} 
-                                        title="Confirmation d'Achat"  
+                                    <Modal
+                                        setShowModal={setShowModal}
+                                        handleConfirm={() => handleConfirmPurchase(product)}
+                                        title="Confirmation d'Achat"
                                         message={
-                                        <>
-                                          Êtes-vous sûr de vouloir acheter <b>{product.name}</b> pack pour <b>{product.price} OC</b> ?
-                                        </>
-                                      }
+                                            <>
+                                                Êtes-vous sûr de vouloir acheter <b>{product.name}</b> pack pour <b>{product.price} OC</b> ?
+                                            </>
+                                        }
                                     />
                                 )}
                                 {showModalCards && (

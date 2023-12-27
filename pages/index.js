@@ -32,8 +32,7 @@ export default function Login() {
           const data = await response.data;
           localStorage.setItem('userOC', JSON.stringify(data));
           setUser(data);
-          const calculatedPoints = calculatePoints(data);
-          const totalPoints = calculatedPoints - data.pointsUsed;
+          const totalPoints = calculatePoints(data);
           localStorage.setItem('points', totalPoints);
           setPoints(totalPoints);
         } catch (error) {
