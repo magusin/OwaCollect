@@ -59,3 +59,14 @@ body {
 .card-back {
   transform: rotateY(180deg);
 }
+
+.tooltip-text {
+  visibility: hidden; 
+  position: absolute;
+  z-index: 100; 
+  
+}
+
+.group:hover .tooltip-text {
+  visibility: visible; /* Visible au survol */
+}

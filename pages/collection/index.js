@@ -19,8 +19,8 @@ export default function Collection({ cards, errorServer }) {
     const [selectedCard, setSelectedCard] = React.useState(null);
     const [showModal, setShowModal] = React.useState(false);
     const [isFetching, setIsFetching] = React.useState(false);
-    const [allCard, setAllCard] = React.useState(cards.cards);
-    const [playerCards, setPlayerCards] = React.useState(cards.playerCards);
+    const [allCard, setAllCard] = React.useState(cards?.cards);
+    const [playerCards, setPlayerCards] = React.useState(cards?.playerCards);
 
     // fonction de level up de la carte
     const handleConfirmLevelUp = async (selectedCard) => {
@@ -190,7 +190,7 @@ export default function Collection({ cards, errorServer }) {
                         />
                     </div>
                     <div className="text-lg font-semibold my-4">
-                        {`Cartes de l'utilisateur : ${ownedCardIds.size} / ${allCard.length}`}
+                        {`Cartes découvertes : ${ownedCardIds.size} / ${allCard.length}`}
                     </div>
                     <div className="flex flex-wrap justify-center">
                         {allCard.map((card) => (
@@ -215,6 +215,18 @@ export default function Collection({ cards, errorServer }) {
                                         X {cardCounts[card.id]}
                                     </div>
                                 )}
+                                <span className="absolute bottom-2 left-2 text-black bg-white rounded-full font-bold text-xl cursor-pointer group w-5 h-5 flex items-center justify-center">
+                                    ?
+                                    <span className="tooltip-text absolute hidden group-hover:block bg-gray-700 text-white text-xs rounded p-2 -ml-5 -mb-6 bottom-12 left-6 md:text-base w-[100px] sm:w-[100px] md:w-[150px] lg:w-[200px] xl:w-[250px] 2xl:w-[300px]">
+                                        {card.isDraw === true
+                                            ? "S'obtient via la boutique"
+                                            : `S'obtient via le levelUp de ${ownedCardIds.has(card.id - 1)
+                                                ? allCard.find(c => c.id === card.id - 1)?.name
+                                                : card.id - 1
+                                            }`
+                                        }
+                                    </span>
+                                </span>
                             </div>
                         ))}
                     </div>
