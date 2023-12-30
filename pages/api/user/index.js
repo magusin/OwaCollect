@@ -78,7 +78,9 @@ export default async function handler(req, res) {
                         userId: decoded.id
                     },
                     data: {
-                        pointsUsed: pointsUsed,
+                        pointsUsed: {
+                            increment: pointsUsed
+                        }
                     }
                 })
                 res.status(200).json(updatedUser)

@@ -18,9 +18,48 @@ export default function Collection({ cards, errorServer }) {
     const [points, setPoints] = React.useState(0);
     const [selectedCard, setSelectedCard] = React.useState(null);
     const [showModal, setShowModal] = React.useState(false);
+    const [showModalSell, setShowModalSell] = React.useState(false);
     const [isFetching, setIsFetching] = React.useState(false);
     const [allCard, setAllCard] = React.useState(cards?.cards);
     const [playerCards, setPlayerCards] = React.useState(cards?.playerCards);
+
+    // Fonction pour vendre
+    const handleConfirmSell = async (selectedCard, quantity) => {
+        console.log('quantity', quantity)
+        setLoading(true);
+        setShowModalSell(false);
+        const costPerCard = selectedCard.rarety === 'Rare' ? 70 : selectedCard.rarety === 'Epique' ? 150 : 30;
+        const amount = costPerCard * quantity;
+
+        try {
+            const response = await axios.put('/api/user/card/sell', { id: selectedCard.id, quantity: quantity, amount: amount }, {
+                headers: {
+                    Authorization: `Bearer ${session.customJwt}`,
+                    'Content-Type': 'application/json'
+                },
+            });
+            if (response.status === 200) {
+                const data = await response.data;
+                localStorage.setItem('userOC', JSON.stringify(data.userData));
+                const totalPoints = calculatePoints(data.userData);
+                localStorage.setItem('points', totalPoints);
+                setPoints(totalPoints);
+                setPlayerCards(data.allPlayerCards);
+            }
+        } catch (error) {
+            if (error.response.status === 401) {
+                setError('Erreur avec votre Token ou il est expiré. Veuillez vous reconnecter.')
+                setTimeout(() => {
+                    signOut()
+                    router.push('/');
+                }, 3000);
+            } else {
+                setError('Erreur lors de la vente. ' + error);
+            }
+        } finally {
+            setLoading(false);
+        }
+    }
 
     // fonction de level up de la carte
     const handleConfirmLevelUp = async (selectedCard) => {
@@ -65,6 +104,10 @@ export default function Collection({ cards, errorServer }) {
         setShowModal(true);
     };
 
+    const handleSell = () => {
+        setShowModalSell(true);
+    };
+
     const selectedCardIndex = cards?.cards.findIndex(card => card.id === selectedCard?.id);
     // Gestionnaire de clic pour sélectionner une carte
     const handleCardClick = (card) => {
@@ -85,6 +128,10 @@ export default function Collection({ cards, errorServer }) {
     const closeEnlargeView = () => {
         setSelectedCard(null);
     };
+
+    console.log(cards)
+
+
 
     useEffect(() => {
 
@@ -167,14 +214,12 @@ export default function Collection({ cards, errorServer }) {
 
     if (session) {
         const ownedCardIds = new Set(playerCards.map(card => card.cardId));
-        console.log('playerCards :', playerCards.length);
 
         // Créer un objet pour le suivi du count pour chaque cardId
         const cardCounts = playerCards.reduce((acc, card) => {
             acc[card.cardId] = card.count;
             return acc;
         }, {});
-
 
         return (
             <div className="flex flex-col h-screen">
@@ -230,15 +275,16 @@ export default function Collection({ cards, errorServer }) {
                             </div>
                         ))}
                     </div>
-
                     {selectedCard && (
                         <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 px-4 py-6 overflow-y-auto h-full w-full">
-                            <div className="flex flex-wrap flex-row space-x-0 p-4 h-full w-full items-center justify-center">
-                                <button className="w-full md:w-auto">
+                            <div className="flex flex-wrap flex-row p-4 h-full w-full items-center justify-center md:flex-col">
+                                {/* Button previous card */}
+                                <button className="w-20 xl:w-auto md:w-24">
                                     <Image onClick={previousCard} src="/images/previous.png" alt="previous card" objectFit="contain" objectPosition="center" width={130} height={100} />
                                 </button>
+                                {/* Image card */}
                                 <div className="relative h-full" style={{ width: '100%', maxWidth: '100vh' }}>
-                                    <div className="aspect-w-1 aspect-h-1 h-auto">
+                                    <div className="aspect-w-1 aspect-h-1 ">
                                         <Image
                                             priority={true}
                                             src={ownedCardIds.has(selectedCard.id) ? `${selectedCard.picture}.png` : `${selectedCard.picture_back}.png`}
@@ -249,15 +295,24 @@ export default function Collection({ cards, errorServer }) {
                                         />
                                     </div>
                                 </div>
-                                <button className="w-full md:w-auto">
+                                {/* Button next card */}
+                                <button className="w-20 xl:w-auto md:w-24">
                                     <Image onClick={nextCard} src="/images/next.png" alt="next card" objectFit="contain" objectPosition="center" width={130} height={100} />
                                 </button>
+                                {/* Button sell up */}
+                                {ownedCardIds.has(selectedCard.id) && (cardCounts[selectedCard.id] > 1) && (
+                                    <button onClick={handleSell} disabled={!cardCounts[selectedCard.id] > 1} className="w-20 absolute bottom-2 left-4 md:w-24 xl:w-auto">
+                                        <Image src="/images/sell.png" alt="next card" objectFit="contain" objectPosition="center" width={100} height={100} />
+                                    </button>
+                                )}
+                                {/* Button level up */}
                                 {ownedCardIds.has(selectedCard.id) && (selectedCard.evolveCost) && (
-                                    <button onClick={handleLevelUp} disabled={!(cardCounts[selectedCard.id] > 2 && points >= selectedCard.evolveCost)} className="md:absolute md:bottom-0 border border-yellow-500">
+                                    <button onClick={handleLevelUp} disabled={!(cardCounts[selectedCard.id] > 2 && points >= selectedCard.evolveCost)} className="w-16 md:w-24 lg:w-28 xl:w-32 absolute bottom-0 border border-yellow-500 md:bottom-0">
                                         <Image src="/images/levelUp.png" alt="next card" objectFit="contain" objectPosition="center" width={120} height={120} />
                                     </button>
                                 )}
-                                <button onClick={closeEnlargeView} className="w-full md:w-auto bg-red-500 text-white py-2 px-4 rounded mt-4 md:mt-0 md:absolute md:top-2 md:right-2">
+                                {/* Button close */}
+                                <button onClick={closeEnlargeView} className="w-full sm:w-auto bg-red-500 text-white py-2 px-4 rounded mt-4 sm:mt-0 sm:absolute sm:top-2 sm:right-2">
                                     Fermer
                                 </button>
                             </div>
@@ -271,6 +326,21 @@ export default function Collection({ cards, errorServer }) {
                                             Êtes-vous sûr de vouloir dépensser 2 exemplaires de <b>{selectedCard.name}</b> ainsi que <b>{selectedCard.evolveCost} OC</b> ?
                                         </>
                                     }
+                                />
+                            )}
+                            {showModalSell && (
+                                <Modal
+                                    setShowModal={setShowModalSell}
+                                    handleConfirm={(quantity) => handleConfirmSell(selectedCard, quantity)}
+                                    title="Confirmation de vente"
+                                    message={
+                                        <>
+                                            {/* eslint-disable-next-line react/no-unescaped-entities */}
+                                            Combien d'exemplaires de <b>{selectedCard.name}</b> souhaitez-vous vendre ?
+                                        </>
+                                    }
+                                    maxQuantity={cardCounts[selectedCard.id] - 1}
+                                    cost={selectedCard.rarety === 'Rare' ? 70 : selectedCard.rarety === 'Epique' ? 150 : 30}
                                 />
                             )}
                         </div>
