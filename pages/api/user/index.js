@@ -48,25 +48,70 @@ export default async function handler(req, res) {
         await runMiddleware(req, res, cors)
         switch (req.method) {
             case 'GET':
-                const user = await prisma.pets.upsert({
-                    where: {
-                        userId: decoded.id
-                    },
-                    create: {
-                        userId: decoded.id,
-                        name: decoded.name,
-                        imageUrl: decoded.image,
-                        subs: 0,
-                        guess: 0,
-                        bits: 0,
-                        quiz: 0,
-                        gifts: 0,
-                        messages: 0,
-                        guess: 0
-                    },
-                    update: {}
-                })
-                res.status(200).json(user)
+                const existingUser = await prisma.pets.findUnique({
+                    where: { userId: decoded.id },
+                });
+
+                // Vérifier si le nom et l'image ont changé
+                if (existingUser && existingUser.name !== decoded.name && existingUser.imageUrl !== decoded.image) {
+                    const updatedUser = await prisma.pets.update({
+                        where: {
+                            userId: decoded.id
+                        },
+                        data: {
+                            name: decoded.name,
+                            imageUrl: decoded.image
+                        }
+                    })
+
+                    // Retourner l'utilisateur mis à jour
+                    res.status(200).json(updatedUser);
+                } else if (existingUser && existingUser.name !== decoded.name) {
+                    const updatedUser = await prisma.pets.update({
+                        where: {
+                            userId: decoded.id
+                        },
+                        data: {
+                            name: decoded.name
+                        }
+                    })
+
+                    // Retourner l'utilisateur mis à jour
+                    res.status(200).json(updatedUser);
+                } else if (existingUser && existingUser.imageUrl !== decoded.image) {
+                    const updatedUser = await prisma.pets.update({
+                        where: {
+                            userId: decoded.id
+                        },
+                        data: {
+                            imageUrl: decoded.image
+                        }
+                    })
+
+                    // Retourner l'utilisateur mis à jour
+                    res.status(200).json(updatedUser);
+                } else {
+                    if (existingUser) {
+                    return res.status(200).json(existingUser);
+                    } else {
+                        const createPlayer = await prisma.pets.create({
+                            data: {
+                                userId: decoded.id,
+                                name: decoded.name,
+                                imageUrl: decoded.image,
+                                subs: 0,
+                                guess: 0,
+                                bits: 0,
+                                quiz: 0,
+                                gifts: 0,
+                                messages: 0,
+                                guess: 0
+                            }
+                        })
+
+                        res.status(200).json(createPlayer)
+                    }
+                }
                 break
             case 'PUT':
                 const { pointsUsed } = req.body
