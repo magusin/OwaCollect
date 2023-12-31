@@ -9,6 +9,7 @@ import Header from 'C/header';
 import { getServerSession } from "next-auth";
 import nextAuthOptions from "../../config/nextAuthOptions";
 import Modal from "C/modal";
+import Alert from "C/alert";
 
 export default function Collection({ cards, errorServer }) {
     const [error, setError] = React.useState(errorServer || null);
@@ -19,13 +20,15 @@ export default function Collection({ cards, errorServer }) {
     const [selectedCard, setSelectedCard] = React.useState(null);
     const [showModal, setShowModal] = React.useState(false);
     const [showModalSell, setShowModalSell] = React.useState(false);
+    const [showAlert, setShowAlert] = React.useState(false);
+    const [alertMessage, setAlertMessage] = React.useState('');
+    const [alertType, setAlertType] = React.useState(null);
     const [isFetching, setIsFetching] = React.useState(false);
     const [allCard, setAllCard] = React.useState(cards?.cards);
     const [playerCards, setPlayerCards] = React.useState(cards?.playerCards);
 
     // Fonction pour vendre
     const handleConfirmSell = async (selectedCard, quantity) => {
-        console.log('quantity', quantity)
         setLoading(true);
         setShowModalSell(false);
         const costPerCard = selectedCard.rarety === 'Rare' ? 70 : selectedCard.rarety === 'Epique' ? 150 : 30;
@@ -45,6 +48,16 @@ export default function Collection({ cards, errorServer }) {
                 localStorage.setItem('points', totalPoints);
                 setPoints(totalPoints);
                 setPlayerCards(data.allPlayerCards);
+                setAlertType('success');
+                setAlertMessage(
+                    <>
+                        Vous avez vendu pour <b>{amount} OC</b>
+                    </>
+                );
+                setShowAlert(true);
+                setTimeout(() => {
+                    setShowAlert(false);
+                }, 5000);
             }
         } catch (error) {
             if (error.response.status === 401) {
@@ -80,6 +93,16 @@ export default function Collection({ cards, errorServer }) {
                     localStorage.setItem('points', totalPoints);
                     setPoints(totalPoints);
                     setPlayerCards(data.allPlayerCards);
+                    setAlertType('success');
+                    setAlertMessage(
+                        <>
+                            Vous avez level Up la carte <b>{selectedCard.name}</b>
+                        </>
+                    );
+                    setShowAlert(true);
+                    setTimeout(() => {
+                        setShowAlert(false);
+                    }, 5000);
                     nextCard();
                 }
             } catch (error) {
@@ -96,7 +119,12 @@ export default function Collection({ cards, errorServer }) {
                 setLoading(false);
             }
         } else {
-            setError('Vous n\'avez pas assez de points pour effectuer cette action.');
+            setAlertType('error');
+            setAlertMessage('Vous n\'avez pas assez de points pour effectuer cette action')
+            setShowAlert(true);
+            setTimeout(() => {
+                setShowAlert(false);
+            }, 5000);
         };
     }
 
@@ -128,10 +156,6 @@ export default function Collection({ cards, errorServer }) {
     const closeEnlargeView = () => {
         setSelectedCard(null);
     };
-
-    console.log(cards)
-
-
 
     useEffect(() => {
 
@@ -265,7 +289,7 @@ export default function Collection({ cards, errorServer }) {
                                     <span className="tooltip-text absolute hidden group-hover:block bg-gray-700 text-white text-xs rounded p-2 -ml-5 -mb-6 bottom-12 left-6 md:text-base w-[100px] sm:w-[100px] md:w-[150px] lg:w-[200px] xl:w-[250px] 2xl:w-[300px]">
                                         {card.isDraw === true
                                             ? "S'obtient via la boutique"
-                                            : `S'obtient via le levelUp de ${ownedCardIds.has(card.id - 1)
+                                            : `S'obtient via le level Up de ${ownedCardIds.has(card.id - 1)
                                                 ? allCard.find(c => c.id === card.id - 1)?.name
                                                 : card.id - 1
                                             }`
@@ -341,6 +365,13 @@ export default function Collection({ cards, errorServer }) {
                                     }
                                     maxQuantity={cardCounts[selectedCard.id] - 1}
                                     cost={selectedCard.rarety === 'Rare' ? 70 : selectedCard.rarety === 'Epique' ? 150 : 30}
+                                />
+                            )}
+                            {showAlert && (
+                                <Alert
+                                    type={alertType}
+                                    message={alertMessage}
+                                    close={setShowAlert}
                                 />
                             )}
                         </div>

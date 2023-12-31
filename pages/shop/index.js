@@ -8,6 +8,7 @@ import Image from 'next/image';
 import axios from 'axios'
 import calculatePoints from '@/utils/calculatePoints';
 import Modal from 'C/modal';
+import Alert from 'C/alert';
 import CardsModal from 'C/cardsModal';
 import { getServerSession } from "next-auth";
 import nextAuthOptions from "../../config/nextAuthOptions";
@@ -22,6 +23,9 @@ export default function Shop({ productsData, errorServer }) {
     const [showModal, setShowModal] = React.useState(false);
     const [drawnCards, setDrawnCards] = React.useState([]);
     const [showModalCards, setShowModalCards] = React.useState(false);
+    const [showAlert, setShowAlert] = React.useState(false);
+    const [alertMessage, setAlertMessage] = React.useState('');
+    const [alertType, setAlertType] = React.useState(null);
 
     const handleBuyPack = () => {
         setShowModal(true);
@@ -49,6 +53,12 @@ export default function Shop({ productsData, errorServer }) {
                     setPoints(totalPoints);
                     setDrawnCards(data.selectedCards);
                     setShowModalCards(true);
+                    setAlertType('success');
+                    setAlertMessage('Vous avez bien acheté le pack');
+                    setShowAlert(true);
+                    setTimeout(() => {
+                        setShowAlert(false);
+                    }, 5000);
                 }
             } catch (error) {
                 if (error.response.status === 401) {
@@ -64,7 +74,12 @@ export default function Shop({ productsData, errorServer }) {
                 setLoading(false);
             }
         } else {
-            setError("Vous n'avez pas assez de points pour acheter ce pack");
+            setAlertType('error');
+            setAlertMessage("Vous n'avez pas assez de points pour acheter ce pack");
+            setShowAlert(true);
+            setTimeout(() => {
+                setShowAlert(false);
+            }, 5000);
         }
     };
 
@@ -177,6 +192,13 @@ export default function Shop({ productsData, errorServer }) {
                                 )}
                                 {showModalCards && (
                                     <CardsModal cards={drawnCards} onClose={() => setShowModalCards(false)} />
+                                )}
+                                {showAlert && (
+                                    <Alert
+                                        type={alertType}
+                                        message={alertMessage}
+                                        close={setShowAlert}
+                                    />
                                 )}
                             </div>
                         ))}
