@@ -216,7 +216,7 @@ export default function Collection({ cards, errorServer }) {
 
     if (status === "loading" || loading) {
         return (
-            <div className="flex flex-col h-screen">
+            <div className="flex flex-col h-screen" style={{marginTop: "80px"}}>
                 <Header points={points} />
                 <div className="flex-grow flex justify-center items-center">
                     <span className="text-center">Chargement ...</span>
@@ -227,7 +227,7 @@ export default function Collection({ cards, errorServer }) {
 
     if (error) {
         return (
-            <div className="flex flex-col h-screen">
+            <div className="flex flex-col h-screen" style={{marginTop: "80px"}}>
                 <Header points={points} />
                 <div className="flex-grow flex justify-center items-center">
                     <span className="text-center text-red-500">⚠ {error}</span>
@@ -246,7 +246,7 @@ export default function Collection({ cards, errorServer }) {
         }, {});
 
         return (
-            <div className="flex flex-col h-screen">
+            <div className="flex flex-col h-screen" style={{marginTop: "80px"}}>
                 <Header points={points} />
                 <div className="flex-grow flex flex-col items-center">
                     <div className="relative w-full h-16 md:h-24 hl:h-28 2xl:h-32 my-4">

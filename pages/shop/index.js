@@ -139,7 +139,7 @@ export default function Shop({ productsData, errorServer }) {
 
     if (status === "loading" || loading) {
         return (
-            <div className="flex flex-col h-screen">
+            <div className="flex flex-col h-screen" style={{marginTop: "80px"}}>
                 <Header points={points} />
                 <div className="flex-grow flex justify-center items-center">
                     <span className="text-center">Chargement ...</span>
@@ -150,7 +150,7 @@ export default function Shop({ productsData, errorServer }) {
 
     if (error) {
         return (
-            <div className="flex flex-col h-screen">
+            <div className="flex flex-col h-screen" style={{marginTop: "80px"}}>
                 <Header points={points} />
                 <div className="flex-grow flex justify-center items-center">
                     <span className="text-center text-red-500">⚠ {error}</span>
@@ -162,7 +162,7 @@ export default function Shop({ productsData, errorServer }) {
 
     return (
         <>
-            <div className="flex-col min-h-screen ">
+            <div className="flex-col min-h-screen" style={{marginTop: "80px"}}>
                 <Header points={points} />
                 <div className="container mx-auto px-4 md:my-8 my-4">
 
