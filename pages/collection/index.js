@@ -216,10 +216,10 @@ export default function Collection({ cards, errorServer }) {
 
     if (status === "loading" || loading) {
         return (
-            <div className="flex flex-col h-screen" style={{marginTop: "80px"}}>
+            <div className="flex flex-col h-screen" style={{ marginTop: "80px" }}>
                 <Header points={points} />
                 <div className="flex-grow flex justify-center items-center">
-                    <span className="text-center"><svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24"><path fill="#1f2937" d="M12,4a8,8,0,0,1,7.89,6.7A1.53,1.53,0,0,0,21.38,12h0a1.5,1.5,0,0,0,1.48-1.75,11,11,0,0,0-21.72,0A1.5,1.5,0,0,0,2.62,12h0a1.53,1.53,0,0,0,1.49-1.3A8,8,0,0,1,12,4Z"><animateTransform attributeName="transform" dur="0.75s" repeatCount="indefinite" type="rotate" values="0 12 12;360 12 12"/></path></svg></span>
+                    <span className="text-center"><svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24"><path fill="#1f2937" d="M12,4a8,8,0,0,1,7.89,6.7A1.53,1.53,0,0,0,21.38,12h0a1.5,1.5,0,0,0,1.48-1.75,11,11,0,0,0-21.72,0A1.5,1.5,0,0,0,2.62,12h0a1.53,1.53,0,0,0,1.49-1.3A8,8,0,0,1,12,4Z"><animateTransform attributeName="transform" dur="0.75s" repeatCount="indefinite" type="rotate" values="0 12 12;360 12 12" /></path></svg></span>
                 </div>
             </div>
         )
@@ -227,7 +227,7 @@ export default function Collection({ cards, errorServer }) {
 
     if (error) {
         return (
-            <div className="flex flex-col h-screen" style={{marginTop: "80px"}}>
+            <div className="flex flex-col h-screen" style={{ marginTop: "80px" }}>
                 <Header points={points} />
                 <div className="flex-grow flex justify-center items-center">
                     <span className="text-center text-red-500">⚠ {error}</span>
@@ -246,7 +246,7 @@ export default function Collection({ cards, errorServer }) {
         }, {});
 
         return (
-            <div className="flex flex-col h-screen" style={{marginTop: "80px"}}>
+            <div className="flex flex-col h-screen" style={{ marginTop: "80px" }}>
                 <Header points={points} />
                 <div className="flex-grow flex flex-col items-center">
                     <div className="relative w-full h-16 md:h-24 hl:h-28 2xl:h-32 my-4">
@@ -258,8 +258,18 @@ export default function Collection({ cards, errorServer }) {
                             priority={true}
                         />
                     </div>
-                    <div className="text-lg font-semibold my-4">
-                        {`Cartes découvertes : ${ownedCardIds.size} / ${allCard.length}`}
+                    <div className="flex items-center text-lg font-semibold my-4">
+                        <span>{`Cartes découvertes : ${ownedCardIds.size} / ${allCard.length}`}</span>
+                        <span className="relative mx-4 md:mx-8 text-black bg-white rounded-full font-bold text-xl cursor-pointer group w-10 h-10 flex items-center justify-center">
+                            ?
+                            <span className="tooltip-text absolute hidden group-hover:block bg-gray-700 text-white text-xs rounded p-2 bottom-full mb-2 left-1/2 transform -translate-x-1/2 w-[200px] md:w-[400px] md:text-base lg:w-[450px] 2xl:w-[500px]">
+                                <div className="flex flex-col">
+                                    <span>Les <b>OC</b> s&apos;obtiennent en participant au stream d&apos;Owarida.</span>
+                                    <span>Il y a trois raretés de cartes : <b>Commune</b>, <b>Rare</b> et <b>Epique</b>.</span>
+                                    <span>Certaines cartes peuvent Level Up pour obtenir la carte suivante, cependant il faut 3 exemplaires + une quantité d&apos;OC pour level Up.</span>
+                                </div>
+                            </span>
+                        </span>
                     </div>
                     <div className="flex flex-wrap justify-center">
                         {allCard.map((card) => (
