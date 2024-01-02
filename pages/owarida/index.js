@@ -110,7 +110,7 @@ export default function Owarida() {
                         <div className="flex-grow" style={{ width: '70%' }}>
                             <div className="relative" style={{ paddingTop: '58.33%' }}> {/* 700/1200 = 0.5833 */}
                                 <iframe
-                                    src={`https://player.twitch.tv/?channel=owarida&parent=localhost`}
+                                    src={`https://player.twitch.tv/?channel=owarida&parent=owa-collect.vercel.app`}
                                     allowFullScreen={true}
                                     seamless={true}
                                     style={{
