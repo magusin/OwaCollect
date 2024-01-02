@@ -297,8 +297,8 @@ export default function Collection({ cards, errorServer }) {
                                 <span className="absolute bottom-2 left-2 text-black bg-white rounded-full font-bold text-xl cursor-pointer group w-5 h-5 flex items-center justify-center">
                                     ?
                                     <span className="tooltip-text absolute hidden group-hover:block bg-gray-700 text-white text-xs rounded p-2 -ml-5 -mb-6 bottom-12 left-6 md:text-base w-[100px] sm:w-[100px] md:w-[150px] lg:w-[200px] xl:w-[250px] 2xl:w-[300px]">
-                                        {card.isDraw === true
-                                            ? "S'obtient via la boutique"
+                                        {card.id === 66 ? "? ? ?" : card.isDraw === true
+                                            ? `S'obtient via la boutique ${card.evolveCost ? "et peut level Up" : ""}`
                                             : `S'obtient via le level Up de ${ownedCardIds.has(card.id - 1)
                                                 ? allCard.find(c => c.id === card.id - 1)?.name
                                                 : card.id - 1
