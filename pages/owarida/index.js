@@ -167,7 +167,7 @@ export default function Owarida() {
                         <div className="flex-grow" style={{ width: '70%' }}>
                             <div className="relative" style={{ paddingTop: '58.33%' }}> {/* 700/1200 = 0.5833 */}
                                 <iframe
-                                    src={`https://player.twitch.tv/?channel=owarida&parent=https://owa-collect.vercel.app`}
+                                    src={`https://player.twitch.tv/?channel=owarida&parent=owa-collect.vercel.app`}
                                     allowFullScreen={true}
                                     seamless={true}
                                     style={{
@@ -186,7 +186,7 @@ export default function Owarida() {
                         <div className="flex-grow" style={{ width: '30%' }}>
                             <div className="relative" style={{ paddingTop: '142.85%' }}> {/* 500/350 = 1,4285 */}
                                 <iframe
-                                    src={`https://www.twitch.tv/embed/owarida/chat?parent=https://owa-collect.vercel.app`}
+                                    src={`https://www.twitch.tv/embed/owarida/chat?parent=owa-collect.vercel.app`}
                                     style={{
                                         position: 'absolute',
                                         top: 0,

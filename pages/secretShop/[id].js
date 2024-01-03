@@ -96,25 +96,34 @@ export default function SecretShop() {
             return (
                 <div className="flex flex-col h-screen" style={{ marginTop: "80px" }}>
                     <Header points={points} />
+                    <div className="flex-grow flex flex-col items-center">
+                        <Image
+                            src="/images/salesman.png"
+                            alt="salesman"
+                            priority={true}
+                            width={600}
+                            height={525}
+                        />
+                    </div>
                 </div>
             );
         } else {
             return (
                 <div className="flex flex-col h-screen">
-                <Header points={points} />
-                <div className="flex-grow flex items-start justify-center" >
-                    <div className="w-full h-screen">
-                        <Image
-                            src="/images/closed.png"
-                            alt="Fond"
-                            layout="fill"
-                            objectFit="cover"
-                            objectPosition={"center"}
-                            priority={true}
-                        />
+                    <Header points={points} />
+                    <div className="flex-grow flex items-start justify-center" >
+                        <div className="w-full h-screen">
+                            <Image
+                                src="/images/closed.png"
+                                alt="Fond"
+                                layout="fill"
+                                objectFit="cover"
+                                objectPosition={"center"}
+                                priority={true}
+                            />
+                        </div>
                     </div>
                 </div>
-            </div>
             );
         }
     }
