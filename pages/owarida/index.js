@@ -4,6 +4,7 @@ import { signOut, useSession } from 'next-auth/react';
 import { useRouter } from 'next/router';
 import Header from 'C/header';
 import Image from 'next/legacy/image';
+import axios from 'axios';
 
 export default function Owarida() {
     const [error, setError] = React.useState(null);
@@ -11,8 +12,59 @@ export default function Owarida() {
     const router = useRouter();
     const [loading, setLoading] = React.useState(false);
     const [points, setPoints] = React.useState(0);
+    const [showInput, setShowInput] = React.useState(false);
+    const inputRef = React.useRef(null);
+    const [code, setCode] = React.useState('');
+    const [message, setMessage] = React.useState('');
+
+    const handleSubmit = async () => {
+        setLoading(true);
+        try {
+            const response = await axios.post('/api/verifyCode', { code }, {
+                headers: {
+                    Authorization: `Bearer ${session.customJwt}`,
+                },
+            });
+           
+            if (response.data.success) {
+                setMessage('Code correct !');
+                session.secretShopLink = response.data.secretShopLink;
+                console.log(session)
+                router.push(`/secretShop/${response.data.secretShopLink}`)
+            } else {
+                setMessage('Code incorrect.');
+            }
+        } catch (error) {
+            if (error.response.status === 401) {
+                setError('Erreur avec votre Token ou il est expiré. Veuillez vous reconnecter.')
+                setTimeout(() => {
+                    signOut()
+                    router.push('/');
+                }, 3000);
+            } else {
+                setError('Erreur lors de la validation. ' + error);
+            }
+        } finally {
+            setLoading(false);
+        }
+    };
+    // Gestionnaire pour afficher/masquer l'input
+    const handleImageClick = () => {
+        setShowInput(true);
+    };
+
+    // Gestionnaire pour masquer l'input lorsqu'un clic est effectué en dehors
+    const handleClickOutside = (event) => {
+        if (inputRef.current && !inputRef.current.contains(event.target)) {
+            setShowInput(false);
+            setMessage('');
+        }
+    };
 
     useEffect(() => {
+
+        // Ajout de l'écouteur d'événement
+        document.addEventListener("mousedown", handleClickOutside);
 
         if (error === 'Erreur avec votre Token ou il est expiré. Veuillez vous reconnecter.') {
             setTimeout(() => {
@@ -64,6 +116,11 @@ export default function Owarida() {
                 }
             };
             getUser();
+
+            return () => {
+                // Nettoyage de l'écouteur d'événement
+                document.removeEventListener("mousedown", handleClickOutside);
+            };
         }
 
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -96,7 +153,7 @@ export default function Owarida() {
             <div className="flex flex-col h-screen" style={{ marginTop: "80px" }}>
                 <Header points={points} />
                 <div className="flex-grow flex flex-col items-center">
-                    <div>
+                    <div onClick={handleImageClick}>
                         <Image
                             src="/images/owarida.png"
                             alt="OWARIDA ON STREAM"
@@ -110,7 +167,7 @@ export default function Owarida() {
                         <div className="flex-grow" style={{ width: '70%' }}>
                             <div className="relative" style={{ paddingTop: '58.33%' }}> {/* 700/1200 = 0.5833 */}
                                 <iframe
-                                    src={`https://player.twitch.tv/?channel=owarida&parent=owa-collect.vercel.app`}
+                                    src={`https://player.twitch.tv/?channel=owarida&parent=https://owa-collect.vercel.app`}
                                     allowFullScreen={true}
                                     seamless={true}
                                     style={{
@@ -129,7 +186,7 @@ export default function Owarida() {
                         <div className="flex-grow" style={{ width: '30%' }}>
                             <div className="relative" style={{ paddingTop: '142.85%' }}> {/* 500/350 = 1,4285 */}
                                 <iframe
-                                    src={`https://www.twitch.tv/embed/owarida/chat?parent=owa-collect.vercel.app`}
+                                    src={`https://www.twitch.tv/embed/owarida/chat?parent=https://owa-collect.vercel.app`}
                                     style={{
                                         position: 'absolute',
                                         top: 0,
@@ -141,8 +198,21 @@ export default function Owarida() {
                             </div>
                         </div>
                     </div>
-                    <div><input className="max-w-screen"></input></div>
                 </div>
+                {showInput && (
+                    <div className="fixed bottom-0 w-full px-4" ref={inputRef}>
+                        <p className={message != '' && message != 'Code correct !' ? "text-red-500" : "text-green-500"}>{message != '' ? message : 'Vous avez un code pour Owarida ?'}</p>
+                        <div className="flex">
+                        <input
+                            className="border-2 w-full border p-2"
+                            type="text"
+                            value={code}
+                            onChange={(e) => setCode(e.target.value)}
+                        />
+                        <button className="text-green-500 px-4 bg-black" onClick={handleSubmit}>Vérifier</button>
+                        </div>
+                    </div>
+                )}
             </div>
         );
     }
