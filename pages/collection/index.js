@@ -26,6 +26,8 @@ export default function Collection({ cards, errorServer }) {
     const [isFetching, setIsFetching] = React.useState(false);
     const [allCard, setAllCard] = React.useState(cards?.cards);
     const [playerCards, setPlayerCards] = React.useState(cards?.playerCards);
+    const [selectedRarity, setSelectedRarity] = React.useState('Toutes');
+
 
     // Fonction pour vendre
     const handleConfirmSell = async (selectedCard, quantity) => {
@@ -136,6 +138,11 @@ export default function Collection({ cards, errorServer }) {
         setShowModalSell(true);
     };
 
+    // Fonction pour mettre à jour la rareté sélectionnée
+    const handleRarityChange = (rarity) => {
+        setSelectedRarity(rarity);
+    };
+
     const selectedCardIndex = cards?.cards.findIndex(card => card.id === selectedCard?.id);
     // Gestionnaire de clic pour sélectionner une carte
     const handleCardClick = (card) => {
@@ -238,7 +245,10 @@ export default function Collection({ cards, errorServer }) {
 
     if (session) {
         const ownedCardIds = new Set(playerCards.map(card => card.cardId));
-
+        const allCardsName = new Map(allCard.map(card => [card.id, card]));
+        const filteredCards = selectedRarity === 'Toutes'
+        ? allCard
+        : allCard.filter(card => card.rarety === selectedRarity);
         // Créer un objet pour le suivi du count pour chaque cardId
         const cardCounts = playerCards.reduce((acc, card) => {
             acc[card.cardId] = card.count;
@@ -258,8 +268,16 @@ export default function Collection({ cards, errorServer }) {
                             priority={true}
                         />
                     </div>
+                <div>
+                <button className="bg-green-500 hover:bg-green-700 font-bold py-2 px-4 rounded-full mx-1" onClick={() => handleRarityChange('Toutes')}>Toutes</button>
+                <button className="bg-gray-500 hover:bg-gray-700 font-bold py-2 px-4 rounded-full mx-1" onClick={() => handleRarityChange('Commune')}>Commune</button>
+                <button className="bg-blue-500 hover:bg-blue-700 font-bold py-2 px-4 rounded-full mx-1" onClick={() => handleRarityChange('Rare')}>Rare</button>
+                <button className="bg-teal-500 hover:bg-teal-700 font-bold py-2 px-4 rounded-full mx-1" onClick={() => handleRarityChange('Epique')}>Épique</button>
+            </div>
                     <div className="flex items-center text-lg font-semibold my-4">
-                        <span>{`Cartes découvertes : ${ownedCardIds.size} / ${allCard.length}`}</span>
+                        <span>{`Cartes découvertes : ${
+        filteredCards.filter(card => ownedCardIds.has(card.id)).length
+    } / ${filteredCards.length}`}</span>
                         <span className="relative mx-4 md:mx-8 text-black bg-white rounded-full font-bold text-xl cursor-pointer group w-10 h-10 flex items-center justify-center">
                             ?
                             <span className="tooltip-text absolute hidden group-hover:block bg-gray-700 text-white text-xs rounded p-2 bottom-full mb-2 left-1/2 transform -translate-x-1/2 w-[200px] md:w-[400px] md:text-base lg:w-[450px] 2xl:w-[500px]">
@@ -272,7 +290,7 @@ export default function Collection({ cards, errorServer }) {
                         </span>
                     </div>
                     <div className="flex flex-wrap justify-center">
-                        {allCard.map((card) => (
+                        {filteredCards.map((card) => (
                             <div key={card.id} onClick={() => handleCardClick(card)} className="relative flex flex-col items-center justify-center m-4 cursor-pointer">
                                 <div className="relative w-[100px] h-[100px] sm:w-[150px] sm:h-[150px] md:w-[200px] md:h-[200px] lg:w-[250px] lg:h-[250px] xl:w-[300px] xl:h-[300px] 2xl:w-[350px] 2xl:h-[350px]">
                                     <Image
@@ -297,12 +315,15 @@ export default function Collection({ cards, errorServer }) {
                                 <span className="absolute bottom-2 left-2 text-black bg-white rounded-full font-bold text-xl cursor-pointer group w-5 h-5 flex items-center justify-center">
                                     ?
                                     <span className="tooltip-text absolute hidden group-hover:block bg-gray-700 text-white text-xs rounded p-2 -ml-5 -mb-6 bottom-12 left-6 md:text-base w-[100px] sm:w-[100px] md:w-[150px] lg:w-[200px] xl:w-[250px] 2xl:w-[300px]">
-                                        {card.id === 66 ? "? ? ?" : card.isDraw === true
-                                            ? `S'obtient via la boutique ${card.evolveCost ? "et peut level Up" : ""}`
-                                            : `S'obtient via le level Up de ${ownedCardIds.has(card.id - 1)
-                                                ? allCard.find(c => c.id === card.id - 1)?.name
-                                                : card.id - 1
-                                            }`
+                                        {card.id === 66 ? "? ? ?"
+                                            : card.isDraw === true
+                                                ? `S'obtient via la boutique ${card.evolveCost ? "et peut level Up" : ""}`
+                                                : (!allCardsName.get(card.id - 1)?.evolvedId)
+                                                    ? "Vendu par un mystérieux marchand"
+                                                    : `S'obtient via le level Up de ${ownedCardIds.has(card.id - 1)
+                                                        ? allCardsName.get(card.id - 1)?.name
+                                                        : card.id - 1
+                                                    }`
                                         }
                                     </span>
                                 </span>
