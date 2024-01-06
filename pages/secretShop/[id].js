@@ -4,6 +4,7 @@ import { signOut, useSession } from 'next-auth/react';
 import { useRouter } from 'next/router';
 import Header from 'C/header';
 import Image from 'next/legacy/image';
+import calculatePoints from "@/utils/calculatePoints";
 
 export default function SecretShop() {
     const [error, setError] = React.useState(null);
