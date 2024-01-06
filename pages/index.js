@@ -19,7 +19,7 @@ export default function Login() {
   const [points, setPoints] = React.useState(0);
   const [isFetching, setIsFetching] = React.useState(false);
   const { darkMode } = useDarkMode();
-  
+
   useEffect(() => {
     if (session && !isFetching) {
       setIsFetching(true);
@@ -98,9 +98,10 @@ export default function Login() {
             <TwitchUserInfo userData={user} />
           </div>
         </div> */}
-        <div className="mx-auto p-4 border border-gray-200 rounded-lg" style={{ marginTop: "100px" }}>
-          <h2 className="text-lg font-semibold text-center">{user.name}</h2>
-          <div className="flex flex-col md:flex-row items-center mt-4">
+        <div className="flex justify-center items-center min-h-screen">
+  <div className={`${darkMode ? 'border-gray-200' : 'border-black'} mt-4 max-w-lg p-4 border rounded-lg md:mt-0`}>
+    <h2 className="text-lg font-semibold text-center">{user.name}</h2>
+    <div className="flex flex-col md:flex-row items-center mt-4">
             <Image
               src={user.imageUrl}
               alt={user.name}
@@ -111,10 +112,11 @@ export default function Login() {
             />
             <div className="px-6 py-4">
               <div className="px-6 py-4 flex md:flex-col justify-between ">
-                <span className="text-lg inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-red-700 mr-2 mb-2 whitespace-nowrap">Subs: {user.subs}</span>
-                <span className="text-lg inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-red-700 mr-2 mb-2 whitespace-nowrap">Messages: {user.messages}</span>
-                <span className="text-lg inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-red-700 mr-2 mb-2 whitespace-nowrap">Gifts: {user.gifts}</span>
-                <span className="text-lg inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-red-700 mr-2 mb-2 whitespace-nowrap">Bits: {user.bits}</span>
+                <span className={`${darkMode ? 'bg-gray-200' : 'bg-gray-300'} text-lg inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-red-700 mr-2 mb-2 whitespace-nowrap`}>Subs: {user.subs}</span>
+                <span className={`${darkMode ? 'bg-gray-200' : 'bg-gray-300'} text-lg inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-red-700 mr-2 mb-2 whitespace-nowrap`}>Messages: {user.messages}</span>
+                <span className={`${darkMode ? 'bg-gray-200' : 'bg-gray-300'} text-lg inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-red-700 mr-2 mb-2 whitespace-nowrap`}>Gifts: {user.gifts}</span>
+                <span className={`${darkMode ? 'bg-gray-200' : 'bg-gray-300'} text-lg inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-red-700 mr-2 mb-2 whitespace-nowrap`}>Bits: {user.bits}</span>
+              </div>
               </div>
             </div>
           </div>
