@@ -11,7 +11,7 @@ export default function Modal ({ setShowModal, handleConfirm, title, message, ma
 
     return (
      
-        <div className="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center">
+        <div className="text-black fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center">
             <div className="bg-white p-4 rounded-lg shadow-xl">
                 <h2 className="text-xl font-bold mb-4">{title}</h2>
                 <p>{message}</p>

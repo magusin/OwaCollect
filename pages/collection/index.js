@@ -168,6 +168,8 @@ export default function Collection({ cards, errorServer }) {
 
         if (error === 'Erreur avec votre Token ou il est expiré. Veuillez vous reconnecter.') {
             setTimeout(() => {
+                localStorage.removeItem('userOC');
+                localStorage.removeItem('points');
                 signOut()
                 router.push('/');
             }, 3000);
@@ -291,7 +293,7 @@ export default function Collection({ cards, errorServer }) {
                     </div>
                     <div className="flex flex-wrap justify-center">
                         {filteredCards.map((card) => (
-                            <div key={card.id} onClick={() => handleCardClick(card)} className="relative flex flex-col items-center justify-center m-4 cursor-pointer">
+                            <div key={card.id} onClick={() => handleCardClick(card)} className="text-black relative flex flex-col items-center justify-center m-4 cursor-pointer">
                                 <div className="relative w-[100px] h-[100px] sm:w-[150px] sm:h-[150px] md:w-[200px] md:h-[200px] lg:w-[250px] lg:h-[250px] xl:w-[300px] xl:h-[300px] 2xl:w-[350px] 2xl:h-[350px]">
                                     <Image
                                         priority={true}
@@ -315,7 +317,7 @@ export default function Collection({ cards, errorServer }) {
                                 <span className="absolute bottom-2 left-2 text-black bg-white rounded-full font-bold text-xl cursor-pointer group w-5 h-5 flex items-center justify-center">
                                     ?
                                     <span className="tooltip-text absolute hidden group-hover:block bg-gray-700 text-white text-xs rounded p-2 -ml-5 -mb-6 bottom-12 left-6 md:text-base w-[100px] sm:w-[100px] md:w-[150px] lg:w-[200px] xl:w-[250px] 2xl:w-[300px]">
-                                        {card.id === 66 ? "? ? ?"
+                                        {card.id === 66 || card.id === 51 ? "S'obtient via un événement"
                                             : card.isDraw === true
                                                 ? `S'obtient via la boutique ${card.evolveCost ? "et peut level Up" : ""}`
                                                 : (!allCardsName.get(card.id - 1)?.evolvedId)

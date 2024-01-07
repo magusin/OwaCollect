@@ -71,6 +71,8 @@ export default function Owarida() {
 
         if (error === 'Erreur avec votre Token ou il est expiré. Veuillez vous reconnecter.') {
             setTimeout(() => {
+                localStorage.removeItem('userOC');
+                localStorage.removeItem('points');
                 signOut()
                 router.push('/');
             }, 3000);
@@ -203,7 +205,7 @@ export default function Owarida() {
                     </div>
                 </div>
                 {showInput && (
-                    <div className="fixed bottom-0 w-full px-4" ref={inputRef}>
+                    <div className="text-black fixed bottom-0 w-full px-4" ref={inputRef}>
                         <p className={message != '' && message != 'Code correct !' ? "text-red-500" : "text-green-500"}>{message != '' ? message : 'Vous avez un code pour Owarida ?'}</p>
                         <div className="flex">
                         <input
