@@ -49,7 +49,7 @@ export default function Header({ points }) {
       {session ? (
         // if session
         <header className={`fixed top-0 left-0 right-0 z-10 transition duration-300 ease-in-out font-bold ${isScrolled ? 'backdrop-blur' : ''} ${darkMode ? 'text-black' : 'text-white'} p-4 w-full`} style={{ backgroundColor: isScrolled ? '#00990080' : '#009900' }}>
-          <div className="container mx-auto flex justify-between items-center">
+          <div className=" flex justify-between items-center">
             <Link href='/' className="flex items-center">
               <span className={`${darkMode ? 'border-black' : 'border-white'} mr-4 border-r-2 pr-2`}>{session.user.name}</span>
               <span className="mr-4">{points ? points : 0} OC</span>
@@ -59,7 +59,8 @@ export default function Header({ points }) {
               <Link href="/shop" className="hover:text-gray-300">Boutique</Link>
               <Link href="/owarida" className="hover:text-gray-300">Owarida</Link>
             </nav>
-            <button onClick={toggleDarkMode} className="hidden md:block text-white py-2 px-4 rounded">
+            <div className='flex'>
+            <button onClick={toggleDarkMode} className="hidden md:block text-white py-2 px-4 rounded mr-4">
               <DarkModeToggleSVG isDarkMode={darkMode} />
             </button>
             <button onClick={toggleMenu} className="md:hidden">
@@ -71,6 +72,7 @@ export default function Header({ points }) {
             >
               Déconnexion
             </button>
+            </div>
           </div>
           {/* Menu déroulant pour petits écrans */}
           {isMenuOpen && (
