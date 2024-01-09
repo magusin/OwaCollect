@@ -31,8 +31,7 @@ export default function Owarida() {
            
             if (response.data.success) {
                 setMessage('Code correct !');
-                session.secretShopLink = response.data.secretShopLink;
-                console.log(session)
+                localStorage.setItem('secretShopLink', response.data.secretShopLink);
                 router.push(`/secretShop/${response.data.secretShopLink}`)
             } else {
                 setMessage('Code incorrect.');
