@@ -9,6 +9,7 @@ import calculatePoints from "@/utils/calculatePoints";
 import TwitchUserInfo from "C/twitchUserInfo";
 import Image from "next/legacy/image";
 import { useDarkMode } from "@/contexts/darkModeContext";
+import Footer from "C/footer";
 
 export default function Login() {
   const { data: session, status } = useSession();
@@ -66,6 +67,7 @@ export default function Login() {
         <div className="flex-grow flex justify-center items-center">
           <span className="text-center"><svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24"><path fill="#1f2937" d="M12,4a8,8,0,0,1,7.89,6.7A1.53,1.53,0,0,0,21.38,12h0a1.5,1.5,0,0,0,1.48-1.75,11,11,0,0,0-21.72,0A1.5,1.5,0,0,0,2.62,12h0a1.53,1.53,0,0,0,1.49-1.3A8,8,0,0,1,12,4Z"><animateTransform attributeName="transform" dur="0.75s" repeatCount="indefinite" type="rotate" values="0 12 12;360 12 12" /></path></svg></span>
         </div>
+        <Footer />
       </div>
     )
   }
@@ -77,6 +79,7 @@ export default function Login() {
         <div className="flex-grow flex justify-center items-center">
           <span className="text-center text-red-500">⚠ {error}</span>
         </div>
+        <Footer />
       </div>
     );
   }
@@ -84,44 +87,38 @@ export default function Login() {
   if (session && user) {
 
     return (
-      <div className="flex flex-col h-screen">
-        <Header points={points} />
-        {/* <div className="relative flex-grow flex justify-center items-center">
-          <Image
-            src="/images/twitchuser.png"
-            alt="Fond"
-            layout="fill"
-            objectFit="cover"
-            priority={true}
-          />
-          <div className="absolute" style={{ width: 'calc(100% - 4rem)', top: 'calc(50%)', left: 'calc(50% + 2rem)', transform: 'translate(-50%, -50%)' }}>
-            <TwitchUserInfo userData={user} />
-          </div>
-        </div> */}
-        <div className="flex justify-center items-center min-h-screen">
-  <div className={`${darkMode ? 'border-gray-200' : 'border-black'} mt-4 max-w-lg p-4 border rounded-lg md:mt-0`}>
-    <h2 className="text-lg font-semibold text-center">{user.name}</h2>
-    <div className="flex flex-col md:flex-row items-center mt-4">
-            <Image
-              src={user.imageUrl}
-              alt={user.name}
-              className="rounded-full mr-4"
-              priority={true}
-              width={300}
-              height={300}
-            />
-            <div className="px-6 py-4">
-              <div className="px-6 py-4 flex md:flex-col justify-between ">
-                <span className={`${darkMode ? 'bg-gray-200' : 'bg-gray-300'} text-lg inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-red-700 mr-2 mb-2 whitespace-nowrap`}>Subs: {user.subs}</span>
-                <span className={`${darkMode ? 'bg-gray-200' : 'bg-gray-300'} text-lg inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-red-700 mr-2 mb-2 whitespace-nowrap`}>Messages: {user.messages}</span>
-                <span className={`${darkMode ? 'bg-gray-200' : 'bg-gray-300'} text-lg inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-red-700 mr-2 mb-2 whitespace-nowrap`}>Gifts: {user.gifts}</span>
-                <span className={`${darkMode ? 'bg-gray-200' : 'bg-gray-300'} text-lg inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-red-700 mr-2 mb-2 whitespace-nowrap`}>Bits: {user.bits}</span>
-              </div>
+      <>
+        <div className="flex flex-col min-h-screen">
+          <Header points={points} />
+
+          <div className="flex-grow flex justify-center items-center">
+            <div className={`${darkMode ? 'border-gray-200' : 'border-black'} mt-4 p-4 border rounded-lg md:mt-0`}>
+              <h2 className="text-lg font-semibold text-center">{user.name}</h2>
+              <div className="flex flex-col md:flex-row items-center justify-center mt-4">
+                <div className="h-[200px] w-[200px] md:w-[250px] md:h-[250px] lg:w-[300px] lg:h-[300px]">
+                <Image
+                  src={user.imageUrl}
+                  alt={user.name}
+                  className="rounded-full"
+                  priority={true}
+                  width={300}
+                  height={300}
+                />
+                </div>
+                <div className="md:px-6 md:py-4">
+                  <div className="md:px-6 py-4 flex md:flex-col justify-between ">
+                    <span className={`${darkMode ? 'bg-gray-200' : 'bg-gray-300'} text-lg inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-red-700 mr-2 mb-2 whitespace-nowrap`}>Subs: {user.subs}</span>
+                    <span className={`${darkMode ? 'bg-gray-200' : 'bg-gray-300'} text-lg inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-red-700 mr-2 mb-2 whitespace-nowrap`}>Messages: {user.messages}</span>
+                    <span className={`${darkMode ? 'bg-gray-200' : 'bg-gray-300'} text-lg inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-red-700 mr-2 mb-2 whitespace-nowrap`}>Gifts: {user.gifts}</span>
+                    <span className={`${darkMode ? 'bg-gray-200' : 'bg-gray-300'} text-lg inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-red-700 mr-2 mb-2 whitespace-nowrap`}>Bits: {user.bits}</span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
+          <Footer />
         </div>
-      </div>
+      </>
     )
   }
 

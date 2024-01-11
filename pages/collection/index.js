@@ -10,6 +10,7 @@ import { getServerSession } from "next-auth";
 import nextAuthOptions from "../../config/nextAuthOptions";
 import Modal from "C/modal";
 import Alert from "C/alert";
+import Footer from "@/components/footer";
 
 export default function Collection({ cards, errorServer }) {
     const [error, setError] = React.useState(errorServer || null);
@@ -231,6 +232,7 @@ export default function Collection({ cards, errorServer }) {
                 <div className="flex-grow flex justify-center items-center">
                     <span className="text-center"><svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24"><path fill="#1f2937" d="M12,4a8,8,0,0,1,7.89,6.7A1.53,1.53,0,0,0,21.38,12h0a1.5,1.5,0,0,0,1.48-1.75,11,11,0,0,0-21.72,0A1.5,1.5,0,0,0,2.62,12h0a1.53,1.53,0,0,0,1.49-1.3A8,8,0,0,1,12,4Z"><animateTransform attributeName="transform" dur="0.75s" repeatCount="indefinite" type="rotate" values="0 12 12;360 12 12" /></path></svg></span>
                 </div>
+                <Footer />
             </div>
         )
     }
@@ -242,6 +244,7 @@ export default function Collection({ cards, errorServer }) {
                 <div className="flex-grow flex justify-center items-center">
                     <span className="text-center text-red-500">⚠ {error}</span>
                 </div>
+                <Footer />
             </div>
         );
     }
@@ -306,7 +309,7 @@ export default function Collection({ cards, errorServer }) {
                                     />
                                 </div>
                                 <div className={`absolute inset-0 flex items-center justify-center rounded-full ${ownedCardIds.has(card.id) ? "hidden" : ""}`}>
-                                    <div className="bg-white/80 backdrop-blur-sm rounded-full px-4 py-2 text-lg font-semibold shadow-xl border border-gray-300">
+                                    <div className="bg-white/80 backdrop-blur-sm rounded-full px-2 py-1 md:px-4 md:py-2 text-lg font-semibold shadow-xl border border-gray-300">
                                         {card.id}
                                     </div>
                                 </div>
@@ -411,6 +414,7 @@ export default function Collection({ cards, errorServer }) {
                         </div>
                     )}
                 </div>
+                <Footer />
             </div>
         );
     }
