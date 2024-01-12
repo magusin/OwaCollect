@@ -34,7 +34,7 @@ async function runMiddleware(req, res, fn) {
     })
 }
 
-// POST /api/verifyCode
+// POST api/duel (create duel)
 
 export default async function handler(req, res) {
     try {
@@ -46,24 +46,16 @@ export default async function handler(req, res) {
     if (!decoded) {
         return res.status(401).json({ message: 'Token invalide' });
     }
-        await runMiddleware(req, res, cors)
-        switch (req.method) {
-            case 'POST':
-                const userCode = req.body.code;
-                const secretCode = process.env.SECRET_CODE;
-                if (userCode.toLowerCase() === secretCode) {
-                    const secretShopLink = uuidv4();
-                    return res.status(200).json({ success: true, secretShopLink: secretShopLink });
-                } else {
-                    return res.status(200).json({ success: false });
-                }
+    await runMiddleware(req, res, cors)
+    switch (req.method) {
+        case 'POST':
+            const link = uuidv4();
             default:
                 res.setHeader('Allow', ['POST'])
                 res.status(405).end(`Method ${req.method} Not Allowed`)
-        }
-    } catch (err) {
-        onError(err, res)
-    }
-    finally { await prisma.$disconnect() }
 }
-
+} catch (err) {
+    onError(err, res)
+}
+finally { await prisma.$disconnect() }
+}
