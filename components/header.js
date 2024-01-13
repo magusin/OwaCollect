@@ -93,7 +93,7 @@ export default function Header({ points }) {
       ) : (
         // if user haven't session
         <header className="w-full p-4" style={{ backgroundColor: '#009900' }}>
-          <div className="container mx-auto flex justify-center items-center  h-full">
+          <div className="container mx-auto flex justify-center items-center  h-auto">
             <Image
               src={"/images/owaCollect.png"}
               alt="banner owaCollect"

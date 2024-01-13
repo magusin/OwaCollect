@@ -8,9 +8,8 @@ export default function Footer() {
         <footer className={`text-center md:flex justify-around items-center min-w-full w-full ${darkMode ? 'text-black' : 'text-white'}`} style={{ backgroundColor:'#009900', minHeight: '50px' }}>
             <p>© 2024 - OwaCollect</p>
             <nav className="md:flex space-x-4 md:space-x-8 xl:space-x-16">
-                {/* <Link href="/mentions-legales" className="md:block">Mentions légales</Link> */}
-                <Link href="/cgu">CGU</Link>
-                <Link href="/contact">Contact</Link>
+                <Link href="/cgu" className="hover:text-gray-300">CGU</Link>
+                <Link href="/contact" className="hover:text-gray-300">Contact</Link>
             </nav>
         </footer>
     );
