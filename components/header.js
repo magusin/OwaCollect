@@ -56,6 +56,7 @@ export default function Header({ points }) {
             </Link>
             <nav className="hidden md:flex space-x-16 px-4">
               <Link href="/collection" className="hover:text-gray-300">Collection</Link>
+              <Link href="/deck" className="hover:text-gray-300">Deck</Link>
               <Link href="/shop" className="hover:text-gray-300">Boutique</Link>
               <Link href="/owarida" className="hover:text-gray-300">Owarida</Link>
             </nav>
@@ -78,6 +79,7 @@ export default function Header({ points }) {
           {isMenuOpen && (
             <div className="md:hidden absolute top-full left-0 right-0 p-4" style={{ backgroundColor: '#009900' }}>
               <Link href="/collection" className="text-center hover:text-gray-300 block">Collection</Link>
+              <Link href="/deck" className="text-center hover:text-gray-300 block">Deck</Link>
               <Link href="/shop" className="text-center hover:text-gray-300 block">Boutique</Link>
               <Link href="/owarida" className="text-center hover:text-gray-300 block">Owarida</Link>
               

@@ -49,7 +49,6 @@ export default async function handler(req, res) {
         switch (req.method) {
             case 'PUT':
                 const { id, cost } = req.body;
-                console.log(id, cost)
                 if (!id) {
                     return res.status(400).json({ message: 'Id de la carte non fourni' });
                 }
