@@ -4,8 +4,9 @@ import { signOut, useSession } from 'next-auth/react';
 import Header from 'C/header';
 import Footer from 'C/footer';
 import { useEffect } from 'react';
+import calculatePoints from '@/utils/calculatePoints';
 
-export default function CGU() {
+export default function Contact() {
     const { data: session, status } = useSession();
     const [points, setPoints] = React.useState(0);
 

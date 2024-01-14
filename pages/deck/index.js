@@ -10,22 +10,73 @@ import { useDarkMode } from "@/contexts/darkModeContext";
 import { getServerSession } from "next-auth";
 import nextAuthOptions from "../../config/nextAuthOptions";
 import Image from 'next/image';
+import Alert from "C/alert";
 
-export default function Duel({ cards, errorServer }) {
+export default function Duel({ cards, deckInitial, errorServer }) {
     const [error, setError] = React.useState(errorServer || null);
     const { data: session, status } = useSession();
     const router = useRouter();
     const { darkMode } = useDarkMode();
     const [points, setPoints] = React.useState(0);
     const [playerCards, setPlayerCards] = React.useState(cards?.playerCards);
-    const [deck, setDeck] = React.useState(new Array(4).fill(null));
+    const [deck, setDeck] = React.useState(deckInitial);
+    const [loading, setLoading] = React.useState(false);
+    const [showAlert, setShowAlert] = React.useState(false);
+    const [alertType, setAlertType] = React.useState('success');
+    const [alertMessage, setAlertMessage] = React.useState('');
 
     // Fonction pour gérer la sélection d'une nouvelle carte pour un emplacement
     const handleSelectCard = (cardId, index) => {
         const newDeck = [...deck];
-        newDeck[index] = cardId;
+        // Convertir cardId en un entier avant de le stocker
+        newDeck[index] = parseInt(cardId, 10);
         setDeck(newDeck);
     };
+
+    const saveDeck = async () => {
+        setLoading(true);
+        if (deck.some(cardId => cardId === null)) {
+            setAlertType('error');
+            setAlertMessage("Veuillez sélectionner une carte pour chaque emplacement dans le deck.");
+            setShowAlert(true);
+            setTimeout(() => {
+                setShowAlert(false);
+            }, 5000);
+            setLoading(false);
+            return;
+        } else {
+            try {
+                const response = await axios.put('/api/user/deck', {
+                    deck
+                }, {
+                    headers: {
+                        Authorization: `Bearer ${session.customJwt}`,
+                    },
+                });
+                if (response.status === 200) {
+                    const data = await response.data;
+                }
+            } catch (error) {
+                if (error.response.status === 401) {
+                    setError('Erreur Lors de la sauvegarde de votre deck.')
+                    setTimeout(() => {
+                        signOut()
+                        router.push('/');
+                    }, 3000);
+                } else {
+                    setError('Erreur lors du levelUp de la carte. ' + error);
+                }
+            } finally {
+                setAlertType('success');
+                setAlertMessage('Votre deck a bien été sauvegardé.');
+                setShowAlert(true);
+                setTimeout(() => {
+                    setShowAlert(false);
+                }, 5000);
+                setLoading(false);
+            }
+        }
+    }
 
     useEffect(() => {
 
@@ -99,10 +150,10 @@ export default function Duel({ cards, errorServer }) {
     }
 
     if (session) {
-        console.log(deck)
+        console.log('deck', deck)
         // Construire une Map des cartes du joueur
         const cardMap = new Map(playerCards.map(pc => [pc.card.id, pc.card]));
-        console.log('cardMap', cardMap)
+
 
         return (
             <div className="flex flex-col h-screen" style={{ marginTop: "80px" }}>
@@ -111,18 +162,18 @@ export default function Duel({ cards, errorServer }) {
                     {deck.map((cardId, index) => {
                         // Récupérer la carte correspondante depuis la Map
                         const card = cardMap.get(cardId);
-                        console.log('card', card)
+                        console.log(`cardId: ${cardId}, card: `, card);
 
                         return (
                             <div key={index}>
                                 {card ? (
-                                    <div className="card-container">
+                                    <div className="relative w-[100px] h-[100px] sm:w-[150px] sm:h-[150px] md:w-[200px] md:h-[200px] lg:w-[250px] lg:h-[250px] xl:w-[300px] xl:h-[300px] 2xl:w-[350px] 2xl:h-[350px]">
                                         <Image
                                             src={`${card.picture}.png`}
                                             alt={`Card ${card.name}`}
                                             layout="fill"
                                             objectFit="fill"
-                                            className="rounded-lg"
+                                            sizes="100%"
                                             priority={true}
                                         />
                                     </div>
@@ -149,11 +200,18 @@ export default function Duel({ cards, errorServer }) {
                 </div>
                 {/* Bouton pour sauvegarder le deck */}
                 <button
-                    onClick={() => console.log('Sauvegarder le deck', deck)}
+                    onClick={() => saveDeck()}
                     className="mt-4 bg-blue-500 text-white py-2 px-4 rounded"
                 >
                     Sauvegarder le Deck
                 </button>
+                {showAlert && (
+                    <Alert
+                        type={alertType}
+                        message={alertMessage}
+                        close={setShowAlert}
+                    />
+                )}
                 <Footer />
             </div>
         );
@@ -181,8 +239,15 @@ export async function getServerSideProps(context) {
             }
         })
         const cards = await response.data;
+        const deckInitial = cards.playerCards
+            .filter(pc => pc.isInDeck)
+            .map(pc => pc.card.id);
+
+        while (deckInitial.length < 4) {
+            deckInitial.push(null);
+        }
         return {
-            props: { cards },
+            props: { cards, deckInitial },
         };
     } catch (error) {
         if (error.response.status === 401) {
