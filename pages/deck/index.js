@@ -137,6 +137,18 @@ export default function Duel({ cards, deckInitial, errorServer }) {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [status, session, error, router]);
 
+    if (status === "loading" || loading) {
+        return (
+          <div className="flex flex-col h-screen">
+            <Header points={points} />
+            <div className="flex-grow flex justify-center items-center">
+              <span className="text-center"><svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24"><path fill="#1f2937" d="M12,4a8,8,0,0,1,7.89,6.7A1.53,1.53,0,0,0,21.38,12h0a1.5,1.5,0,0,0,1.48-1.75,11,11,0,0,0-21.72,0A1.5,1.5,0,0,0,2.62,12h0a1.53,1.53,0,0,0,1.49-1.3A8,8,0,0,1,12,4Z"><animateTransform attributeName="transform" dur="0.75s" repeatCount="indefinite" type="rotate" values="0 12 12;360 12 12" /></path></svg></span>
+            </div>
+            <Footer />
+          </div>
+        )
+      }
+
     if (error) {
         return (
             <div className="flex flex-col h-screen" style={{ marginTop: "80px" }}>
@@ -150,15 +162,13 @@ export default function Duel({ cards, deckInitial, errorServer }) {
     }
 
     if (session) {
-        console.log('deck', deck)
         // Construire une Map des cartes du joueur
         const cardMap = new Map(playerCards.map(pc => [pc.card.id, pc.card]));
 
-
         return (
-            <div className="flex flex-col h-screen" style={{ marginTop: "80px" }}>
+            <div className="flex flex-col justify-between min-h-screen" >
                 <Header points={points} />
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 gap-4" style={{ marginTop: "80px" }}>
                     {deck.map((cardId, index) => {
                         // Récupérer la carte correspondante depuis la Map
                         const card = cardMap.get(cardId);
@@ -185,7 +195,7 @@ export default function Duel({ cards, deckInitial, errorServer }) {
                                 <select
                                     value={cardId || ''}
                                     onChange={(e) => handleSelectCard(e.target.value, index)}
-                                    className="mt-2"
+                                    className="mt-2 text-black"
                                 >
                                     <option value="">Sélectionnez une carte</option>
                                     {playerCards.map((playerCard) => (
@@ -199,12 +209,22 @@ export default function Duel({ cards, deckInitial, errorServer }) {
                     })}
                 </div>
                 {/* Bouton pour sauvegarder le deck */}
+                <div className="flex flex-col justify-center items-center">
                 <button
                     onClick={() => saveDeck()}
-                    className="mt-4 bg-blue-500 text-white py-2 px-4 rounded"
+                    className="my-4 bg-blue-500 py-2 px-4 rounded mt-12 hover:bg-blue-300"
+                    disabled={deckInitial === deck}
                 >
                     Sauvegarder le Deck
                 </button>
+
+                <button
+                    onClick={() => createDuel()}
+                    className="my-4 bg-blue-500 py-2 px-4 rounded hover:bg-blue-300"
+                >
+                    Générer un duel
+                </button>
+                </div>
                 {showAlert && (
                     <Alert
                         type={alertType}

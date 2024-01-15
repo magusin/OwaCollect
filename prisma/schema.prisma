@@ -38,6 +38,7 @@ model pets {
   pointsUsed                  Int?                @default(0)
   duels_duels_player1IdTopets duels[]             @relation("duels_player1IdTopets")
   duels_duels_player2IdTopets duels[]             @relation("duels_player2IdTopets")
+  duels_duels_winnerIdTopets  duels[]             @relation("duels_winnerIdTopets")
   playercards                 playercards[]
   user_achievements           user_achievements[]
 }
@@ -93,10 +94,12 @@ model duels {
   uuid                       String  @id @db.VarChar(255)
   player1Id                  String? @db.VarChar(255)
   player2Id                  String? @db.VarChar(255)
-  winner                     String? @db.VarChar(255)
+  winnerId                   String? @db.VarChar(255)
   pets_duels_player1IdTopets pets?   @relation("duels_player1IdTopets", fields: [player1Id], references: [userId], onDelete: Cascade, map: "duels_ibfk_1")
   pets_duels_player2IdTopets pets?   @relation("duels_player2IdTopets", fields: [player2Id], references: [userId], onDelete: Cascade, map: "duels_ibfk_2")
+  pets_duels_winnerIdTopets  pets?   @relation("duels_winnerIdTopets", fields: [winnerId], references: [userId], onDelete: Cascade, map: "duels_ibfk_3")
 
   @@index([player2Id], map: "duels_ibfk_2")
   @@index([player1Id], map: "duels_ibfk_1")
+  @@index([winnerId], map: "duels_ibfk_3")
 }

@@ -54,11 +54,9 @@ export default async function handler(req, res) {
 
                 // Mettre à jour le deck du joueur
                 await prisma.playercards.updateMany({
-                    where: {
-                        
+                    where: {                     
                         petId: decoded.id,
-                        isInDeck: true
-                        
+                        isInDeck: true                     
                     },
                     data: {
                         isInDeck: false
