@@ -4,8 +4,10 @@ import { signOut, useSession } from 'next-auth/react';
 import Header from 'C/header';
 import Footer from 'C/footer';
 import { useEffect } from 'react';
+import axios from 'axios';
+import calculatePoints from '@/utils/calculatePoints';
 
-export default function CGU() {
+export default function Contact() {
     const { data: session, status } = useSession();
     const [points, setPoints] = React.useState(0);
 
@@ -70,10 +72,9 @@ export default function CGU() {
 
     if (session) {
         return (
-            <>
-            <div className="flex flex-col min-h-screen" style={{ marginTop: "80px" }}>
+            <div className="flex flex-col min-h-screen">
                 <Header points={points} />
-                <div className="p-4 md:px-8 xl:px-12">
+                <div className="flex-grow p-4 md:px-8 xl:px-12" style={{ marginTop: "80px" }}>
                     <h1 className='pb-4 text-center font-bold text-2xl'>Owarida</h1>
                     <section>
                         <div className="flex justify-center items-center">
@@ -98,9 +99,8 @@ export default function CGU() {
                     </div>
                     </section>
                 </div>
-            </div>
                 <Footer />
-                </>
+            </div>
         )
     }
 

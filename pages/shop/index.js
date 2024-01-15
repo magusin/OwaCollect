@@ -167,9 +167,9 @@ export default function Shop({ productsData, errorServer }) {
 
     return (
         <>
-            <div className="flex-col min-h-screen" style={{ marginTop: "80px" }}>
+            <div className="flex flex-col min-h-screen">
                 <Header points={points} />
-                <div className="container text-black mx-auto px-4 md:my-8 my-4">
+                <div className="flex-grow container text-black mx-auto px-4 md:my-8 my-4" style={{ marginTop: "80px" }}>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         {/*  itérer sur produit */}
@@ -209,8 +209,8 @@ export default function Shop({ productsData, errorServer }) {
                         ))}
                     </div>
                 </div>
-            </div>
                 <Footer />
+            </div>
         </>
     );
 }

@@ -173,9 +173,9 @@ export default function SecretShop({ cards, errorServer }) {
             const secretCardsToBuy = [74, 99, 100].filter(id => !ownedCardIds.has(id));
             return (
                 <>
-                <div className="flex flex-col h-screen" style={{ marginTop: "80px" }}>
+                <div className="flex flex-col h-screen" >
                     <Header points={points} />
-                    <div className="mt-4 flex flex-col items-center">
+                    <div className="flex-grow mt-4 flex flex-col items-center" style={{ marginTop: "80px" }}>
                         <Image
                             src="/images/salesman.png"
                             alt="salesman"
@@ -184,11 +184,11 @@ export default function SecretShop({ cards, errorServer }) {
                             height={525}
                         />
                     </div>
-                    <div className="mt-4 flex flex-wrap justify-center">
+                    <div className="flex-grow mt-4 flex flex-wrap justify-center">
                         {secretCardsToBuy.map(cardId => (
                             <div key={cardId} className={`p-4 border-2 ${darkMode ? 'border-white' : 'border-black'} rounded-lg m-2 text-center max-w-xs md:max-w-sm lg:max-w-md xl:max-w-lg`}>
                                 <h3 className="font-bold mb-4">Carte {cardId}</h3>
-                                <p className="mb-4">Prix: 2500 <b>OC</b></p>
+                                <p className="mb-4">Prix: 500 <b>OC</b></p>
                                 <button
                                     className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700 transition duration-300"
                                     onClick={() => handleBuyCard()}
@@ -198,12 +198,12 @@ export default function SecretShop({ cards, errorServer }) {
                                 {showModal && (
                                     <Modal
                                         setShowModal={setShowModal}
-                                        handleConfirm={() => handleConfirmBuyCard(cardId, 2500)}
+                                        handleConfirm={() => handleConfirmBuyCard(cardId, 500)}
                                         title="Confirmation d'achat"
                                         message={
                                             <>
                                                 {/* eslint-disable-next-line react/no-unescaped-entities */}
-                                                Êtes-vous sûr de vouloir acheter la carte {cardId} pour 2500 <b>OC</b> ?
+                                                Êtes-vous sûr de vouloir acheter la carte {cardId} pour 500 <b>OC</b> ?
                                             </>
                                         }
                                     />
@@ -218,8 +218,8 @@ export default function SecretShop({ cards, errorServer }) {
                         close={setShowAlert}
                         />
                         )}
-                </div>
                         <Footer />
+                </div>
                         </>
             );
         } else {
@@ -227,7 +227,7 @@ export default function SecretShop({ cards, errorServer }) {
                 <>
                 <div className="flex flex-col h-screen">
                     <Header points={points} />
-                    <div className="flex-grow flex items-start justify-center" >
+                    <div className="flex-grow items-start justify-center" >
                         <div className="w-full h-screen">
                             <Image
                                 src="/images/closed.png"
@@ -239,8 +239,8 @@ export default function SecretShop({ cards, errorServer }) {
                             />
                         </div>
                     </div>
-                </div>
                     <Footer />
+                </div>
                     </>
             );
         }
