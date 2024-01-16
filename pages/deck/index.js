@@ -12,7 +12,7 @@ import nextAuthOptions from "../../config/nextAuthOptions";
 import Image from 'next/image';
 import Alert from "C/alert";
 
-export default function Duel({ cards, deckInitial, errorServer }) {
+export default function Deck({ cards, deckInitial, errorServer }) {
     const [error, setError] = React.useState(errorServer || null);
     const { data: session, status } = useSession();
     const router = useRouter();
@@ -24,6 +24,7 @@ export default function Duel({ cards, deckInitial, errorServer }) {
     const [showAlert, setShowAlert] = React.useState(false);
     const [alertType, setAlertType] = React.useState('success');
     const [alertMessage, setAlertMessage] = React.useState('');
+    const [link, setLink] = React.useState('');
 
     // Fonction pour gérer la sélection d'une nouvelle carte pour un emplacement
     const handleSelectCard = (cardId, index) => {
@@ -32,6 +33,36 @@ export default function Duel({ cards, deckInitial, errorServer }) {
         newDeck[index] = parseInt(cardId, 10);
         setDeck(newDeck);
     };
+
+    const createDuel = async () => {
+        setLoading(true);
+        try {
+            const response = await axios.post('/api/duel', {
+                deck
+            }, {
+                headers: {
+                    Authorization: `Bearer ${session.customJwt}`,
+                },
+            });
+            if (response.status === 200) {
+                const data = await response.data;
+                console.log('data', data);
+                setLink(data.link);
+            }
+        } catch (error) {
+            if (error.response.status === 401) {
+                setError('Erreur Lors de la création du duel. Veuillez vous reconnecter.')
+                setTimeout(() => {
+                    signOut()
+                    router.push('/');
+                }, 3000);
+            } else {
+                setError('Erreur lors de la création du duel. ' + error);
+            }
+        } finally {
+            setLoading(false);
+        }
+    }
 
     const saveDeck = async () => {
         setLoading(true);
@@ -55,6 +86,12 @@ export default function Duel({ cards, deckInitial, errorServer }) {
                 });
                 if (response.status === 200) {
                     const data = await response.data;
+                    setAlertType('success');
+                    setAlertMessage('Votre deck a bien été sauvegardé.');
+                    setShowAlert(true);
+                    setTimeout(() => {
+                        setShowAlert(false);
+                    }, 5000);
                 }
             } catch (error) {
                 if (error.response.status === 401) {
@@ -67,12 +104,7 @@ export default function Duel({ cards, deckInitial, errorServer }) {
                     setError('Erreur lors du levelUp de la carte. ' + error);
                 }
             } finally {
-                setAlertType('success');
-                setAlertMessage('Votre deck a bien été sauvegardé.');
-                setShowAlert(true);
-                setTimeout(() => {
-                    setShowAlert(false);
-                }, 5000);
+
                 setLoading(false);
             }
         }
@@ -139,15 +171,15 @@ export default function Duel({ cards, deckInitial, errorServer }) {
 
     if (status === "loading" || loading) {
         return (
-          <div className="flex flex-col h-screen">
-            <Header points={points} />
-            <div className="flex-grow flex justify-center items-center">
-              <span className="text-center"><svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24"><path fill="#1f2937" d="M12,4a8,8,0,0,1,7.89,6.7A1.53,1.53,0,0,0,21.38,12h0a1.5,1.5,0,0,0,1.48-1.75,11,11,0,0,0-21.72,0A1.5,1.5,0,0,0,2.62,12h0a1.53,1.53,0,0,0,1.49-1.3A8,8,0,0,1,12,4Z"><animateTransform attributeName="transform" dur="0.75s" repeatCount="indefinite" type="rotate" values="0 12 12;360 12 12" /></path></svg></span>
+            <div className="flex flex-col h-screen">
+                <Header points={points} />
+                <div className="flex-grow flex justify-center items-center">
+                    <span className="text-center"><svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24"><path fill="#1f2937" d="M12,4a8,8,0,0,1,7.89,6.7A1.53,1.53,0,0,0,21.38,12h0a1.5,1.5,0,0,0,1.48-1.75,11,11,0,0,0-21.72,0A1.5,1.5,0,0,0,2.62,12h0a1.53,1.53,0,0,0,1.49-1.3A8,8,0,0,1,12,4Z"><animateTransform attributeName="transform" dur="0.75s" repeatCount="indefinite" type="rotate" values="0 12 12;360 12 12" /></path></svg></span>
+                </div>
+                <Footer />
             </div>
-            <Footer />
-          </div>
         )
-      }
+    }
 
     if (error) {
         return (
@@ -172,7 +204,6 @@ export default function Duel({ cards, deckInitial, errorServer }) {
                     {deck.map((cardId, index) => {
                         // Récupérer la carte correspondante depuis la Map
                         const card = cardMap.get(cardId);
-                        console.log(`cardId: ${cardId}, card: `, card);
 
                         return (
                             <div key={index}>
@@ -210,21 +241,26 @@ export default function Duel({ cards, deckInitial, errorServer }) {
                 </div>
                 {/* Bouton pour sauvegarder le deck */}
                 <div className="flex flex-col justify-center items-center">
-                <button
-                    onClick={() => saveDeck()}
-                    className="my-4 bg-blue-500 py-2 px-4 rounded mt-12 hover:bg-blue-300"
-                    disabled={deckInitial === deck}
-                >
-                    Sauvegarder le Deck
-                </button>
+                    <button
+                        onClick={() => saveDeck()}
+                        className="my-4 bg-blue-500 py-2 px-4 rounded mt-12 hover:bg-blue-300"
+                        disabled={deckInitial === deck}
+                    >
+                        Sauvegarder le Deck
+                    </button>
 
-                <button
-                    onClick={() => createDuel()}
-                    className="my-4 bg-blue-500 py-2 px-4 rounded hover:bg-blue-300"
-                >
-                    Générer un duel
-                </button>
+                    <button
+                        onClick={() => createDuel()}
+                        className="my-4 bg-blue-500 py-2 px-4 rounded hover:bg-blue-300"
+                    >
+                        Générer un duel
+                    </button>
                 </div>
+                {link && (
+                    <div className="flex flex-col justify-center items-center">
+                        <p className="text-center">Voici le lien de votre duel: <a href={link} target="_blank" rel="noreferrer">{link}</a></p>
+                    </div>
+                )}
                 {showAlert && (
                     <Alert
                         type={alertType}

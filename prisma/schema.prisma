@@ -95,6 +95,7 @@ model duels {
   player1Id                  String? @db.VarChar(255)
   player2Id                  String? @db.VarChar(255)
   winnerId                   String? @db.VarChar(255)
+  bet                        Int?    @default(0)
   pets_duels_player1IdTopets pets?   @relation("duels_player1IdTopets", fields: [player1Id], references: [userId], onDelete: Cascade, map: "duels_ibfk_1")
   pets_duels_player2IdTopets pets?   @relation("duels_player2IdTopets", fields: [player2Id], references: [userId], onDelete: Cascade, map: "duels_ibfk_2")
   pets_duels_winnerIdTopets  pets?   @relation("duels_winnerIdTopets", fields: [winnerId], references: [userId], onDelete: Cascade, map: "duels_ibfk_3")

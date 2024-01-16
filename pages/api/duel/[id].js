@@ -5,7 +5,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 // Initialiser le midleware Cors
 const cors = Cors({
-    methods: ['POST', 'HEAD'],
+    methods: ['GET', 'HEAD'],
 })
 
 const prisma = new PrismaClient()
@@ -34,7 +34,7 @@ async function runMiddleware(req, res, fn) {
     })
 }
 
-// POST api/duel (create duel)
+// POST api/duel/[uuid] (create duel)
 
 export default async function handler(req, res) {
     try {
@@ -48,19 +48,15 @@ export default async function handler(req, res) {
         }
         await runMiddleware(req, res, cors)
         switch (req.method) {
-            case 'POST':
-                const uuid = uuidv4();
-                const link = process.env.NEXTAUTH_URL + '/duel/' + uuid;
-                const duel = await prisma.duels.create({
-                    data: {
-                        uuid: uuid,
-                        player1Id: decoded.id              
+            case 'GET':
+                const duelFind = await prisma.duels.findUnique({
+                    where: {
+                        uuid: req.query.id
                     }
                 })
-                res.status(200).json({duel, link})
+                res.status(200).json(duelFind)
                 break;
             default:
-                res.setHeader('Allow', ['POST'])
                 res.status(405).end(`Method ${req.method} Not Allowed`)
         }
     } catch (err) {
