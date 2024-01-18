@@ -8,14 +8,45 @@ import { useRouter } from 'next/router';
 import calculatePoints from '@/utils/calculatePoints';
 import Header from 'C/header';
 import Footer from 'C/footer';
+import Pusher from 'pusher-js';
 
 export default function Duel({ errorServer, duelInfo}) {
+    
     const { data: session, status } = useSession();
     const router = useRouter();
     const [error, setError] = React.useState(errorServer || null);
     const [points, setPoints] = React.useState(0);
     const { id } = router.query; 
     const [loading, setLoading] = React.useState(false);  
+
+    const pusher = new Pusher('96c01ff6052b2c529504', {
+        cluster: 'eu'
+      });
+
+
+    const registerP2 = async () => {    
+        setLoading(true);
+        try {
+            const response = await axios.put(`/api/duel/${id}`, {bet: duelInfo.bet}, {
+                headers: {
+                    Authorization: `Bearer ${session.customJwt}`,
+                },
+            });
+            const data = await response.data;
+            console.log(data)
+            setLoading(false);
+        } catch (error) {
+            if (error.response.status === 401) {
+                setError('Erreur avec votre Token ou il est expiré. Veuillez vous reconnecter.')
+                setTimeout(() => {
+                    signOut()
+                    router.push('/');
+                }, 2000);
+            } else {
+                setError(error);
+            }
+        }
+    }
 
     useEffect(() => {
 
@@ -70,11 +101,31 @@ export default function Duel({ errorServer, duelInfo}) {
                     }
                 }
             };
-            getUser();
+            getUser();          
         }
+      
+          // S'abonner au canal spécifique au duel
+          const channel = pusher.subscribe(`duel-${id}`);
+      
+          pusher.connection.bind('connected', function() {
+            console.log('Pusher successfully connected');
+          });
+
+          // Écouter un événement
+          channel.bind('duel-action', function(data) {
+            // Gérer l'action ici
+            console.log('Received data:', data);
+          });
+
+          axios.post("/api/pusher", { duelId: id });
+      
+          // Nettoyage lors du démontage du composant
+          return () => {
+            pusher.unsubscribe(`duel-${id}`);
+          };
 
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [status, session, error, router]);
+    }, [status, session, error, router, id]);
 
     if (error) {
         return (
@@ -101,7 +152,8 @@ export default function Duel({ errorServer, duelInfo}) {
     }
 
     if (session) {
-        if ((session.user.id === duelInfo.player1Id) && !duelInfo.player2Id) {
+        if (duelInfo.player1Id && !duelInfo.player2Id) {
+            if (session.user.id === duelInfo.player1Id) {
             return (
                 <div className="flex flex-col h-screen">
                     <Header points={points} />
@@ -111,18 +163,75 @@ export default function Duel({ errorServer, duelInfo}) {
                     <Footer />
                 </div>
             );
-        }
-        if (session.user.id === duelInfo.player1Id && duelInfo.player2Id) {
-            return (
-                <div className="flex flex-col h-screen">
-                    <Header points={points} />
-                    <div className="flex-grow flex justify-center items-center">
-                        <span className="text-center">Vous êtes le joueur 1</span>
+            } else {
+                return (
+                    <div className="flex flex-col h-screen">
+                        <Header points={points} />
+                        <div className="flex-grow flex flex-col justify-center items-center">
+                            <span className="mb-4 text-center">Voulez vous accepter de relever le duel de <b>{duelInfo.pets_duels_player1IdTopets.name}</b> en misant <b>{duelInfo.bet} OC</b> ?</span>
+                            <span><button className='bg-green-500 py-2 px-4 rounded mr-4' onClick={registerP2} disabled={points < duelInfo.bet}>Accepter</button><button className='bg-red-500 py-2 px-4 rounded'>Refuser</button></span>                          
+                        </div>
+                        <Footer />
                     </div>
-                    <Footer />
-                </div>
-            );
+                );
+            }
         }
+
+        if (duelInfo.player1Id && duelInfo.player2Id) {
+            if (session.user.id === duelInfo.player1Id || session.user.id === duelInfo.player2Id) {
+                return (
+                    <div className="flex flex-col h-screen">
+                        <Header points={points} />
+                        <div className="flex-grow flex justify-center items-center">
+                            <span className="text-center">Vous êtes un des joueur</span>
+                        </div>
+                        <Footer />
+                    </div>
+                );
+            } else {
+                return (
+                    <div className="flex flex-col h-screen">
+                        <Header points={points} />
+                        <div className="flex-grow flex justify-center items-center">
+                            <span className="text-center">Ce duel est plein</span>
+                        </div>
+                        <Footer />
+                    </div>
+                );
+            }
+        }
+
+        return (
+            <div className="flex flex-col h-screen">
+                <Header points={points} />
+                <div className="flex-grow flex justify-center items-center">
+                    <span className="text-center">Duel {id}</span>
+                </div>
+                <Footer />
+            </div>
+        );
+        // if ((session.user.id === duelInfo.player1Id) && !duelInfo.player2Id) {
+        //     return (
+        //         <div className="flex flex-col h-screen">
+        //             <Header points={points} />
+        //             <div className="flex-grow flex justify-center items-center">
+        //                 <span className="text-center">En attente d'un autre joueur</span>
+        //             </div>
+        //             <Footer />
+        //         </div>
+        //     );
+        // }
+        // if (session.user.id === duelInfo.player1Id && duelInfo.player2Id) {
+        //     return (
+        //         <div className="flex flex-col h-screen">
+        //             <Header points={points} />
+        //             <div className="flex-grow flex justify-center items-center">
+        //                 <span className="text-center">Vous êtes le joueur 1</span>
+        //             </div>
+        //             <Footer />
+        //         </div>
+        //     );
+        // }
     }
 
 }

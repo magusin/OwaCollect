@@ -46,7 +46,6 @@ export default function Deck({ cards, deckInitial, errorServer }) {
             });
             if (response.status === 200) {
                 const data = await response.data;
-                console.log('data', data);
                 setLink(data.link);
             }
         } catch (error) {

@@ -5,7 +5,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 // Initialiser le midleware Cors
 const cors = Cors({
-    methods: ['GET', 'HEAD'],
+    methods: ['GET', 'PUT', 'HEAD'],
 })
 
 const prisma = new PrismaClient()
@@ -34,7 +34,8 @@ async function runMiddleware(req, res, fn) {
     })
 }
 
-// POST api/duel/[uuid] (create duel)
+// GET api/duel/[uuid]
+// PUT api/duel/[uuid]
 
 export default async function handler(req, res) {
     try {
@@ -52,9 +53,42 @@ export default async function handler(req, res) {
                 const duelFind = await prisma.duels.findUnique({
                     where: {
                         uuid: req.query.id
+                    },
+                    include: {
+                        pets_duels_player1IdTopets: true, // Inclure les informations de pets pour le joueur 1
+                        pets_duels_player2IdTopets: true, // Inclure les informations de pets pour le joueur 2
                     }
                 })
                 res.status(200).json(duelFind)
+                break;
+            case 'PUT':
+                const { bet } = req.body;
+
+                if (bet === null || bet === undefined) {
+                    return res.status(400).json({ message: 'Montant du duel non fourni' });
+                }
+                const duelUpdate = await prisma.duels.update({
+                    where: {
+                        uuid: req.query.id
+                    },
+                    data: {
+                        player2Id: decoded.id
+                    }
+                })
+
+                if (bet != 0) {
+                    await prisma.pets.update({
+                        where: {
+                            userId: decoded.id
+                        },
+                        data: {
+                            pointsUsed: {
+                                increment: bet
+                            }
+                        }
+                    });
+                }
+                res.status(200).json(duelUpdate)
                 break;
             default:
                 res.status(405).end(`Method ${req.method} Not Allowed`)
