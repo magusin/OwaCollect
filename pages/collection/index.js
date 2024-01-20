@@ -28,7 +28,7 @@ export default function Collection({ cards, errorServer }) {
     const [allCard, setAllCard] = React.useState(cards?.cards);
     const [playerCards, setPlayerCards] = React.useState(cards?.playerCards);
     const [selectedRarity, setSelectedRarity] = React.useState('Toutes');
-
+    const [showOwnedOnly, setShowOwnedOnly] = React.useState(false);
 
     // Fonction pour vendre
     const handleConfirmSell = async (selectedCard, quantity) => {
@@ -151,6 +151,11 @@ export default function Collection({ cards, errorServer }) {
         setSelectedCard(card);
     };
 
+    // Fonction pour gérer le changement de filtre
+    const handleShowOwnedOnlyChange = (event) => {
+        setShowOwnedOnly(event.target.checked);
+    };
+
     const nextCard = () => {
         const prevCard = allCard[(selectedCardIndex + 1) % allCard.length];
         setSelectedCard(prevCard)
@@ -253,8 +258,9 @@ export default function Collection({ cards, errorServer }) {
         const ownedCardIds = new Set(playerCards.map(card => card.cardId));
         const allCardsName = new Map(allCard.map(card => [card.id, card]));
         const filteredCards = selectedRarity === 'Toutes'
-        ? allCard
-        : allCard.filter(card => card.rarety === selectedRarity);
+            ? allCard.filter(card => !showOwnedOnly || ownedCardIds.has(card.id))
+            : allCard.filter(card => !showOwnedOnly || ownedCardIds.has(card.id))
+                .filter(card => card.rarety === selectedRarity);
         // Créer un objet pour le suivi du count pour chaque cardId
         const cardCounts = playerCards.reduce((acc, card) => {
             acc[card.cardId] = card.count;
@@ -274,16 +280,26 @@ export default function Collection({ cards, errorServer }) {
                             priority={true}
                         />
                     </div>
-                <div>
-                <button className="bg-green-500 hover:bg-green-700 font-bold py-2 px-4 rounded-full mx-1" onClick={() => handleRarityChange('Toutes')}>Toutes</button>
-                <button className="bg-gray-500 hover:bg-gray-700 font-bold py-2 px-4 rounded-full mx-1" onClick={() => handleRarityChange('Commune')}>Commune</button>
-                <button className="bg-blue-500 hover:bg-blue-700 font-bold py-2 px-4 rounded-full mx-1" onClick={() => handleRarityChange('Rare')}>Rare</button>
-                <button className="bg-teal-500 hover:bg-teal-700 font-bold py-2 px-4 rounded-full mx-1" onClick={() => handleRarityChange('Epique')}>Épique</button>
-            </div>
+                    <div>
+                        <button className="bg-green-500 hover:bg-green-700 font-bold py-2 px-4 rounded-full mx-1" onClick={() => handleRarityChange('Toutes')}>Toutes</button>
+                        <button className="bg-gray-500 hover:bg-gray-700 font-bold py-2 px-4 rounded-full mx-1" onClick={() => handleRarityChange('Commune')}>Commune</button>
+                        <button className="bg-blue-500 hover:bg-blue-700 font-bold py-2 px-4 rounded-full mx-1" onClick={() => handleRarityChange('Rare')}>Rare</button>
+                        <button className="bg-teal-500 hover:bg-teal-700 font-bold py-2 px-4 rounded-full mx-1" onClick={() => handleRarityChange('Epique')}>Épique</button>
+                        <div className="m-4 font-bold">
+                        <label>
+                            <input
+                            className="mr-2 leading-tight cursor-pointer"
+                                type="checkbox"
+                                checked={showOwnedOnly}
+                                onChange={handleShowOwnedOnlyChange}
+                            />
+                            Cartes possédées
+                        </label>
+                        </div>
+                    </div>
                     <div className="flex items-center text-lg font-semibold my-4">
-                        <span>{`Cartes découvertes : ${
-        filteredCards.filter(card => ownedCardIds.has(card.id)).length
-    } / ${filteredCards.length}`}</span>
+                        <span>{`Cartes découvertes : ${filteredCards.filter(card => ownedCardIds.has(card.id)).length
+                            } / ${filteredCards.length}`}</span>
                         <span className="relative mx-4 md:mx-8 text-black bg-white rounded-full font-bold text-xl cursor-pointer group w-10 h-10 flex items-center justify-center">
                             ?
                             <span className="tooltip-text absolute hidden group-hover:block bg-gray-700 text-white text-xs rounded p-2 bottom-full mb-2 left-1/2 transform -translate-x-1/2 w-[200px] md:w-[400px] md:text-base lg:w-[450px] 2xl:w-[500px]">
