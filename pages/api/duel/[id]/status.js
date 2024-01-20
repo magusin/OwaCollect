@@ -1,11 +1,10 @@
 import Cors from 'cors'
 import { PrismaClient } from '@prisma/client'
 import jwt from 'jsonwebtoken';
-import Pusher from "pusher";
 
 // Initialiser le midleware Cors
 const cors = Cors({
-    methods: ['GET', 'HEAD'],
+    methods: ['GET', 'PUT', 'HEAD'],
 })
 
 const prisma = new PrismaClient()
@@ -18,7 +17,7 @@ function onError(err, res) {
     if (err.name === 'TokenExpiredError') {
         return res.status(401).json({ message: 'Token expiré' });
     }
-    
+
     res.status(500).json({ error: err.message })
 }
 
@@ -34,23 +33,25 @@ async function runMiddleware(req, res, fn) {
     })
 }
 
-// pages/api/pusher/index.js
-
-const pusher = new Pusher({
-  appId: process.env.PUSHER_APP_ID,
-  key: process.env.PUSHER_APP_KEY,
-  secret: process.env.PUSHER_APP_SECRET,
-  cluster: process.env.PUSHER_APP_CLUSTER,
-  useTLS: true
-});
-
+// GET api/duel/[id]/status
 export default async function handler(req, res) {
-  const { duelId } = req.body;
-
-  // Déclenchez l'événement Pusher basé sur l'action reçue
-  pusher.trigger(`duel-${duelId}`, 'duel-action', {
-      message: `Action occurred in duel ${duelId}`
-  });
+    try {
+        const token = req.headers.authorization?.split(' ')[1];
+        if (!token) {
+            return res.status(401).json({ message: 'Token non fourni' });
+        }
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        if (!decoded) {
+            return res.status(401).json({ message: 'Token invalide' });
+        }
+        const duelId = req.params.id;
+        if (!duelId) {
+            return res.status(400).json({ message: 'Identifiant du duel non fourni' });
+        }
+        await runMiddleware(req, res, cors)
+        const currentTime = Date.now();
+    } catch (err) {
+        onError(err, res)
+    }
+    finally { await prisma.$disconnect() }
 }
-
-  res.json({ message: "Event triggered" });

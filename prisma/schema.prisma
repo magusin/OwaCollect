@@ -91,14 +91,19 @@ model playercards {
 }
 
 model duels {
-  uuid                       String  @id @db.VarChar(255)
-  player1Id                  String? @db.VarChar(255)
-  player2Id                  String? @db.VarChar(255)
-  winnerId                   String? @db.VarChar(255)
-  bet                        Int?    @default(0)
-  pets_duels_player1IdTopets pets?   @relation("duels_player1IdTopets", fields: [player1Id], references: [userId], onDelete: Cascade, map: "duels_ibfk_1")
-  pets_duels_player2IdTopets pets?   @relation("duels_player2IdTopets", fields: [player2Id], references: [userId], onDelete: Cascade, map: "duels_ibfk_2")
-  pets_duels_winnerIdTopets  pets?   @relation("duels_winnerIdTopets", fields: [winnerId], references: [userId], onDelete: Cascade, map: "duels_ibfk_3")
+  uuid                       String    @id @db.VarChar(255)
+  player1Id                  String?   @db.VarChar(255)
+  player2Id                  String?   @db.VarChar(255)
+  winnerId                   String?   @db.VarChar(255)
+  bet                        Int       @default(0)
+  status                     String    @default("waiting") @db.VarChar(255)
+  isOnP1                     Int       @default(0) @db.TinyInt
+  isOnP2                     Int       @default(0) @db.TinyInt
+  lastTimeP1                 DateTime? @db.Timestamp(0)
+  lastTimeP2                 DateTime? @db.Timestamp(0)
+  pets_duels_player1IdTopets pets?     @relation("duels_player1IdTopets", fields: [player1Id], references: [userId], onDelete: Cascade, map: "duels_ibfk_1")
+  pets_duels_player2IdTopets pets?     @relation("duels_player2IdTopets", fields: [player2Id], references: [userId], onDelete: Cascade, map: "duels_ibfk_2")
+  pets_duels_winnerIdTopets  pets?     @relation("duels_winnerIdTopets", fields: [winnerId], references: [userId], onDelete: Cascade, map: "duels_ibfk_3")
 
   @@index([player2Id], map: "duels_ibfk_2")
   @@index([player1Id], map: "duels_ibfk_1")

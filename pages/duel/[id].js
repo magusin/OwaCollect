@@ -1,5 +1,5 @@
 /* eslint-disable react/no-unescaped-entities */
-import React, {useEffect} from 'react';
+import React, { useEffect } from 'react';
 import { signOut, useSession } from 'next-auth/react';
 import axios from 'axios';
 import { getServerSession } from "next-auth";
@@ -10,24 +10,25 @@ import Header from 'C/header';
 import Footer from 'C/footer';
 import Pusher from 'pusher-js';
 
-export default function Duel({ errorServer, duelInfo}) {
-    
+export default function Duel({ errorServer, duelInfo }) {
+    console.log(duelInfo)
     const { data: session, status } = useSession();
     const router = useRouter();
     const [error, setError] = React.useState(errorServer || null);
     const [points, setPoints] = React.useState(0);
-    const { id } = router.query; 
-    const [loading, setLoading] = React.useState(false);  
+    const { id } = router.query;
+    const [loading, setLoading] = React.useState(false);
+    const [duelStatus, setDuelStatus] = React.useState(duelInfo.duelFind.status);
+    const [player1Deck, setPlayer1Deck] = React.useState(duelInfo.pets_duels_player1IdTopets);
+    const [player2Deck, setPlayer2Deck] = React.useState(duelInfo.pets_duels_player2IdTopets);
+    const [player1On, setPlayer1On] = React.useState(null);
+    const [player2On, setPlayer2On] = React.useState(null);
 
-    const pusher = new Pusher('96c01ff6052b2c529504', {
-        cluster: 'eu'
-      });
 
-
-    const registerP2 = async () => {    
+    const registerP2 = async () => {
         setLoading(true);
         try {
-            const response = await axios.put(`/api/duel/${id}`, {bet: duelInfo.bet}, {
+            const response = await axios.put(`/api/duel/${id}`, { bet: duelInfo.bet }, {
                 headers: {
                     Authorization: `Bearer ${session.customJwt}`,
                 },
@@ -101,31 +102,23 @@ export default function Duel({ errorServer, duelInfo}) {
                     }
                 }
             };
-            getUser();          
+            getUser();
         }
-      
-          // S'abonner au canal spécifique au duel
-          const channel = pusher.subscribe(`duel-${id}`);
-      
-          pusher.connection.bind('connected', function() {
-            console.log('Pusher successfully connected');
-          });
-
-          // Écouter un événement
-          channel.bind('duel-action', function(data) {
-            // Gérer l'action ici
-            console.log('Received data:', data);
-          });
-
-          axios.post("/api/pusher", { duelId: id });
-      
-          // Nettoyage lors du démontage du composant
-          return () => {
-            pusher.unsubscribe(`duel-${id}`);
-          };
-
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [status, session, error, router, id]);
+    }, [status, session, error, router]);
+
+    useEffect(() => {
+        const pusher = new Pusher(`${process.env.PUSHER_APP_KEY}`, {
+            cluster: 'eu',
+            authEndpoint: '/api/pusher/auth', // Auth endpoint pour les canaux privés
+            encrypted: true
+          });
+      
+          const channel = pusher.subscribe(`channel-${id}`);
+          channel.bind('my-event', (data) => {
+            console.log('Données reçues:', data);
+          });
+    }, [id]);
 
     if (error) {
         return (
@@ -154,22 +147,22 @@ export default function Duel({ errorServer, duelInfo}) {
     if (session) {
         if (duelInfo.player1Id && !duelInfo.player2Id) {
             if (session.user.id === duelInfo.player1Id) {
-            return (
-                <div className="flex flex-col h-screen">
-                    <Header points={points} />
-                    <div className="flex-grow flex justify-center items-center">
-                        <span className="text-center">En attente d'un autre joueur</span>
+                return (
+                    <div className="flex flex-col h-screen">
+                        <Header points={points} />
+                        <div className="flex-grow flex justify-center items-center">
+                            <span className="text-center">En attente d'un autre joueur</span>
+                        </div>
+                        <Footer />
                     </div>
-                    <Footer />
-                </div>
-            );
+                );
             } else {
                 return (
                     <div className="flex flex-col h-screen">
                         <Header points={points} />
                         <div className="flex-grow flex flex-col justify-center items-center">
                             <span className="mb-4 text-center">Voulez vous accepter de relever le duel de <b>{duelInfo.pets_duels_player1IdTopets.name}</b> en misant <b>{duelInfo.bet} OC</b> ?</span>
-                            <span><button className='bg-green-500 py-2 px-4 rounded mr-4' onClick={registerP2} disabled={points < duelInfo.bet}>Accepter</button><button className='bg-red-500 py-2 px-4 rounded'>Refuser</button></span>                          
+                            <span><button className='bg-green-500 py-2 px-4 rounded mr-4' onClick={registerP2} disabled={points < duelInfo.bet}>Accepter</button><button className='bg-red-500 py-2 px-4 rounded'>Refuser</button></span>
                         </div>
                         <Footer />
                     </div>
@@ -200,38 +193,6 @@ export default function Duel({ errorServer, duelInfo}) {
                 );
             }
         }
-
-        return (
-            <div className="flex flex-col h-screen">
-                <Header points={points} />
-                <div className="flex-grow flex justify-center items-center">
-                    <span className="text-center">Duel {id}</span>
-                </div>
-                <Footer />
-            </div>
-        );
-        // if ((session.user.id === duelInfo.player1Id) && !duelInfo.player2Id) {
-        //     return (
-        //         <div className="flex flex-col h-screen">
-        //             <Header points={points} />
-        //             <div className="flex-grow flex justify-center items-center">
-        //                 <span className="text-center">En attente d'un autre joueur</span>
-        //             </div>
-        //             <Footer />
-        //         </div>
-        //     );
-        // }
-        // if (session.user.id === duelInfo.player1Id && duelInfo.player2Id) {
-        //     return (
-        //         <div className="flex flex-col h-screen">
-        //             <Header points={points} />
-        //             <div className="flex-grow flex justify-center items-center">
-        //                 <span className="text-center">Vous êtes le joueur 1</span>
-        //             </div>
-        //             <Footer />
-        //         </div>
-        //     );
-        // }
     }
 
 }
@@ -262,15 +223,15 @@ export async function getServerSideProps(context) {
         return {
             props: { duelInfo },
         };
-        } catch (error) {
-            if (error.response.status === 401) {
-                return {
-                    props: { errorServer: 'Erreur avec votre Token ou il est expiré. Veuillez vous reconnecter.' },
-                };
-            }
-    
+    } catch (error) {
+        if (error.response.status === 401) {
             return {
-                props: { errorServer: error.message },
-            }; 
+                props: { errorServer: 'Erreur avec votre Token ou il est expiré. Veuillez vous reconnecter.' },
+            };
+        }
+
+        return {
+            props: { errorServer: error.message },
+        };
     }
 }

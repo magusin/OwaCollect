@@ -1,7 +1,6 @@
 import Cors from 'cors'
 import { PrismaClient } from '@prisma/client'
 import jwt from 'jsonwebtoken';
-import { v4 as uuidv4 } from 'uuid';
 
 // Initialiser le midleware Cors
 const cors = Cors({
@@ -59,7 +58,30 @@ export default async function handler(req, res) {
                         pets_duels_player2IdTopets: true, // Inclure les informations de pets pour le joueur 2
                     }
                 })
-                res.status(200).json(duelFind)
+
+                const cardP1 = await prisma.playercards.findMany({
+                    where: {
+                        petId: decoded.id,
+                        isInDeck: true
+                    },
+                    include: {
+                        card: true
+                    }
+                })
+                if (duelFind.player2Id != null) {
+                const cardP2 = await prisma.playercards.findMany({
+                    where: {
+                        userId: duelFind.player2Id,
+                        isInDeck: true
+                    },
+                    include: {
+                        card: true
+                    }
+                })
+                res.status(200).json({ duelFind, cardP1, cardP2 })
+                break;
+            }
+                res.status(200).json({ duelFind, cardP1 })
                 break;
             case 'PUT':
                 const { bet } = req.body;
