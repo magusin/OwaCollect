@@ -198,6 +198,7 @@ export default function Collection({ cards, errorServer }) {
             return isCorrectRarity;
         });
         setFilteredCards(newFilteredCards);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [showOwnedOnly, allCard, selectedRarity, showLevelUpOnly]);
 
     useEffect(() => {
@@ -284,23 +285,6 @@ export default function Collection({ cards, errorServer }) {
     }
 
     if (session) {
-        // const ownedCardIds = new Set(playerCards.map(card => card.cardId));
-        // const allCardsName = new Map(allCard.map(card => [card.id, card]));
-        // // Créer un objet pour le suivi du count pour chaque cardId
-        // const cardCounts = playerCards.reduce((acc, card) => {
-        //     acc[card.cardId] = card.count;
-        //     return acc;
-        // }, {});
-        // const filteredCards = allCard.filter(card => {
-        //     const cardOwned = ownedCardIds.has(card.id);
-        //     const canLevelUp = cardCounts[card.id] >= 3 && points >= card.evolveCost && card.evolveCost !== null;
-        //     const isCorrectRarity = selectedRarity === 'Toutes' || card.rarety === selectedRarity;
-        
-        //     if (showOwnedOnly && !cardOwned) return false;
-        //     if (showLevelUpOnly && !canLevelUp) return false;
-        //     return isCorrectRarity;
-        // });
-
         return (
             <div className="flex flex-col h-screen" style={{ marginTop: "80px" }}>
                 <Header points={points} />

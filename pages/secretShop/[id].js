@@ -27,10 +27,16 @@ export default function SecretShop({ cards, errorServer }) {
     const [showAlert, setShowAlert] = React.useState(false);
     const [alertType, setAlertType] = React.useState(null);
     const [showModal, setShowModal] = React.useState(false);
+    const [selectedCard, setSelectedCard] = React.useState(null);
 
     const handleBuyCard = () => {
         setShowModal(true);
     }
+
+    // Pour fermer la vue agrandie
+    const closeEnlargeView = () => {
+        setSelectedCard(null);
+    };
 
     const handleConfirmBuyCard = async (id, cost) => {
         setLoading(true);
@@ -57,10 +63,13 @@ export default function SecretShop({ cards, errorServer }) {
                     setTimeout(() => {
                         setShowAlert(false);
                     }, 5000);
+
+                    let selectedCard = data.allPlayerCards.find(card => card.card.id === data.updatedCard.cardId);
+                    setSelectedCard(selectedCard.card)  
                 }
 
             } catch (error) {
-                if (error.response.status === 401) {
+                if (error.response?.status === 401) {
                     setError('Erreur avec votre Token ou il est expiré. Veuillez vous reconnecter.')
                     setTimeout(() => {
                         signOut()
@@ -188,7 +197,7 @@ export default function SecretShop({ cards, errorServer }) {
                         {secretCardsToBuy.map(cardId => (
                             <div key={cardId} className={`p-4 border-2 ${darkMode ? 'border-white' : 'border-black'} rounded-lg m-2 text-center max-w-xs md:max-w-sm lg:max-w-md xl:max-w-lg`}>
                                 <h3 className="font-bold mb-4">Carte {cardId}</h3>
-                                <p className="mb-4">Prix: 500 <b>OC</b></p>
+                                <p className="mb-4">Prix: <b>500 OC</b></p>
                                 <button
                                     className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700 transition duration-300"
                                     onClick={() => handleBuyCard()}
@@ -203,7 +212,7 @@ export default function SecretShop({ cards, errorServer }) {
                                         message={
                                             <>
                                                 {/* eslint-disable-next-line react/no-unescaped-entities */}
-                                                Êtes-vous sûr de vouloir acheter la carte {cardId} pour 500 <b>OC</b> ?
+                                                Êtes-vous sûr de vouloir acheter la carte {cardId} pour <b>500 OC</b> ?
                                             </>
                                         }
                                     />
@@ -211,6 +220,30 @@ export default function SecretShop({ cards, errorServer }) {
                             </div>
                         ))}
                     </div>
+                    {selectedCard && (
+                        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 px-4 py-6 overflow-y-auto h-full w-full">
+                        <div className="flex flex-wrap flex-row p-4 h-full w-full items-center justify-center md:flex-col">
+                            {/* Image card */}
+                            <div className="relative h-full" style={{ width: '100%', maxWidth: '100vh' }}>
+                                <div className="aspect-w-1 aspect-h-1 ">
+                                    <Image
+                                        priority={true}
+                                        src={`${selectedCard.picture}.png`}
+                                        alt={'Dos de la carte ' + selectedCard.id}
+                                        layout="fill"
+                                        objectFit="contain"
+                                        sizes="100%"
+                                    />
+                                </div>
+                            </div>
+                            
+                            {/* Button close */}
+                            <button onClick={closeEnlargeView} className="w-full sm:w-auto bg-red-500 text-white py-2 px-4 rounded mt-4 sm:mt-0 sm:absolute sm:top-2 sm:right-2">
+                                Fermer
+                            </button>
+                        </div>
+                    </div>
+                    )}
                     {showAlert && (
                         <Alert
                         type={alertType}
