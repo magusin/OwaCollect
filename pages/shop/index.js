@@ -32,21 +32,23 @@ export default function Shop({ productsData, errorServer }) {
         setShowModal(true);
     };
 
-    const handleConfirmPurchase = async (selectedProduct) => {
+    const handleConfirmPurchase = async (selectedProduct, quantity) => {
         setLoading(true);
         setShowModal(false);
-        if (points >= selectedProduct.price && session) {
+        const totalPointsCost = selectedProduct.price * quantity;
+        if (points >= totalPointsCost && session) {
             try {
-                const response = await axios.get(`/api/card/draw/${selectedProduct.name}`, {
+                const response = await axios.post(`/api/card/draw`, {quantity, category: selectedProduct.name, cost: totalPointsCost}, {
                     headers: {
                         'Content-Type': 'application/json',
-                        Authorization: `Bearer ${session.customJwt}`,
+                        Authorization: `Bearer ${session.customJwt}`
                     }
                 })
 
                 // if response status is 200 then set cards in state and show modal
                 if (response.status === 200) {
                     const data = await response.data;
+                    console.log('data', data)
                     // await editUserPoints(selectedProduct);
                     localStorage.setItem('userOC', JSON.stringify(data.userData));
                     const totalPoints = calculatePoints(data.userData);
@@ -186,13 +188,16 @@ export default function Shop({ productsData, errorServer }) {
                                 {showModal && (
                                     <Modal
                                         setShowModal={setShowModal}
-                                        handleConfirm={() => handleConfirmPurchase(product)}
+                                        handleConfirm={(quantity) => handleConfirmPurchase(product, quantity)}
                                         title="Confirmation d'Achat"
                                         message={
                                             <>
                                                 Êtes-vous sûr de vouloir acheter <b>{product.name}</b> pack pour <b>{product.price} OC</b> ?
                                             </>
                                         }
+                                        maxQuantity={Math.floor(points / product.price)}
+                                        cost={product.price}
+                                        buy={true}
                                     />
                                 )}
                                 {showModalCards && (

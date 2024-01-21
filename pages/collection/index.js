@@ -418,6 +418,7 @@ export default function Collection({ cards, errorServer }) {
                                     }
                                     maxQuantity={cardCounts[selectedCard.id] - 1}
                                     cost={selectedCard.rarety === 'Rare' ? 70 : selectedCard.rarety === 'Epique' ? 150 : 30}
+                                    sell={true}
                                 />
                             )}
                             {showAlert && (

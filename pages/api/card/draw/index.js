@@ -4,7 +4,7 @@ import jwt from 'jsonwebtoken';
 
 // Initialiser le midleware Cors
 const cors = Cors({
-    methods: ['GET', 'HEAD'],
+    methods: ['POST', 'HEAD'],
 })
 
 const prisma = new PrismaClient()
@@ -47,10 +47,11 @@ export default async function handler(req, res) {
     }
         await runMiddleware(req, res, cors)
         switch (req.method) {
-            case 'GET':
+            case 'POST':
+                const { quantity, category, cost } = req.body;
                 const cards = await prisma.card.findMany({
                     where: {
-                        category: req.query.category,
+                        category: category,
                         isDraw: true
                     }
                 })
@@ -66,7 +67,7 @@ export default async function handler(req, res) {
                 };
 
                 const selectedCards = [];
-                for (let i = 0; i < 5; i++) {
+                for (let i = 0; i < 5 * quantity; i++) {
                     const randomCard = selectRandomCard()
                     selectedCards.push(randomCard);
                 }
@@ -86,7 +87,7 @@ export default async function handler(req, res) {
                     },
                     data: {
                         pointsUsed: {
-                            increment: 500
+                            increment: cost
                         }
                     }
                 });
