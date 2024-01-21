@@ -1,6 +1,6 @@
 import React from "react";
 import Image from 'next/legacy/image';
-import axios from 'axios'
+import axios, { all } from 'axios'
 import calculatePoints from '@/utils/calculatePoints';
 import { signOut, useSession } from 'next-auth/react';
 import { useEffect } from "react";
@@ -30,6 +30,15 @@ export default function Collection({ cards, errorServer }) {
     const [selectedRarity, setSelectedRarity] = React.useState('Toutes');
     const [showOwnedOnly, setShowOwnedOnly] = React.useState(false);
     const [showLevelUpOnly, setShowLevelUpOnly] = React.useState(false);
+    const [filteredCards, setFilteredCards] = React.useState(allCard);
+
+    const ownedCardIds = new Set(playerCards.map(card => card.cardId));
+        const allCardsName = new Map(allCard.map(card => [card.id, card]));
+        // Créer un objet pour le suivi du count pour chaque cardId
+        const cardCounts = playerCards.reduce((acc, card) => {
+            acc[card.cardId] = card.count;
+            return acc;
+        }, {});
 
     // Fonction pour vendre
     const handleConfirmSell = async (selectedCard, quantity) => {
@@ -146,7 +155,7 @@ export default function Collection({ cards, errorServer }) {
         setSelectedRarity(rarity);
     };
 
-    const selectedCardIndex = cards?.cards.findIndex(card => card.id === selectedCard?.id);
+    const selectedCardIndex = filteredCards.findIndex(card => card.id === selectedCard?.id);
     // Gestionnaire de clic pour sélectionner une carte
     const handleCardClick = (card) => {
         setSelectedCard(card);
@@ -163,12 +172,12 @@ export default function Collection({ cards, errorServer }) {
     };
 
     const nextCard = () => {
-        const prevCard = allCard[(selectedCardIndex + 1) % allCard.length];
+        const prevCard = filteredCards[(selectedCardIndex + 1) % filteredCards.length];
         setSelectedCard(prevCard)
     };
 
     const previousCard = () => {
-        const prevCard = allCard[selectedCardIndex === 0 ? allCard.length - 1 : selectedCardIndex - 1];
+        const prevCard = filteredCards[selectedCardIndex === 0 ? filteredCards.length - 1 : selectedCardIndex - 1];
         setSelectedCard(prevCard)
     };
 
@@ -176,6 +185,20 @@ export default function Collection({ cards, errorServer }) {
     const closeEnlargeView = () => {
         setSelectedCard(null);
     };
+
+    // Mettre à jour les cartes filtrées lorsque le filtre change
+    useEffect(() => {
+        const newFilteredCards = allCard.filter(card => {
+            const cardOwned = ownedCardIds.has(card.id);
+            const canLevelUp = cardCounts[card.id] >= 3 && points >= card.evolveCost && card.evolveCost !== null;
+            const isCorrectRarity = selectedRarity === 'Toutes' || card.rarety === selectedRarity;
+        
+            if (showOwnedOnly && !cardOwned) return false;
+            if (showLevelUpOnly && !canLevelUp) return false;
+            return isCorrectRarity;
+        });
+        setFilteredCards(newFilteredCards);
+    }, [showOwnedOnly, allCard, selectedRarity, showLevelUpOnly]);
 
     useEffect(() => {
 
@@ -261,22 +284,22 @@ export default function Collection({ cards, errorServer }) {
     }
 
     if (session) {
-        const ownedCardIds = new Set(playerCards.map(card => card.cardId));
-        const allCardsName = new Map(allCard.map(card => [card.id, card]));
-        // Créer un objet pour le suivi du count pour chaque cardId
-        const cardCounts = playerCards.reduce((acc, card) => {
-            acc[card.cardId] = card.count;
-            return acc;
-        }, {});
-        const filteredCards = allCard.filter(card => {
-            const cardOwned = ownedCardIds.has(card.id);
-            const canLevelUp = cardCounts[card.id] >= 3 && points >= card.evolveCost && card.evolveCost !== null;
-            const isCorrectRarity = selectedRarity === 'Toutes' || card.rarety === selectedRarity;
+        // const ownedCardIds = new Set(playerCards.map(card => card.cardId));
+        // const allCardsName = new Map(allCard.map(card => [card.id, card]));
+        // // Créer un objet pour le suivi du count pour chaque cardId
+        // const cardCounts = playerCards.reduce((acc, card) => {
+        //     acc[card.cardId] = card.count;
+        //     return acc;
+        // }, {});
+        // const filteredCards = allCard.filter(card => {
+        //     const cardOwned = ownedCardIds.has(card.id);
+        //     const canLevelUp = cardCounts[card.id] >= 3 && points >= card.evolveCost && card.evolveCost !== null;
+        //     const isCorrectRarity = selectedRarity === 'Toutes' || card.rarety === selectedRarity;
         
-            if (showOwnedOnly && !cardOwned) return false;
-            if (showLevelUpOnly && !canLevelUp) return false;
-            return isCorrectRarity;
-        });
+        //     if (showOwnedOnly && !cardOwned) return false;
+        //     if (showLevelUpOnly && !canLevelUp) return false;
+        //     return isCorrectRarity;
+        // });
 
         return (
             <div className="flex flex-col h-screen" style={{ marginTop: "80px" }}>
