@@ -57,7 +57,7 @@ export default function Shop({ productsData, errorServer }) {
                     setDrawnCards(data.selectedCards);
                     setShowModalCards(true);
                     setAlertType('success');
-                    setAlertMessage('Vous avez bien acheté le pack');
+                    setAlertMessage(`Vous avez bien acheté ${quantity} ${quantity > 1 ? "packs" : "pack"}`);
                     setShowAlert(true);
                     setTimeout(() => {
                         setShowAlert(false);
@@ -195,7 +195,7 @@ export default function Shop({ productsData, errorServer }) {
                                                 Êtes-vous sûr de vouloir acheter <b>{product.name}</b> pack pour <b>{product.price} OC</b> ?
                                             </>
                                         }
-                                        maxQuantity={Math.floor(points / product.price)}
+                                        maxQuantity={Math.floor(points / product.price) > 5 ? 5 : Math.floor(points / product.price)}
                                         cost={product.price}
                                         buy={true}
                                     />

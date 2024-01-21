@@ -33,7 +33,7 @@ async function runMiddleware(req, res, fn) {
     })
 }
 
-// GET /api/card/draw/[category]
+// GET /api/card/draw
 
 export default async function handler(req, res) {
     try {
