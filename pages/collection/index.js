@@ -29,6 +29,7 @@ export default function Collection({ cards, errorServer }) {
     const [playerCards, setPlayerCards] = React.useState(cards?.playerCards);
     const [selectedRarity, setSelectedRarity] = React.useState('Toutes');
     const [showOwnedOnly, setShowOwnedOnly] = React.useState(false);
+    const [showLevelUpOnly, setShowLevelUpOnly] = React.useState(false);
 
     // Fonction pour vendre
     const handleConfirmSell = async (selectedCard, quantity) => {
@@ -156,6 +157,11 @@ export default function Collection({ cards, errorServer }) {
         setShowOwnedOnly(event.target.checked);
     };
 
+    // Fonction pour gérer le changement de filtre
+    const handleShowLevelUpOnlyChange = (event) => {
+        setShowLevelUpOnly(event.target.checked);
+    };
+
     const nextCard = () => {
         const prevCard = allCard[(selectedCardIndex + 1) % allCard.length];
         setSelectedCard(prevCard)
@@ -257,15 +263,20 @@ export default function Collection({ cards, errorServer }) {
     if (session) {
         const ownedCardIds = new Set(playerCards.map(card => card.cardId));
         const allCardsName = new Map(allCard.map(card => [card.id, card]));
-        const filteredCards = selectedRarity === 'Toutes'
-            ? allCard.filter(card => !showOwnedOnly || ownedCardIds.has(card.id))
-            : allCard.filter(card => !showOwnedOnly || ownedCardIds.has(card.id))
-                .filter(card => card.rarety === selectedRarity);
         // Créer un objet pour le suivi du count pour chaque cardId
         const cardCounts = playerCards.reduce((acc, card) => {
             acc[card.cardId] = card.count;
             return acc;
         }, {});
+        const filteredCards = allCard.filter(card => {
+            const cardOwned = ownedCardIds.has(card.id);
+            const canLevelUp = cardCounts[card.id] >= 3 && points >= card.evolveCost && card.evolveCost !== null;
+            const isCorrectRarity = selectedRarity === 'Toutes' || card.rarety === selectedRarity;
+        
+            if (showOwnedOnly && !cardOwned) return false;
+            if (showLevelUpOnly && !canLevelUp) return false;
+            return isCorrectRarity;
+        });
 
         return (
             <div className="flex flex-col h-screen" style={{ marginTop: "80px" }}>
@@ -286,7 +297,7 @@ export default function Collection({ cards, errorServer }) {
                         <button className="bg-blue-500 hover:bg-blue-700 font-bold py-2 px-4 rounded-full mx-1" onClick={() => handleRarityChange('Rare')}>Rare</button>
                         <button className="bg-teal-500 hover:bg-teal-700 font-bold py-2 px-4 rounded-full mx-1" onClick={() => handleRarityChange('Epique')}>Épique</button>
                         <div className="m-4 font-bold">
-                        <label>
+                        <label className="mr-2">
                             <input
                             className="mr-2 leading-tight cursor-pointer"
                                 type="checkbox"
@@ -294,6 +305,15 @@ export default function Collection({ cards, errorServer }) {
                                 onChange={handleShowOwnedOnlyChange}
                             />
                             Cartes possédées
+                        </label>
+                        <label>
+                            <input
+                            className="mr-2 leading-tight cursor-pointer"
+                                type="checkbox"
+                                checked={showLevelUpOnly}
+                                onChange={handleShowLevelUpOnlyChange}
+                            />
+                            Level Up possible
                         </label>
                         </div>
                     </div>
