@@ -33,12 +33,12 @@ export default function Collection({ cards, errorServer }) {
     const [filteredCards, setFilteredCards] = React.useState(allCard);
 
     const ownedCardIds = new Set(playerCards.map(card => card.cardId));
-        const allCardsName = new Map(allCard.map(card => [card.id, card]));
-        // Créer un objet pour le suivi du count pour chaque cardId
-        const cardCounts = playerCards.reduce((acc, card) => {
-            acc[card.cardId] = card.count;
-            return acc;
-        }, {});
+    const allCardsName = new Map(allCard.map(card => [card.id, card]));
+    // Créer un objet pour le suivi du count pour chaque cardId
+    const cardCounts = playerCards.reduce((acc, card) => {
+        acc[card.cardId] = card.count;
+        return acc;
+    }, {});
 
     // Fonction pour vendre
     const handleConfirmSell = async (selectedCard, quantity) => {
@@ -87,6 +87,21 @@ export default function Collection({ cards, errorServer }) {
         }
     }
 
+    // Mettre à jour les cartes filtrées lorsque le filtre change
+    useEffect(() => {
+        let newFilteredCards = allCard.filter(card => {
+            const cardOwned = ownedCardIds.has(card.id);
+            const canLevelUp = cardCounts[card.id] >= 3 && points >= card.evolveCost && card.evolveCost !== null;
+            const isCorrectRarity = selectedRarity === 'Toutes' || card.rarety === selectedRarity;
+
+            if (showOwnedOnly && !cardOwned) return false;
+            if (showLevelUpOnly && !canLevelUp) return false;
+            return isCorrectRarity;
+        });
+        setFilteredCards(newFilteredCards);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [showOwnedOnly, allCard, selectedRarity, showLevelUpOnly, selectedCard]);
+
     // fonction de level up de la carte
     const handleConfirmLevelUp = async (selectedCard) => {
         setLoading(true);
@@ -107,6 +122,15 @@ export default function Collection({ cards, errorServer }) {
                     setPoints(totalPoints);
                     setPlayerCards(data.allPlayerCards);
                     setAlertType('success');
+                    const newCard = allCard.find(card => card.id === data.updatedCard.cardId);
+                    setFilteredCards(filteredCards => {
+                        const isCardIncluded = filteredCards.some(card => card.id === data.updatedCard.cardId);
+                        if (!isCardIncluded) {
+                            return [...filteredCards, newCard]
+                        }
+                        return filteredCards;
+                    })
+                    setSelectedCard(newCard)
                     setAlertMessage(
                         <>
                             Vous avez level Up la carte <b>{selectedCard.name}</b>
@@ -116,7 +140,6 @@ export default function Collection({ cards, errorServer }) {
                     setTimeout(() => {
                         setShowAlert(false);
                     }, 5000);
-                    nextCard();
                 }
             } catch (error) {
                 if (error.response.status === 401) {
@@ -185,21 +208,6 @@ export default function Collection({ cards, errorServer }) {
     const closeEnlargeView = () => {
         setSelectedCard(null);
     };
-
-    // Mettre à jour les cartes filtrées lorsque le filtre change
-    useEffect(() => {
-        const newFilteredCards = allCard.filter(card => {
-            const cardOwned = ownedCardIds.has(card.id);
-            const canLevelUp = cardCounts[card.id] >= 3 && points >= card.evolveCost && card.evolveCost !== null;
-            const isCorrectRarity = selectedRarity === 'Toutes' || card.rarety === selectedRarity;
-        
-            if (showOwnedOnly && !cardOwned) return false;
-            if (showLevelUpOnly && !canLevelUp) return false;
-            return isCorrectRarity;
-        });
-        setFilteredCards(newFilteredCards);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [showOwnedOnly, allCard, selectedRarity, showLevelUpOnly]);
 
     useEffect(() => {
 
@@ -304,24 +312,24 @@ export default function Collection({ cards, errorServer }) {
                         <button className="bg-blue-500 hover:bg-blue-700 font-bold py-2 px-4 rounded-full mx-1" onClick={() => handleRarityChange('Rare')}>Rare</button>
                         <button className="bg-teal-500 hover:bg-teal-700 font-bold py-2 px-4 rounded-full mx-1" onClick={() => handleRarityChange('Epique')}>Épique</button>
                         <div className="m-4 font-bold">
-                        <label className="mr-2">
-                            <input
-                            className="mr-2 leading-tight cursor-pointer"
-                                type="checkbox"
-                                checked={showOwnedOnly}
-                                onChange={handleShowOwnedOnlyChange}
-                            />
-                            Cartes possédées
-                        </label>
-                        <label>
-                            <input
-                            className="mr-2 leading-tight cursor-pointer"
-                                type="checkbox"
-                                checked={showLevelUpOnly}
-                                onChange={handleShowLevelUpOnlyChange}
-                            />
-                            Level Up possible
-                        </label>
+                            <label className="mr-2">
+                                <input
+                                    className="mr-2 leading-tight cursor-pointer"
+                                    type="checkbox"
+                                    checked={showOwnedOnly}
+                                    onChange={handleShowOwnedOnlyChange}
+                                />
+                                Cartes possédées
+                            </label>
+                            <label>
+                                <input
+                                    className="mr-2 leading-tight cursor-pointer"
+                                    type="checkbox"
+                                    checked={showLevelUpOnly}
+                                    onChange={handleShowLevelUpOnlyChange}
+                                />
+                                Level Up possible
+                            </label>
                         </div>
                     </div>
                     <div className="flex items-center text-lg font-semibold my-4">
