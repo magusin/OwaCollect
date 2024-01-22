@@ -16,8 +16,10 @@ export default function CardsModal({ cards, onClose }) {
 
     const handleNextPage = () => {
         if (currentPage < totalPages - 1) {
-            setCurrentPage(currentPage + 1);
             setFlippedCards(new Array(cardsPerPage).fill(false)); // Réinitialiser flippedCards pour la nouvelle page
+            setTimeout(() => {
+                setCurrentPage(currentPage + 1);
+            }, 300); // 300 millisecondes de retard
         }
     };
 
