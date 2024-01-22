@@ -11,6 +11,7 @@ import nextAuthOptions from "../../config/nextAuthOptions";
 import Modal from "C/modal";
 import Alert from "C/alert";
 import Footer from "@/components/footer";
+import Switch from "@/components/filterToggleSVG";
 
 export default function Collection({ cards, errorServer }) {
     const [error, setError] = React.useState(errorServer || null);
@@ -31,14 +32,26 @@ export default function Collection({ cards, errorServer }) {
     const [showOwnedOnly, setShowOwnedOnly] = React.useState(false);
     const [showLevelUpOnly, setShowLevelUpOnly] = React.useState(false);
     const [filteredCards, setFilteredCards] = React.useState(allCard);
+    const [filterState, setFilterState] = React.useState("none");
 
-    const ownedCardIds = new Set(playerCards.map(card => card.cardId));
-    const allCardsName = new Map(allCard.map(card => [card.id, card]));
+    const ownedCardIds = new Set(playerCards?.map(card => card.cardId));
+    const allCardsName = new Map(allCard?.map(card => [card.id, card]));
     // Créer un objet pour le suivi du count pour chaque cardId
-    const cardCounts = playerCards.reduce((acc, card) => {
+    const cardCounts = playerCards?.reduce((acc, card) => {
         acc[card.cardId] = card.count;
         return acc;
     }, {});
+
+    const handleSwitchChange = (position) => {
+        // Logique pour modifier l'état en fonction de la position
+        if (position === 30) {
+            setFilterState('non possédé'); // Exemple
+        } else if (position === 75) {
+            setFilterState('none'); // Exemple
+        } else if (position === 120) {
+            setFilterState('possédé'); // Exemple
+        }
+    };
 
     // Fonction pour vendre
     const handleConfirmSell = async (selectedCard, quantity) => {
@@ -89,18 +102,23 @@ export default function Collection({ cards, errorServer }) {
 
     // Mettre à jour les cartes filtrées lorsque le filtre change
     useEffect(() => {
-        let newFilteredCards = allCard.filter(card => {
+        let newFilteredCards = allCard?.filter(card => {
             const cardOwned = ownedCardIds.has(card.id);
             const canLevelUp = cardCounts[card.id] >= 3 && points >= card.evolveCost && card.evolveCost !== null;
             const isCorrectRarity = selectedRarity === 'Toutes' || card.rarety === selectedRarity;
-
+    
+            // Ajoutez votre logique de filtrage basée sur la position du switch
+            if (filterState === 'non possédé' && cardOwned) return false; // Si le switch est à gauche, exclure les cartes possédées
+            if (filterState === 'possédé' && !cardOwned) return false; // Si le switch est à droite, exclure les cartes non possédées
+    
+            // Les autres filtres restent inchangés
             if (showOwnedOnly && !cardOwned) return false;
             if (showLevelUpOnly && !canLevelUp) return false;
             return isCorrectRarity;
         });
         setFilteredCards(newFilteredCards);
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [showOwnedOnly, allCard, selectedRarity, showLevelUpOnly, selectedCard]);
+    }, [showOwnedOnly, allCard, selectedRarity, showLevelUpOnly, selectedCard, filterState]);
 
     // fonction de level up de la carte
     const handleConfirmLevelUp = async (selectedCard) => {
@@ -178,7 +196,7 @@ export default function Collection({ cards, errorServer }) {
         setSelectedRarity(rarity);
     };
 
-    const selectedCardIndex = filteredCards.findIndex(card => card.id === selectedCard?.id);
+    const selectedCardIndex = filteredCards?.findIndex(card => card.id === selectedCard?.id);
     // Gestionnaire de clic pour sélectionner une carte
     const handleCardClick = (card) => {
         setSelectedCard(card);
@@ -268,18 +286,6 @@ export default function Collection({ cards, errorServer }) {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [status, session, error, router]);
 
-    if (status === "loading" || loading) {
-        return (
-            <div className="flex flex-col h-screen" style={{ marginTop: "80px" }}>
-                <Header points={points} />
-                <div className="flex-grow flex justify-center items-center">
-                    <span className="text-center"><svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24"><path fill="#1f2937" d="M12,4a8,8,0,0,1,7.89,6.7A1.53,1.53,0,0,0,21.38,12h0a1.5,1.5,0,0,0,1.48-1.75,11,11,0,0,0-21.72,0A1.5,1.5,0,0,0,2.62,12h0a1.53,1.53,0,0,0,1.49-1.3A8,8,0,0,1,12,4Z"><animateTransform attributeName="transform" dur="0.75s" repeatCount="indefinite" type="rotate" values="0 12 12;360 12 12" /></path></svg></span>
-                </div>
-                <Footer />
-            </div>
-        )
-    }
-
     if (error) {
         return (
             <div className="flex flex-col h-screen" style={{ marginTop: "80px" }}>
@@ -290,6 +296,18 @@ export default function Collection({ cards, errorServer }) {
                 <Footer />
             </div>
         );
+    }
+
+    if (status === "loading" || loading) {
+        return (
+            <div className="flex flex-col h-screen" style={{ marginTop: "80px" }}>
+                <Header points={points} />
+                <div className="flex-grow flex justify-center items-center">
+                    <span className="text-center"><svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24"><path fill="#1f2937" d="M12,4a8,8,0,0,1,7.89,6.7A1.53,1.53,0,0,0,21.38,12h0a1.5,1.5,0,0,0,1.48-1.75,11,11,0,0,0-21.72,0A1.5,1.5,0,0,0,2.62,12h0a1.53,1.53,0,0,0,1.49-1.3A8,8,0,0,1,12,4Z"><animateTransform attributeName="transform" dur="0.75s" repeatCount="indefinite" type="rotate" values="0 12 12;360 12 12" /></path></svg></span>
+                </div>
+                <Footer />
+            </div>
+        )
     }
 
     if (session) {
@@ -311,16 +329,10 @@ export default function Collection({ cards, errorServer }) {
                         <button className="bg-gray-500 hover:bg-gray-700 font-bold py-2 px-4 rounded-full mx-1" onClick={() => handleRarityChange('Commune')}>Commune</button>
                         <button className="bg-blue-500 hover:bg-blue-700 font-bold py-2 px-4 rounded-full mx-1" onClick={() => handleRarityChange('Rare')}>Rare</button>
                         <button className="bg-teal-500 hover:bg-teal-700 font-bold py-2 px-4 rounded-full mx-1" onClick={() => handleRarityChange('Epique')}>Épique</button>
+                        <div>
+                        <Switch onSwitchChange={handleSwitchChange}/>
+                        </div>
                         <div className="m-4 font-bold">
-                            <label className="mr-2">
-                                <input
-                                    className="mr-2 leading-tight cursor-pointer"
-                                    type="checkbox"
-                                    checked={showOwnedOnly}
-                                    onChange={handleShowOwnedOnlyChange}
-                                />
-                                Cartes possédées
-                            </label>
                             <label>
                                 <input
                                     className="mr-2 leading-tight cursor-pointer"
@@ -328,7 +340,7 @@ export default function Collection({ cards, errorServer }) {
                                     checked={showLevelUpOnly}
                                     onChange={handleShowLevelUpOnlyChange}
                                 />
-                                Level Up possible
+                                Level Up
                             </label>
                         </div>
                     </div>
