@@ -65,6 +65,7 @@ export default function Owarida() {
     };
 
     useEffect(() => {
+        router.push('/')
 
         // Ajout de l'écouteur d'événement
         document.addEventListener("mousedown", handleClickOutside);

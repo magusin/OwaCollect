@@ -87,6 +87,7 @@ export default function Shop({ productsData, errorServer }) {
     };
 
     useEffect(() => {
+        router.push('/')
         if (error === 'Erreur avec votre Token ou il est expiré. Veuillez vous reconnecter.') {
             setTimeout(() => {
                 localStorage.removeItem('userOC');
