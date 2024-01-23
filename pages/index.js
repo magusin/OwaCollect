@@ -127,14 +127,7 @@ export default function Login() {
       <div className="flex flex-col content-center items-center h-screen">
         <Header />
         <div className="flex flex-col h-full w-full justify-center items-center" style={{ background: 'radial-gradient(circle, #CCCCCC, #0f171b)' }}>
-          <OwaGif />
-          <button
-            className="bg-blue-500 text-white font-bold py-2 px-4 rounded mt-12"
-            onClick={() => signIn('twitch')}
-
-          >
-            Se connecter avec Twitch
-          </button>
+          <p>Maintenance en cours</p>
         </div>
       </div>
     );
