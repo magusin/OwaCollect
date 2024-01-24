@@ -1,13 +1,26 @@
 import Cors from 'cors'
 import { PrismaClient } from '@prisma/client'
 import jwt from 'jsonwebtoken';
+import { getToken } from "next-auth/jwt";
+import verifySignature from '../../verifySignature';
+import calculatePoints from '../../calculatePoints';
 
 // Initialiser le midleware Cors
-const cors = Cors({
+const allowedOrigins = [process.env.NEXTAUTH_URL]
+const corsOptions = {
     methods: ['POST', 'HEAD'],
-})
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
+  };
 
-const prisma = new PrismaClient()
+const prisma = new PrismaClient();
+
+const corsMiddleware = Cors(corsOptions);
 
 // Gestion des erreurs
 function onError(err, res) {
@@ -33,22 +46,52 @@ async function runMiddleware(req, res, fn) {
     })
 }
 
-// GET /api/card/draw
+// POST /api/card/draw
 
 export default async function handler(req, res) {
     try {
+        const nextToken = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+
+        if (!nextToken) {
+            return res.status(400).json({ message: 'Utilisateur non authentifié' });
+        }
+        const signature = await verifySignature(req);
+        if (!signature) {
+            return res.status(400).json({ message: 'Signature invalide' });
+        }
     const token = req.headers.authorization?.split(' ')[1];
     if (!token) {
-        return res.status(401).json({ message: 'Token non fourni' });
+        return res.status(400).json({ message: 'Token non fourni' });
     }
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     if (!decoded) {
-        return res.status(401).json({ message: 'Token invalide ou expiré' });
+        return res.status(400).json({ message: 'Token invalide ou expiré' });
     }
-        await runMiddleware(req, res, cors)
+        await runMiddleware(req, res, corsMiddleware)
         switch (req.method) {
             case 'POST':
                 const { quantity, category, cost } = req.body;
+                if (typeof quantity !== 'number' || typeof category !== 'string' || typeof cost !== 'number') {
+                    return res.status(400).json({ message: 'Invalid input types' });
+                  }
+                if (quantity < 1 || quantity > 5) {
+                    return res.status(400).json({ message: 'Quantité invalide' });
+                }
+                if (quantity * 500 != cost) {
+                    return res.status(400).json({ message: 'Prix invalide' });
+                }
+                const user = await prisma.pets.findUnique({
+                    where: {
+                        userId: decoded.id
+                    }
+                });
+        
+                // Calculer les points disponibles
+                const availablePoints = await calculatePoints(user);
+                // Vérifier si l'utilisateur a assez de points
+                if (cost > availablePoints) {
+                    return res.status(400).json({ message: 'Pas assez de points' });
+                }
                 const cards = await prisma.card.findMany({
                     where: {
                         category: category,

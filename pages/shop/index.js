@@ -13,6 +13,8 @@ import CardsModal from 'C/cardsModal';
 import { getServerSession } from "next-auth";
 import nextAuthOptions from "../../config/nextAuthOptions";
 import Footer from 'C/footer';
+import axiosInstance from '@/utils/axiosInstance';
+
 
 export default function Shop({ productsData, errorServer }) {
     const { data: session, status } = useSession();
@@ -27,7 +29,7 @@ export default function Shop({ productsData, errorServer }) {
     const [showAlert, setShowAlert] = React.useState(false);
     const [alertMessage, setAlertMessage] = React.useState('');
     const [alertType, setAlertType] = React.useState(null);
-
+    
     const handleBuyPack = () => {
         setShowModal(true);
     };
@@ -38,12 +40,13 @@ export default function Shop({ productsData, errorServer }) {
         const totalPointsCost = selectedProduct.price * quantity;
         if (points >= totalPointsCost && session) {
             try {
-                const response = await axios.post(`/api/card/draw`, {quantity, category: selectedProduct.name, cost: totalPointsCost}, {
-                    headers: {
-                        'Content-Type': 'application/json',
-                        Authorization: `Bearer ${session.customJwt}`
-                    }
-                })
+                const response = await axiosInstance.post(`/api/card/draw`, {
+                     quantity, 
+                     category: selectedProduct.name, 
+                     cost: totalPointsCost 
+                    }, {
+                        customConfig: { session: session }
+                    });
 
                 // if response status is 200 then set cards in state and show modal
                 if (response.status === 200) {
@@ -64,14 +67,14 @@ export default function Shop({ productsData, errorServer }) {
                     }, 5000);
                 }
             } catch (error) {
-                if (error.response.status === 401) {
+                if (error.response?.status === 401) {
                     setError('Erreur avec votre Token ou il est expiré. Veuillez vous reconnecter.')
                     setTimeout(() => {
                         signOut()
                         router.push('/');
                     }, 3000);
                 } else {
-                    setError('Erreur lors du tirage des cartes');
+                    setError(error.response?.data?.message || error.message);
                 }
             } finally {
                 setLoading(false);
@@ -127,6 +130,7 @@ export default function Shop({ productsData, errorServer }) {
                     localStorage.setItem('points', totalPoints);
                     setPoints(totalPoints);
                 } catch (error) {
+                    
                     if (error.response.status === 401) {
                         setError('Erreur avec votre Token ou il est expiré. Veuillez vous reconnecter.')
                         setTimeout(() => {
@@ -155,6 +159,7 @@ export default function Shop({ productsData, errorServer }) {
     }
 
     if (error) {
+        console.log(error)
         return (
             <div className="flex flex-col h-screen" style={{ marginTop: "80px" }}>
                 <Header points={points} />
