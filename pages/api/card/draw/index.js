@@ -31,7 +31,7 @@ function onError(err, res) {
         return res.status(401).json({ message: 'Token expiré' });
     }
 
-    res.status(500).json({ error: err.message })
+    res.status(500).json({ message: err.message })
 }
 
 // Gestion des requêtes
@@ -102,18 +102,24 @@ export default async function handler(req, res) {
 
                 const selectRandomCard = () => {
                     let randomNum = Math.random() * totalDropRate;
-                    for (const card of cards) {
-                        if (randomNum - card.dropRate <= 0) {
-                            return card;
+                    let low = 0;
+                    let high = cards.length - 1;
+
+                    while (low <= high) {
+                        let mid = Math.floor((low + high) / 2);
+                        let midDropRate = cards[mid].dropRate;
+
+                        if (midDropRate < randomNum) {
+                            low = mid + 1;
+                        } else if (mid > 0 && cards[mid - 1].dropRate >= randomNum) {
+                            high = mid - 1;
+                        } else {
+                            return cards[mid];
                         }
                     }
                 };
 
-                const selectedCards = [];
-                for (let i = 0; i < 5 * quantity; i++) {
-                    const randomCard = selectRandomCard()
-                    selectedCards.push(randomCard);
-                }
+                const selectedCards = Array.from({ length: 5 * quantity }, () => selectRandomCard(totalDropRate));
 
                 const selectedCardsMap = selectedCards.reduce((acc, card) => {
                     if (!acc[card.id]) {
@@ -122,6 +128,22 @@ export default async function handler(req, res) {
                     acc[card.id].count += 1;
                     return acc;
                 }, {});
+
+
+                // let query = "INSERT INTO playercards (petId, cardId, count) VALUES ";
+                // const values = Object.values(selectedCardsMap).map(card => `(${decoded.id}, ${card.id}, ${card.count})`);
+                // query += values.join(", ");
+                // query += " ON DUPLICATE KEY UPDATE count = VALUES(count)";
+
+                // await prisma.$executeRawUnsafe(query);
+
+                await prisma.$transaction(async (prisma) => {
+                    for (const card of Object.values(selectedCardsMap)) {
+                        await prisma.$executeRaw`INSERT INTO playercards (petId, cardId, count)
+                            VALUES (${decoded.id}, ${card.id}, ${card.count})
+                            ON DUPLICATE KEY UPDATE count = count + ${card.count}`;
+                    }
+                });
 
                 // Déduire les points du joueur
                 const userData = await prisma.pets.update({
@@ -134,29 +156,6 @@ export default async function handler(req, res) {
                         }
                     }
                 });
-
-                const transactionPromises = Object.values(selectedCardsMap).map(card =>
-                    prisma.playercards.upsert({
-                        where: {
-                            petId_cardId: {
-                                petId: decoded.id,
-                                cardId: card.id
-                            }
-                        },
-                        update: {
-                            count: {
-                                increment: card.count
-                            }
-                        },
-                        create: {
-                            petId: decoded.id,
-                            cardId: card.id,
-                            count: card.count
-                        }
-                    })
-                );
-
-                await prisma.$transaction(transactionPromises);
 
                 res.status(200).json({ selectedCards, userData })
                 break

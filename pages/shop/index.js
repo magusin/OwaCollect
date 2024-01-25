@@ -73,7 +73,7 @@ export default function Shop({ productsData, errorServer }) {
                         router.push('/');
                     }, 3000);
                 } else {
-                    setError('Erreur lors de l\'achat' + error.response?.data?.message || error.message);
+                    setError('Erreur lors de l\'achat ' + error.response?.data?.message || error.message);;
                 }
             } finally {
                 setLoading(false);
