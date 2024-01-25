@@ -2,19 +2,21 @@ import Cors from 'cors'
 import { PrismaClient } from '@prisma/client'
 import jwt from 'jsonwebtoken';
 import { getToken } from "next-auth/jwt";
+import verifySignature from '../../verifySignature';
+import calculatePoints from '../../calculatePoints';
 
 // Initialiser le midleware Cors
 const allowedOrigins = [process.env.NEXTAUTH_URL]
 const corsOptions = {
-    methods: ['POST', 'HEAD'],
+    methods: ['GET', 'HEAD'],
     origin: (origin, callback) => {
-      if (!origin || allowedOrigins.indexOf(origin) !== -1) {
-        callback(null, true);
-      } else {
-        callback(new Error('Not allowed by CORS'));
-      }
+        if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
     },
-  };
+};
 
 const prisma = new PrismaClient();
 
@@ -80,6 +82,10 @@ export default async function handler(req, res) {
                 res.status(200).json({ cards, playerCards });
                 break
             case 'PUT':
+                const signature = await verifySignature(req);
+                if (!signature) {
+                    return res.status(400).json({ message: 'Signature invalide' });
+                }
                 const { id, cost } = req.body;
                 if (!id) {
                     return res.status(400).json({ message: 'Id de la carte non fourni' });
@@ -87,6 +93,47 @@ export default async function handler(req, res) {
 
                 if (!cost) {
                     return res.status(400).json({ message: 'Coût de l\'oppération non fourni' });
+                }
+
+                if (typeof id !== 'number' || typeof cost !== 'number') {
+                    return res.status(400).json({ message: 'Invalid input types' });
+                }
+
+                const card = await prisma.playercards.findUnique({
+                    where: {
+                        petId_cardId: {
+                            petId: decoded.id,
+                            cardId: id
+                        }
+                    },
+                    include: {
+                        card: true
+                    }
+                });
+
+                if (!card.card.evolveCost) {
+                    return res.status(400).json({ message: 'Cette carte ne peut pas level Up' });
+                }
+
+                if (card.count < 3) {
+                    return res.status(400).json({ message: 'Vous n\'avez pas assez de cartes' });
+                }
+
+                if (card.card.evolveCost != cost) {
+                    return res.status(400).json({ message: 'Coût invalide' });
+                }
+
+                const user = await prisma.pets.findUnique({
+                    where: {
+                        userId: decoded.id
+                    }
+                });
+
+                // Calculer les points disponibles
+                const availablePoints = await calculatePoints(user);
+                // Vérifier si l'utilisateur a assez de points
+                if (cost > availablePoints) {
+                    return res.status(400).json({ message: 'Pas assez de points' });
                 }
 
                 // Réduire le count de la carte actuelle de 2

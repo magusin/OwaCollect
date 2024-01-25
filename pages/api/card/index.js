@@ -4,11 +4,21 @@ import jwt from 'jsonwebtoken';
 import { getToken } from "next-auth/jwt";
 
 // Initialiser le midleware Cors
-const cors = Cors({
-    methods: ['GET', 'HEAD'],
-})
+const allowedOrigins = [process.env.NEXTAUTH_URL]
+const corsOptions = {
+    methods: ['POST', 'HEAD'],
+    origin: (origin, callback) => {
+        if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
+};
 
 const prisma = new PrismaClient()
+
+const corsMiddleware = Cors(corsOptions);
 
 // Gestion des erreurs
 function onError(err, res) {
@@ -50,7 +60,7 @@ export default async function handler(req, res) {
         if (!decoded) {
             return res.status(401).json({ message: 'Token invalide ou expiré' });
         }
-        await runMiddleware(req, res, cors)
+        await runMiddleware(req, res, corsMiddleware)
         switch (req.method) {
             case 'GET':
                 const cards = await prisma.card.findMany()

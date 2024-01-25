@@ -4,10 +4,10 @@ import { signOut, useSession } from 'next-auth/react';
 import { useRouter } from 'next/router';
 import Header from 'C/header';
 import Image from 'next/legacy/image';
-import axios from 'axios';
 import calculatePoints from "@/utils/calculatePoints";
 import { useDarkMode } from "@/contexts/darkModeContext";
 import Footer from "C/footer";
+import axiosInstance from "@/utils/axiosInstance";
 
 export default function Owarida() {
     const [error, setError] = React.useState(null);
@@ -24,10 +24,8 @@ export default function Owarida() {
     const handleSubmit = async () => {
         setLoading(true);
         try {
-            const response = await axios.post('/api/verifyCode', { code }, {
-                headers: {
-                    Authorization: `Bearer ${session.customJwt}`,
-                },
+            const response = await axiosInstance.post('/api/verifyCode', { code }, {
+                customConfig: { session: session }
             });
            
             if (response.data.success) {
@@ -45,7 +43,7 @@ export default function Owarida() {
                     router.push('/');
                 }, 3000);
             } else {
-                setError('Erreur lors de la validation. ' + error);
+                setError('Erreur lors de la validation. ' + error.response?.data?.message || error.message);
             }
         } finally {
             setLoading(false);
@@ -97,10 +95,8 @@ export default function Owarida() {
         if (localStorage.getItem('userOC') === null && session) {
             const getUser = async () => {
                 try {
-                    const response = await axios.get('/api/user', {
-                        headers: {
-                            Authorization: `Bearer ${session.customJwt}`,
-                        },
+                    const response = await axiosInstance.get('/api/user', {
+                        customConfig: { session: session }
                     });
                     const data = await response.data;
                     localStorage.setItem('userOC', JSON.stringify(data));
@@ -116,7 +112,7 @@ export default function Owarida() {
                             router.push('/');
                         }, 2000);
                     } else {
-                        setError(error);
+                        setError(error.response?.data?.message || error.message);
                     }
                 }
             };

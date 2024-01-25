@@ -1,13 +1,25 @@
 import Cors from 'cors'
 import { PrismaClient } from '@prisma/client'
 import jwt from 'jsonwebtoken';
+import { getToken } from "next-auth/jwt";
+import verifySignature from '../../../verifySignature';
 
 // Initialiser le midleware Cors
-const cors = Cors({
+const allowedOrigins = [process.env.NEXTAUTH_URL]
+const corsOptions = {
     methods: ['PUT', 'HEAD'],
-})
+    origin: (origin, callback) => {
+        if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
+};
 
-const prisma = new PrismaClient()
+const prisma = new PrismaClient();
+
+const corsMiddleware = Cors(corsOptions);
 
 // Gestion des erreurs
 function onError(err, res) {
@@ -36,6 +48,15 @@ async function runMiddleware(req, res, fn) {
 // PUT /api/user/card/sell
 export default async function handler(req, res) {
     try {
+        const nextToken = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+
+        if (!nextToken) {
+            return res.status(400).json({ message: 'Utilisateur non authentifié' });
+        }
+        const signature = await verifySignature(req);
+        if (!signature) {
+            return res.status(400).json({ message: 'Signature invalide' });
+        }
         const token = req.headers.authorization?.split(' ')[1];
         if (!token) {
             return res.status(401).json({ message: 'Token non fourni' });
@@ -44,7 +65,7 @@ export default async function handler(req, res) {
         if (!decoded) {
             return res.status(401).json({ message: 'Token invalide' });
         }
-        await runMiddleware(req, res, cors)
+        await runMiddleware(req, res, corsMiddleware)
         switch (req.method) {
             case 'PUT':
                 const { id, quantity, amount } = req.body;
@@ -58,6 +79,54 @@ export default async function handler(req, res) {
 
                 if (!amount) {
                     return res.status(400).json({ message: 'Montant pour l\'oppération non fourni' });
+                }
+
+                if (typeof quantity !== 'number' || typeof amount !== 'number' || typeof id !== 'number') {
+                    return res.status(400).json({ message: 'Invalid input types' });
+                }
+
+                // Récupérer la carte actuelle
+                const currentCard = await prisma.playercards.findUnique({
+                    where: {
+                        petId_cardId: {
+                            petId: decoded.id,
+                            cardId: id
+                        }
+                    },
+                    include: {
+                        card: true
+                    }
+                });
+
+                if (!currentCard) {
+                    return res.status(400).json({ message: 'Carte non trouvée' });
+                }
+
+                if (currentCard.count <= quantity) {
+                    return res.status(400).json({ message: 'Quantité invalide' });
+                }
+
+                let price;
+
+                switch (currentCard.card.rarety) {
+                    case "Commune":
+                        price = 30;
+                        break;
+                    case "Rare":
+                        price = 70;
+                        break;
+                    case "Epique":
+                        price = 150;
+                        break;
+                    default:
+                        // Gérer le cas où la rareté n'est pas reconnue
+                        return res.status(400).json({ message: 'Rareté de la carte non reconnue' });
+                }
+
+                const totalExpectedCost = quantity * price;
+
+                if (totalExpectedCost !== amount) {
+                    return res.status(400).json({ message: 'Le coût fourni ne correspond pas au coût attendu' });
                 }
 
                 // Réduire le count de la carte actuelle
@@ -99,7 +168,7 @@ export default async function handler(req, res) {
 
                 res.status(200).json({ allPlayerCards, userData });
                 break
-            
+
             default:
                 res.status(405).end(`Method ${req.method} Not Allowed`)
         }

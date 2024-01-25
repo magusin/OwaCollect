@@ -78,7 +78,7 @@ export default function SecretShop({ cards, errorServer }) {
                         router.push('/');
                     }, 3000);
                 } else {
-                    setError(error.response?.data?.message || error.message);
+                    setError('Erreur lors de l\'achat. ' + error.response?.data?.message || error.message);
                 }
             } finally {
                 setLoading(false);
@@ -124,10 +124,8 @@ export default function SecretShop({ cards, errorServer }) {
         if (localStorage.getItem('userOC') === null && session) {
             const getUser = async () => {
                 try {
-                    const response = await axios.get('/api/user', {
-                        headers: {
-                            Authorization: `Bearer ${session.customJwt}`,
-                        },
+                    const response = await axiosInstance.get('/api/user', {
+                        customConfig: { session: session }
                     });
                     const data = await response.data;
                     localStorage.setItem('userOC', JSON.stringify(data));
@@ -143,7 +141,7 @@ export default function SecretShop({ cards, errorServer }) {
                             router.push('/');
                         }, 2000);
                     } else {
-                        setError(error);
+                        setError(error.response?.data?.message || error.message);
                     }
                 }
             };

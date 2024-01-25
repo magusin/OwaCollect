@@ -12,6 +12,7 @@ import Modal from "C/modal";
 import Alert from "C/alert";
 import Footer from "@/components/footer";
 import Switch from "@/components/filterToggleSVG";
+import axiosInstance from "@/utils/axiosInstance";
 
 export default function Collection({ cards, errorServer }) {
     const [error, setError] = React.useState(errorServer || null);
@@ -61,12 +62,10 @@ export default function Collection({ cards, errorServer }) {
         const amount = costPerCard * quantity;
 
         try {
-            const response = await axios.put('/api/user/card/sell', { id: selectedCard.id, quantity: quantity, amount: amount }, {
-                headers: {
-                    Authorization: `Bearer ${session.customJwt}`,
-                    'Content-Type': 'application/json'
-                },
+            const response = await axiosInstance.put('/api/user/card/sell', { id: selectedCard.id, quantity: quantity, amount: amount }, {
+                customConfig: { session: session }
             });
+
             if (response.status === 200) {
                 const data = await response.data;
                 localStorage.setItem('userOC', JSON.stringify(data.userData));
@@ -93,7 +92,7 @@ export default function Collection({ cards, errorServer }) {
                     router.push('/');
                 }, 3000);
             } else {
-                setError('Erreur lors de la vente. ' + error);
+                setError('Erreur lors de la vente. ' + error.response?.data?.message || error.message);
             }
         } finally {
             setLoading(false);
@@ -126,11 +125,8 @@ export default function Collection({ cards, errorServer }) {
         setShowModal(false);
         if (points >= selectedCard.evolveCost) {
             try {
-                const response = await axios.put('/api/user/card', { id: selectedCard.id, cost: selectedCard.evolveCost }, {
-                    headers: {
-                        Authorization: `Bearer ${session.customJwt}`,
-                        'Content-Type': 'application/json'
-                    },
+                const response = await axiosInstance.put('/api/user/card', { id: selectedCard.id, cost: selectedCard.evolveCost }, {
+                    customConfig: { session: session }
                 });
                 if (response.status === 200) {
                     const data = await response.data;
@@ -167,7 +163,7 @@ export default function Collection({ cards, errorServer }) {
                         router.push('/');
                     }, 3000);
                 } else {
-                    setError('Erreur lors du levelUp de la carte. ' + error);
+                    setError('Erreur lors du levelUp de la carte. ' + error.response?.data?.message || error.message);
                 }
             } finally {
                 setLoading(false);
@@ -257,10 +253,8 @@ export default function Collection({ cards, errorServer }) {
         if (localStorage.getItem('userOC') === null && session) {
             const getUser = async () => {
                 try {
-                    const response = await axios.get('/api/user', {
-                        headers: {
-                            Authorization: `Bearer ${session.customJwt}`,
-                        },
+                    const response = await axiosInstance.get('/api/user', {
+                        customConfig: { session: session }
                     });
                     const data = await response.data;
                     localStorage.setItem('userOC', JSON.stringify(data));
@@ -276,7 +270,7 @@ export default function Collection({ cards, errorServer }) {
                             router.push('/');
                         }, 2000);
                     } else {
-                        setError(error);
+                        setError(error.response?.data?.message || error.message);
                     }
                 }
             };
@@ -502,6 +496,7 @@ export async function getServerSideProps(context) {
             headers: {
                 'Content-Type': 'application/json',
                 Authorization: `Bearer ${session.customJwt}`,
+                cookie: context.req.headers.cookie
             }
         })
         const cards = await response.data;

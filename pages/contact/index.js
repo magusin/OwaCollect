@@ -4,8 +4,8 @@ import { signOut, useSession } from 'next-auth/react';
 import Header from 'C/header';
 import Footer from 'C/footer';
 import { useEffect } from 'react';
-import axios from 'axios';
 import calculatePoints from '@/utils/calculatePoints';
+import axiosInstance from "@/utils/axiosInstance";
 
 export default function Contact() {
     const { data: session, status } = useSession();
@@ -31,10 +31,8 @@ export default function Contact() {
         if (localStorage.getItem('userOC') === null && session) {
             const getUser = async () => {
                 try {
-                    const response = await axios.get('/api/user', {
-                        headers: {
-                            Authorization: `Bearer ${session.customJwt}`,
-                        },
+                    const response = await axiosInstance.get('/api/user', {
+                        customConfig: { session: session }
                     });
                     const data = await response.data;
                     localStorage.setItem('userOC', JSON.stringify(data));
@@ -50,7 +48,7 @@ export default function Contact() {
                             router.push('/');
                         }, 2000);
                     } else {
-                        setError(error);
+                        setError(error.response?.data?.message || error.message);
                     }
                 }
             };

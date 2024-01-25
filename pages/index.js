@@ -10,6 +10,7 @@ import TwitchUserInfo from "C/twitchUserInfo";
 import Image from "next/legacy/image";
 import { useDarkMode } from "@/contexts/darkModeContext";
 import Footer from "C/footer";
+import axiosInstance from "@/utils/axiosInstance";
 
 export default function Login() {
   const { data: session, status } = useSession();
@@ -27,10 +28,8 @@ export default function Login() {
       //  add flag if create user for cancel multiple call
       const getUser = async () => {
         try {
-          const response = await axios.get(`/api/user`, {
-            headers: {
-              Authorization: `Bearer ${session.customJwt}`,
-            },
+          const response = await axiosInstance.get(`/api/user`, {
+              customConfig: { session: session }
           });
           const data = await response.data;
           localStorage.setItem('userOC', JSON.stringify(data));
@@ -46,7 +45,7 @@ export default function Login() {
               router.push('/');
             }, 2000);
           } else {
-            setError('Erreur lors de la récupération des données utilisateur. ' + error);
+            setError('Erreur lors de la récupération des données utilisateur. ' + error.response?.data?.message || error.message);
           }
         } finally {
           setLoading(false);

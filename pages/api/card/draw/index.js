@@ -10,13 +10,13 @@ const allowedOrigins = [process.env.NEXTAUTH_URL]
 const corsOptions = {
     methods: ['POST', 'HEAD'],
     origin: (origin, callback) => {
-      if (!origin || allowedOrigins.indexOf(origin) !== -1) {
-        callback(null, true);
-      } else {
-        callback(new Error('Not allowed by CORS'));
-      }
+        if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
     },
-  };
+};
 
 const prisma = new PrismaClient();
 
@@ -30,7 +30,7 @@ function onError(err, res) {
     if (err.name === 'TokenExpiredError') {
         return res.status(401).json({ message: 'Token expiré' });
     }
-    
+
     res.status(500).json({ error: err.message })
 }
 
@@ -53,27 +53,27 @@ export default async function handler(req, res) {
         const nextToken = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
 
         if (!nextToken) {
-            return res.status(400).json({ message: 'Utilisateur non authentifié' });
+            return res.status(401).json({ message: 'Utilisateur non authentifié' });
         }
         const signature = await verifySignature(req);
         if (!signature) {
             return res.status(400).json({ message: 'Signature invalide' });
         }
-    const token = req.headers.authorization?.split(' ')[1];
-    if (!token) {
-        return res.status(400).json({ message: 'Token non fourni' });
-    }
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    if (!decoded) {
-        return res.status(400).json({ message: 'Token invalide ou expiré' });
-    }
+        const token = req.headers.authorization?.split(' ')[1];
+        if (!token) {
+            return res.status(401).json({ message: 'Token non fourni' });
+        }
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        if (!decoded) {
+            return res.status(401).json({ message: 'Token invalide ou expiré' });
+        }
         await runMiddleware(req, res, corsMiddleware)
         switch (req.method) {
             case 'POST':
                 const { quantity, category, cost } = req.body;
                 if (typeof quantity !== 'number' || typeof category !== 'string' || typeof cost !== 'number') {
                     return res.status(400).json({ message: 'Invalid input types' });
-                  }
+                }
                 if (quantity < 1 || quantity > 5) {
                     return res.status(400).json({ message: 'Quantité invalide' });
                 }
@@ -85,7 +85,7 @@ export default async function handler(req, res) {
                         userId: decoded.id
                     }
                 });
-        
+
                 // Calculer les points disponibles
                 const availablePoints = await calculatePoints(user);
                 // Vérifier si l'utilisateur a assez de points
@@ -134,8 +134,8 @@ export default async function handler(req, res) {
                         }
                     }
                 });
-                
-                const transactionPromises = Object.values(selectedCardsMap).map(card => 
+
+                const transactionPromises = Object.values(selectedCardsMap).map(card =>
                     prisma.playercards.upsert({
                         where: {
                             petId_cardId: {
@@ -155,10 +155,10 @@ export default async function handler(req, res) {
                         }
                     })
                 );
-                
+
                 await prisma.$transaction(transactionPromises);
 
-                res.status(200).json({selectedCards, userData})
+                res.status(200).json({ selectedCards, userData })
                 break
             default:
                 res.status(405).end(`Method ${req.method} Not Allowed`)
