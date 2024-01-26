@@ -1,13 +1,26 @@
 import Cors from 'cors'
 import { PrismaClient } from '@prisma/client'
 import jwt from 'jsonwebtoken';
+import { getToken } from "next-auth/jwt";
+import verifySignature from '../../verifySignature';
+import calculatePoints from '../../calculatePoints';
 
 // Initialiser le midleware Cors
-const cors = Cors({
-    methods: ['GET', 'PUT', 'HEAD'],
-})
+const allowedOrigins = [process.env.NEXTAUTH_URL]
+const corsOptions = {
+    methods: ['GET', 'HEAD'],
+    origin: (origin, callback) => {
+        if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
+};
 
-const prisma = new PrismaClient()
+const prisma = new PrismaClient();
+
+const corsMiddleware = Cors(corsOptions);
 
 // Gestion des erreurs
 function onError(err, res) {
@@ -33,9 +46,14 @@ async function runMiddleware(req, res, fn) {
     })
 }
 
-// GET /api/product
+// GET /api/user/card
 export default async function handler(req, res) {
     try {
+        const nextToken = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+
+        if (!nextToken) {
+            return res.status(400).json({ message: 'Utilisateur non authentifié' });
+        }
         const token = req.headers.authorization?.split(' ')[1];
         if (!token) {
             return res.status(401).json({ message: 'Token non fourni' });
@@ -44,9 +62,10 @@ export default async function handler(req, res) {
         if (!decoded) {
             return res.status(401).json({ message: 'Token invalide' });
         }
-        await runMiddleware(req, res, cors)
+        await runMiddleware(req, res, corsMiddleware)
         switch (req.method) {
             case 'GET':
+                // Récupérer toutes les cartes
                 const cards = await prisma.card.findMany()
 
                 // Récupérer les cartes du joueur
@@ -63,6 +82,10 @@ export default async function handler(req, res) {
                 res.status(200).json({ cards, playerCards });
                 break
             case 'PUT':
+                const signature = await verifySignature(req);
+                if (!signature) {
+                    return res.status(400).json({ message: 'Signature invalide' });
+                }
                 const { id, cost } = req.body;
                 if (!id) {
                     return res.status(400).json({ message: 'Id de la carte non fourni' });
@@ -70,6 +93,47 @@ export default async function handler(req, res) {
 
                 if (!cost) {
                     return res.status(400).json({ message: 'Coût de l\'oppération non fourni' });
+                }
+
+                if (typeof id !== 'number' || typeof cost !== 'number') {
+                    return res.status(400).json({ message: 'Invalid input types' });
+                }
+
+                const card = await prisma.playercards.findUnique({
+                    where: {
+                        petId_cardId: {
+                            petId: decoded.id,
+                            cardId: id
+                        }
+                    },
+                    include: {
+                        card: true
+                    }
+                });
+
+                if (!card.card.evolveCost) {
+                    return res.status(400).json({ message: 'Cette carte ne peut pas level Up' });
+                }
+
+                if (card.count < 3) {
+                    return res.status(400).json({ message: 'Vous n\'avez pas assez de cartes' });
+                }
+
+                if (card.card.evolveCost != cost) {
+                    return res.status(400).json({ message: 'Coût invalide' });
+                }
+
+                const user = await prisma.pets.findUnique({
+                    where: {
+                        userId: decoded.id
+                    }
+                });
+
+                // Calculer les points disponibles
+                const availablePoints = await calculatePoints(user);
+                // Vérifier si l'utilisateur a assez de points
+                if (cost > availablePoints) {
+                    return res.status(400).json({ message: 'Pas assez de points' });
                 }
 
                 // Réduire le count de la carte actuelle de 2

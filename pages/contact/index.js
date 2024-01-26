@@ -5,6 +5,7 @@ import Header from 'C/header';
 import Footer from 'C/footer';
 import { useEffect } from 'react';
 import calculatePoints from '@/utils/calculatePoints';
+import axiosInstance from "@/utils/axiosInstance";
 
 export default function Contact() {
     const { data: session, status } = useSession();
@@ -30,10 +31,8 @@ export default function Contact() {
         if (localStorage.getItem('userOC') === null && session) {
             const getUser = async () => {
                 try {
-                    const response = await axios.get('/api/user', {
-                        headers: {
-                            Authorization: `Bearer ${session.customJwt}`,
-                        },
+                    const response = await axiosInstance.get('/api/user', {
+                        customConfig: { session: session }
                     });
                     const data = await response.data;
                     localStorage.setItem('userOC', JSON.stringify(data));
@@ -49,7 +48,7 @@ export default function Contact() {
                             router.push('/');
                         }, 2000);
                     } else {
-                        setError(error);
+                        setError(error.response?.data?.message || error.message);
                     }
                 }
             };
@@ -71,10 +70,9 @@ export default function Contact() {
 
     if (session) {
         return (
-            <>
-            <div className="flex flex-col min-h-screen" style={{ marginTop: "80px" }}>
+            <div className="flex flex-col min-h-screen">
                 <Header points={points} />
-                <div className="p-4 md:px-8 xl:px-12">
+                <div className="flex-grow p-4 md:px-8 xl:px-12" style={{ marginTop: "80px" }}>
                     <h1 className='pb-4 text-center font-bold text-2xl'>Owarida</h1>
                     <section>
                         <div className="flex justify-center items-center">
@@ -99,9 +97,8 @@ export default function Contact() {
                     </div>
                     </section>
                 </div>
-            </div>
                 <Footer />
-                </>
+            </div>
         )
     }
 

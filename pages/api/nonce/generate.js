@@ -1,22 +1,23 @@
 import Cors from 'cors'
 import { PrismaClient } from '@prisma/client'
 import jwt from 'jsonwebtoken';
-import { getToken } from "next-auth/jwt";
+import { randomBytes } from 'crypto';
 
 // Initialiser le midleware Cors
-const allowedOrigins = [process.env.NEXTAUTH_URL]
+const allowedOrigins = [process.env.BASE_URL]
+
 const corsOptions = {
     methods: ['GET', 'HEAD'],
     origin: (origin, callback) => {
-        if (!origin || allowedOrigins.indexOf(origin) !== -1) {
-            callback(null, true);
-        } else {
-            callback(new Error('Not allowed by CORS'));
-        }
+      if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
     },
-};
+  };
 
-const prisma = new PrismaClient()
+const prisma = new PrismaClient();
 
 const corsMiddleware = Cors(corsOptions);
 
@@ -47,11 +48,6 @@ async function runMiddleware(req, res, fn) {
 // GET /api/product
 export default async function handler(req, res) {
     try {
-        const nextToken = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
-
-        if (!nextToken) {
-            return res.status(401).json({ message: 'Utilisateur non authentifié' });
-        }
         const token = req.headers.authorization?.split(' ')[1];
         if (!token) {
             return res.status(401).json({ message: 'Token non fourni' });
@@ -63,8 +59,10 @@ export default async function handler(req, res) {
         await runMiddleware(req, res, corsMiddleware)
         switch (req.method) {
             case 'GET':
-                const products = await prisma.product.findMany()
-                res.status(200).json(products)
+            const nonce = randomBytes(16).toString('hex');
+                
+
+                res.status(200).json({ nonce });
                 break
             default:
                 res.status(405).end(`Method ${req.method} Not Allowed`)

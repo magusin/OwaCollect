@@ -12,6 +12,7 @@ import { useDarkMode } from "@/contexts/darkModeContext";
 import Alert from "C/alert";
 import Modal from "C/modal";
 import Footer from "C/footer";
+import axiosInstance from "@/utils/axiosInstance";
 
 export default function SecretShop({ cards, errorServer }) {
     const [error, setError] = React.useState(errorServer || null);
@@ -27,23 +28,30 @@ export default function SecretShop({ cards, errorServer }) {
     const [showAlert, setShowAlert] = React.useState(false);
     const [alertType, setAlertType] = React.useState(null);
     const [showModal, setShowModal] = React.useState(false);
+    const [selectedCard, setSelectedCard] = React.useState(null);
+    const [cardToBuy, setCardToBuy] = React.useState(null);
 
-    const handleBuyCard = () => {
+    const handleBuyCard = (cardId) => {
+        // Mise à jour de l'état pour la carte sélectionnée
+        setCardToBuy(cardId);
         setShowModal(true);
-    }
+    };
+
+    // Pour fermer la vue agrandie
+    const closeEnlargeView = () => {
+        setSelectedCard(null);
+    };
 
     const handleConfirmBuyCard = async (id, cost) => {
         setLoading(true);
         setShowModal(false);
         if (points >= cost) {
-
             try {
-                const response = await axios.put('/api/user/card/buy', { id, cost }, {
-                    headers: {
-                        Authorization: `Bearer ${session.customJwt}`,
-                        'Content-Type': 'application/json'
-                    },
-                });
+                const response = await axiosInstance.put('/api/user/card/buy', { 
+                    id, 
+                    cost }, {
+                        customConfig: { session: session }
+                    });
                 if (response.status === 200) {
                     const data = await response.data
                     localStorage.setItem('userOC', JSON.stringify(data.userData));
@@ -57,17 +65,20 @@ export default function SecretShop({ cards, errorServer }) {
                     setTimeout(() => {
                         setShowAlert(false);
                     }, 5000);
+
+                    let selectedCard = data.allPlayerCards.find(card => card.card.id === data.updatedCard.cardId);
+                    setSelectedCard(selectedCard.card)  
                 }
 
             } catch (error) {
-                if (error.response.status === 401) {
+                if (error.response?.status === 401) {
                     setError('Erreur avec votre Token ou il est expiré. Veuillez vous reconnecter.')
                     setTimeout(() => {
                         signOut()
                         router.push('/');
                     }, 3000);
                 } else {
-                    setError('Erreur lors de l\'achat. ' + error);
+                    setError('Erreur lors de l\'achat. ' + error.response?.data?.message || error.message);
                 }
             } finally {
                 setLoading(false);
@@ -113,10 +124,8 @@ export default function SecretShop({ cards, errorServer }) {
         if (localStorage.getItem('userOC') === null && session) {
             const getUser = async () => {
                 try {
-                    const response = await axios.get('/api/user', {
-                        headers: {
-                            Authorization: `Bearer ${session.customJwt}`,
-                        },
+                    const response = await axiosInstance.get('/api/user', {
+                        customConfig: { session: session }
                     });
                     const data = await response.data;
                     localStorage.setItem('userOC', JSON.stringify(data));
@@ -132,7 +141,7 @@ export default function SecretShop({ cards, errorServer }) {
                             router.push('/');
                         }, 2000);
                     } else {
-                        setError(error);
+                        setError(error.response?.data?.message || error.message);
                     }
                 }
             };
@@ -173,9 +182,9 @@ export default function SecretShop({ cards, errorServer }) {
             const secretCardsToBuy = [74, 99, 100].filter(id => !ownedCardIds.has(id));
             return (
                 <>
-                <div className="flex flex-col h-screen" style={{ marginTop: "80px" }}>
+                <div className="flex flex-col h-screen" >
                     <Header points={points} />
-                    <div className="mt-4 flex flex-col items-center">
+                    <div className="flex-grow mt-4 flex flex-col items-center" style={{ marginTop: "80px" }}>
                         <Image
                             src="/images/salesman.png"
                             alt="salesman"
@@ -184,26 +193,26 @@ export default function SecretShop({ cards, errorServer }) {
                             height={525}
                         />
                     </div>
-                    <div className="mt-4 flex flex-wrap justify-center">
+                    <div className="flex-grow mt-4 flex flex-wrap justify-center">
                         {secretCardsToBuy.map(cardId => (
                             <div key={cardId} className={`p-4 border-2 ${darkMode ? 'border-white' : 'border-black'} rounded-lg m-2 text-center max-w-xs md:max-w-sm lg:max-w-md xl:max-w-lg`}>
                                 <h3 className="font-bold mb-4">Carte {cardId}</h3>
-                                <p className="mb-4">Prix: 2500 <b>OC</b></p>
+                                <p className="mb-4">Prix: <b>500 OC</b></p>
                                 <button
                                     className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700 transition duration-300"
-                                    onClick={() => handleBuyCard()}
+                                    onClick={() => handleBuyCard(cardId)}
                                 >
                                     Acheter
                                 </button>
                                 {showModal && (
                                     <Modal
                                         setShowModal={setShowModal}
-                                        handleConfirm={() => handleConfirmBuyCard(cardId, 2500)}
+                                        handleConfirm={() => handleConfirmBuyCard(cardToBuy, 500)}
                                         title="Confirmation d'achat"
                                         message={
                                             <>
                                                 {/* eslint-disable-next-line react/no-unescaped-entities */}
-                                                Êtes-vous sûr de vouloir acheter la carte {cardId} pour 2500 <b>OC</b> ?
+                                                Êtes-vous sûr de vouloir acheter la carte {cardToBuy} pour <b>500 OC</b> ?
                                             </>
                                         }
                                     />
@@ -211,6 +220,30 @@ export default function SecretShop({ cards, errorServer }) {
                             </div>
                         ))}
                     </div>
+                    {selectedCard && (
+                        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 px-4 py-6 overflow-y-auto h-full w-full">
+                        <div className="flex flex-wrap flex-row p-4 h-full w-full items-center justify-center md:flex-col">
+                            {/* Image card */}
+                            <div className="relative h-full" style={{ width: '100%', maxWidth: '100vh' }}>
+                                <div className="aspect-w-1 aspect-h-1 ">
+                                    <Image
+                                        priority={true}
+                                        src={`${selectedCard.picture}.png`}
+                                        alt={'Dos de la carte ' + selectedCard.id}
+                                        layout="fill"
+                                        objectFit="contain"
+                                        sizes="100%"
+                                    />
+                                </div>
+                            </div>
+                            
+                            {/* Button close */}
+                            <button onClick={closeEnlargeView} className="w-full sm:w-auto bg-red-500 text-white py-2 px-4 rounded mt-4 sm:mt-0 sm:absolute sm:top-2 sm:right-2">
+                                Fermer
+                            </button>
+                        </div>
+                    </div>
+                    )}
                     {showAlert && (
                         <Alert
                         type={alertType}
@@ -218,8 +251,8 @@ export default function SecretShop({ cards, errorServer }) {
                         close={setShowAlert}
                         />
                         )}
-                </div>
                         <Footer />
+                </div>
                         </>
             );
         } else {
@@ -227,7 +260,7 @@ export default function SecretShop({ cards, errorServer }) {
                 <>
                 <div className="flex flex-col h-screen">
                     <Header points={points} />
-                    <div className="flex-grow flex items-start justify-center" >
+                    <div className="flex-grow items-start justify-center" >
                         <div className="w-full h-screen">
                             <Image
                                 src="/images/closed.png"
@@ -239,8 +272,8 @@ export default function SecretShop({ cards, errorServer }) {
                             />
                         </div>
                     </div>
-                </div>
                     <Footer />
+                </div>
                     </>
             );
         }
@@ -260,11 +293,13 @@ export async function getServerSideProps(context) {
         };
     }
 
+    
     try {
         const response = await axios.get(`${process.env.NEXTAUTH_URL}/api/user/card`, {
             headers: {
                 'Content-Type': 'application/json',
                 Authorization: `Bearer ${session.customJwt}`,
+                cookie: context.req.headers.cookie
             }
         })
         const cards = await response.data;
@@ -272,7 +307,7 @@ export async function getServerSideProps(context) {
             props: { cards },
         };
     } catch (error) {
-        if (error.response.status === 401) {
+        if (error.response && error.response.status === 401) {
             return {
                 props: { errorServer: 'Erreur avec votre Token ou il est expiré. Veuillez vous reconnecter.' },
             };

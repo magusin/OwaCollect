@@ -13,6 +13,8 @@ import CardsModal from 'C/cardsModal';
 import { getServerSession } from "next-auth";
 import nextAuthOptions from "../../config/nextAuthOptions";
 import Footer from 'C/footer';
+import axiosInstance from '@/utils/axiosInstance';
+
 
 export default function Shop({ productsData, errorServer }) {
     const { data: session, status } = useSession();
@@ -27,22 +29,24 @@ export default function Shop({ productsData, errorServer }) {
     const [showAlert, setShowAlert] = React.useState(false);
     const [alertMessage, setAlertMessage] = React.useState('');
     const [alertType, setAlertType] = React.useState(null);
-
+    
     const handleBuyPack = () => {
         setShowModal(true);
     };
 
-    const handleConfirmPurchase = async (selectedProduct) => {
+    const handleConfirmPurchase = async (selectedProduct, quantity) => {
         setLoading(true);
         setShowModal(false);
-        if (points >= selectedProduct.price && session) {
+        const totalPointsCost = selectedProduct.price * quantity;
+        if (points >= totalPointsCost && session) {
             try {
-                const response = await axios.get(`/api/card/draw/${selectedProduct.name}`, {
-                    headers: {
-                        'Content-Type': 'application/json',
-                        Authorization: `Bearer ${session.customJwt}`,
-                    }
-                })
+                const response = await axiosInstance.post(`/api/card/draw`, {
+                     quantity, 
+                     category: selectedProduct.name, 
+                     cost: totalPointsCost 
+                    }, {
+                        customConfig: { session: session }
+                    });
 
                 // if response status is 200 then set cards in state and show modal
                 if (response.status === 200) {
@@ -55,21 +59,21 @@ export default function Shop({ productsData, errorServer }) {
                     setDrawnCards(data.selectedCards);
                     setShowModalCards(true);
                     setAlertType('success');
-                    setAlertMessage('Vous avez bien acheté le pack');
+                    setAlertMessage(`Vous avez bien acheté ${quantity} ${quantity > 1 ? "packs" : "pack"}`);
                     setShowAlert(true);
                     setTimeout(() => {
                         setShowAlert(false);
                     }, 5000);
                 }
             } catch (error) {
-                if (error.response.status === 401) {
+                if (error.response?.status === 401) {
                     setError('Erreur avec votre Token ou il est expiré. Veuillez vous reconnecter.')
                     setTimeout(() => {
                         signOut()
                         router.push('/');
                     }, 3000);
                 } else {
-                    setError('Erreur lors du tirage des cartes');
+                    setError('Erreur lors de l\'achat ' + error.response?.data?.message || error.message);;
                 }
             } finally {
                 setLoading(false);
@@ -113,10 +117,8 @@ export default function Shop({ productsData, errorServer }) {
         if (localStorage.getItem('userOC') === null && session) {
             const getUser = async () => {
                 try {
-                    const response = await axios.get('/api/user', {
-                        headers: {
-                            Authorization: `Bearer ${session.customJwt}`,
-                        },
+                    const response = await axiosInstance.get('/api/user', {
+                        customConfig: { session: session }
                     });
                     const data = await response.data;
                     localStorage.setItem('userOC', JSON.stringify(data));
@@ -125,6 +127,7 @@ export default function Shop({ productsData, errorServer }) {
                     localStorage.setItem('points', totalPoints);
                     setPoints(totalPoints);
                 } catch (error) {
+                    
                     if (error.response.status === 401) {
                         setError('Erreur avec votre Token ou il est expiré. Veuillez vous reconnecter.')
                         setTimeout(() => {
@@ -132,7 +135,7 @@ export default function Shop({ productsData, errorServer }) {
                             router.push('/');
                         }, 2000);
                     } else {
-                        setError(error);
+                        setError(error.response?.data?.message || error.message);
                     }
                 }
             };
@@ -167,9 +170,9 @@ export default function Shop({ productsData, errorServer }) {
 
     return (
         <>
-            <div className="flex-col min-h-screen" style={{ marginTop: "80px" }}>
+            <div className="flex flex-col min-h-screen">
                 <Header points={points} />
-                <div className="container text-black mx-auto px-4 md:my-8 my-4">
+                <div className="flex-grow container text-black mx-auto px-4 md:my-8 my-4" style={{ marginTop: "80px" }}>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         {/*  itérer sur produit */}
@@ -186,13 +189,16 @@ export default function Shop({ productsData, errorServer }) {
                                 {showModal && (
                                     <Modal
                                         setShowModal={setShowModal}
-                                        handleConfirm={() => handleConfirmPurchase(product)}
+                                        handleConfirm={(quantity) => handleConfirmPurchase(product, quantity)}
                                         title="Confirmation d'Achat"
                                         message={
                                             <>
                                                 Êtes-vous sûr de vouloir acheter <b>{product.name}</b> pack pour <b>{product.price} OC</b> ?
                                             </>
                                         }
+                                        maxQuantity={Math.floor(points / product.price) > 5 ? 5 : Math.floor(points / product.price)}
+                                        cost={product.price}
+                                        buy={true}
                                     />
                                 )}
                                 {showModalCards && (
@@ -209,8 +215,8 @@ export default function Shop({ productsData, errorServer }) {
                         ))}
                     </div>
                 </div>
-            </div>
                 <Footer />
+            </div>
         </>
     );
 }
@@ -233,6 +239,7 @@ export async function getServerSideProps(context) {
             headers: {
                 'Content-Type': 'application/json',
                 Authorization: `Bearer ${session.customJwt}`,
+                cookie: context.req.headers.cookie
             }
         })
         const productsData = await response.data;

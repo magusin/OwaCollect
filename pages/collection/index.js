@@ -1,6 +1,6 @@
 import React from "react";
 import Image from 'next/legacy/image';
-import axios from 'axios'
+import axios, { all } from 'axios'
 import calculatePoints from '@/utils/calculatePoints';
 import { signOut, useSession } from 'next-auth/react';
 import { useEffect } from "react";
@@ -11,6 +11,8 @@ import nextAuthOptions from "../../config/nextAuthOptions";
 import Modal from "C/modal";
 import Alert from "C/alert";
 import Footer from "@/components/footer";
+import Switch from "@/components/filterToggleSVG";
+import axiosInstance from "@/utils/axiosInstance";
 
 export default function Collection({ cards, errorServer }) {
     const [error, setError] = React.useState(errorServer || null);
@@ -28,7 +30,29 @@ export default function Collection({ cards, errorServer }) {
     const [allCard, setAllCard] = React.useState(cards?.cards);
     const [playerCards, setPlayerCards] = React.useState(cards?.playerCards);
     const [selectedRarity, setSelectedRarity] = React.useState('Toutes');
+    const [showOwnedOnly, setShowOwnedOnly] = React.useState(false);
+    const [showLevelUpOnly, setShowLevelUpOnly] = React.useState(false);
+    const [filteredCards, setFilteredCards] = React.useState(allCard);
+    const [filterState, setFilterState] = React.useState("none");
 
+    const ownedCardIds = new Set(playerCards?.map(card => card.cardId));
+    const allCardsName = new Map(allCard?.map(card => [card.id, card]));
+    // Créer un objet pour le suivi du count pour chaque cardId
+    const cardCounts = playerCards?.reduce((acc, card) => {
+        acc[card.cardId] = card.count;
+        return acc;
+    }, {});
+
+    const handleSwitchChange = (position) => {
+        // Logique pour modifier l'état en fonction de la position
+        if (position === 30) {
+            setFilterState('non possédé'); // Exemple
+        } else if (position === 75) {
+            setFilterState('none'); // Exemple
+        } else if (position === 120) {
+            setFilterState('possédé'); // Exemple
+        }
+    };
 
     // Fonction pour vendre
     const handleConfirmSell = async (selectedCard, quantity) => {
@@ -38,12 +62,10 @@ export default function Collection({ cards, errorServer }) {
         const amount = costPerCard * quantity;
 
         try {
-            const response = await axios.put('/api/user/card/sell', { id: selectedCard.id, quantity: quantity, amount: amount }, {
-                headers: {
-                    Authorization: `Bearer ${session.customJwt}`,
-                    'Content-Type': 'application/json'
-                },
+            const response = await axiosInstance.put('/api/user/card/sell', { id: selectedCard.id, quantity: quantity, amount: amount }, {
+                customConfig: { session: session }
             });
+
             if (response.status === 200) {
                 const data = await response.data;
                 localStorage.setItem('userOC', JSON.stringify(data.userData));
@@ -70,12 +92,32 @@ export default function Collection({ cards, errorServer }) {
                     router.push('/');
                 }, 3000);
             } else {
-                setError('Erreur lors de la vente. ' + error);
+                setError('Erreur lors de la vente. ' + error.response?.data?.message || error.message);
             }
         } finally {
             setLoading(false);
         }
     }
+
+    // Mettre à jour les cartes filtrées lorsque le filtre change
+    useEffect(() => {
+        let newFilteredCards = allCard?.filter(card => {
+            const cardOwned = ownedCardIds.has(card.id);
+            const canLevelUp = cardCounts[card.id] >= 3 && points >= card.evolveCost && card.evolveCost !== null && !ownedCardIds.has(card.id + 1);
+            const isCorrectRarity = selectedRarity === 'Toutes' || card.rarety === selectedRarity;
+    
+            // Ajoutez votre logique de filtrage basée sur la position du switch
+            if (filterState === 'non possédé' && cardOwned) return false; // Si le switch est à gauche, exclure les cartes possédées
+            if (filterState === 'possédé' && !cardOwned) return false; // Si le switch est à droite, exclure les cartes non possédées
+    
+            // Les autres filtres restent inchangés
+            if (showOwnedOnly && !cardOwned) return false;
+            if (showLevelUpOnly && !canLevelUp) return false;
+            return isCorrectRarity;
+        });
+        setFilteredCards(newFilteredCards);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [showOwnedOnly, allCard, selectedRarity, showLevelUpOnly, selectedCard, filterState]);
 
     // fonction de level up de la carte
     const handleConfirmLevelUp = async (selectedCard) => {
@@ -83,11 +125,8 @@ export default function Collection({ cards, errorServer }) {
         setShowModal(false);
         if (points >= selectedCard.evolveCost) {
             try {
-                const response = await axios.put('/api/user/card', { id: selectedCard.id, cost: selectedCard.evolveCost }, {
-                    headers: {
-                        Authorization: `Bearer ${session.customJwt}`,
-                        'Content-Type': 'application/json'
-                    },
+                const response = await axiosInstance.put('/api/user/card', { id: selectedCard.id, cost: selectedCard.evolveCost }, {
+                    customConfig: { session: session }
                 });
                 if (response.status === 200) {
                     const data = await response.data;
@@ -97,6 +136,15 @@ export default function Collection({ cards, errorServer }) {
                     setPoints(totalPoints);
                     setPlayerCards(data.allPlayerCards);
                     setAlertType('success');
+                    const newCard = allCard.find(card => card.id === data.updatedCard.cardId);
+                    setFilteredCards(filteredCards => {
+                        const isCardIncluded = filteredCards.some(card => card.id === data.updatedCard.cardId);
+                        if (!isCardIncluded) {
+                            return [...filteredCards, newCard]
+                        }
+                        return filteredCards;
+                    })
+                    setSelectedCard(newCard)
                     setAlertMessage(
                         <>
                             Vous avez level Up la carte <b>{selectedCard.name}</b>
@@ -106,7 +154,6 @@ export default function Collection({ cards, errorServer }) {
                     setTimeout(() => {
                         setShowAlert(false);
                     }, 5000);
-                    nextCard();
                 }
             } catch (error) {
                 if (error.response.status === 401) {
@@ -116,7 +163,7 @@ export default function Collection({ cards, errorServer }) {
                         router.push('/');
                     }, 3000);
                 } else {
-                    setError('Erreur lors du levelUp de la carte. ' + error);
+                    setError('Erreur lors du levelUp de la carte. ' + error.response?.data?.message || error.message);
                 }
             } finally {
                 setLoading(false);
@@ -145,19 +192,29 @@ export default function Collection({ cards, errorServer }) {
         setSelectedRarity(rarity);
     };
 
-    const selectedCardIndex = cards?.cards.findIndex(card => card.id === selectedCard?.id);
+    const selectedCardIndex = filteredCards?.findIndex(card => card.id === selectedCard?.id);
     // Gestionnaire de clic pour sélectionner une carte
     const handleCardClick = (card) => {
         setSelectedCard(card);
     };
 
+    // Fonction pour gérer le changement de filtre
+    const handleShowOwnedOnlyChange = (event) => {
+        setShowOwnedOnly(event.target.checked);
+    };
+
+    // Fonction pour gérer le changement de filtre
+    const handleShowLevelUpOnlyChange = (event) => {
+        setShowLevelUpOnly(event.target.checked);
+    };
+
     const nextCard = () => {
-        const prevCard = allCard[(selectedCardIndex + 1) % allCard.length];
+        const prevCard = filteredCards[(selectedCardIndex + 1) % filteredCards.length];
         setSelectedCard(prevCard)
     };
 
     const previousCard = () => {
-        const prevCard = allCard[selectedCardIndex === 0 ? allCard.length - 1 : selectedCardIndex - 1];
+        const prevCard = filteredCards[selectedCardIndex === 0 ? filteredCards.length - 1 : selectedCardIndex - 1];
         setSelectedCard(prevCard)
     };
 
@@ -196,10 +253,8 @@ export default function Collection({ cards, errorServer }) {
         if (localStorage.getItem('userOC') === null && session) {
             const getUser = async () => {
                 try {
-                    const response = await axios.get('/api/user', {
-                        headers: {
-                            Authorization: `Bearer ${session.customJwt}`,
-                        },
+                    const response = await axiosInstance.get('/api/user', {
+                        customConfig: { session: session }
                     });
                     const data = await response.data;
                     localStorage.setItem('userOC', JSON.stringify(data));
@@ -215,7 +270,7 @@ export default function Collection({ cards, errorServer }) {
                             router.push('/');
                         }, 2000);
                     } else {
-                        setError(error);
+                        setError(error.response?.data?.message || error.message);
                     }
                 }
             };
@@ -224,18 +279,6 @@ export default function Collection({ cards, errorServer }) {
 
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [status, session, error, router]);
-
-    if (status === "loading" || loading) {
-        return (
-            <div className="flex flex-col h-screen" style={{ marginTop: "80px" }}>
-                <Header points={points} />
-                <div className="flex-grow flex justify-center items-center">
-                    <span className="text-center"><svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24"><path fill="#1f2937" d="M12,4a8,8,0,0,1,7.89,6.7A1.53,1.53,0,0,0,21.38,12h0a1.5,1.5,0,0,0,1.48-1.75,11,11,0,0,0-21.72,0A1.5,1.5,0,0,0,2.62,12h0a1.53,1.53,0,0,0,1.49-1.3A8,8,0,0,1,12,4Z"><animateTransform attributeName="transform" dur="0.75s" repeatCount="indefinite" type="rotate" values="0 12 12;360 12 12" /></path></svg></span>
-                </div>
-                <Footer />
-            </div>
-        )
-    }
 
     if (error) {
         return (
@@ -249,18 +292,19 @@ export default function Collection({ cards, errorServer }) {
         );
     }
 
-    if (session) {
-        const ownedCardIds = new Set(playerCards.map(card => card.cardId));
-        const allCardsName = new Map(allCard.map(card => [card.id, card]));
-        const filteredCards = selectedRarity === 'Toutes'
-        ? allCard
-        : allCard.filter(card => card.rarety === selectedRarity);
-        // Créer un objet pour le suivi du count pour chaque cardId
-        const cardCounts = playerCards.reduce((acc, card) => {
-            acc[card.cardId] = card.count;
-            return acc;
-        }, {});
+    if (status === "loading" || loading) {
+        return (
+            <div className="flex flex-col h-screen" style={{ marginTop: "80px" }}>
+                <Header points={points} />
+                <div className="flex-grow flex justify-center items-center">
+                    <span className="text-center"><svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24"><path fill="#1f2937" d="M12,4a8,8,0,0,1,7.89,6.7A1.53,1.53,0,0,0,21.38,12h0a1.5,1.5,0,0,0,1.48-1.75,11,11,0,0,0-21.72,0A1.5,1.5,0,0,0,2.62,12h0a1.53,1.53,0,0,0,1.49-1.3A8,8,0,0,1,12,4Z"><animateTransform attributeName="transform" dur="0.75s" repeatCount="indefinite" type="rotate" values="0 12 12;360 12 12" /></path></svg></span>
+                </div>
+                <Footer />
+            </div>
+        )
+    }
 
+    if (session) {
         return (
             <div className="flex flex-col h-screen" style={{ marginTop: "80px" }}>
                 <Header points={points} />
@@ -274,16 +318,29 @@ export default function Collection({ cards, errorServer }) {
                             priority={true}
                         />
                     </div>
-                <div>
-                <button className="bg-green-500 hover:bg-green-700 font-bold py-2 px-4 rounded-full mx-1" onClick={() => handleRarityChange('Toutes')}>Toutes</button>
-                <button className="bg-gray-500 hover:bg-gray-700 font-bold py-2 px-4 rounded-full mx-1" onClick={() => handleRarityChange('Commune')}>Commune</button>
-                <button className="bg-blue-500 hover:bg-blue-700 font-bold py-2 px-4 rounded-full mx-1" onClick={() => handleRarityChange('Rare')}>Rare</button>
-                <button className="bg-teal-500 hover:bg-teal-700 font-bold py-2 px-4 rounded-full mx-1" onClick={() => handleRarityChange('Epique')}>Épique</button>
-            </div>
+                    <div>
+                        <button className="bg-green-500 hover:bg-green-700 font-bold py-2 px-4 rounded-full mx-1" onClick={() => handleRarityChange('Toutes')}>Toutes</button>
+                        <button className="bg-gray-500 hover:bg-gray-700 font-bold py-2 px-4 rounded-full mx-1" onClick={() => handleRarityChange('Commune')}>Commune</button>
+                        <button className="bg-blue-500 hover:bg-blue-700 font-bold py-2 px-4 rounded-full mx-1" onClick={() => handleRarityChange('Rare')}>Rare</button>
+                        <button className="bg-teal-500 hover:bg-teal-700 font-bold py-2 px-4 rounded-full mx-1" onClick={() => handleRarityChange('Epique')}>Épique</button>
+                        <div>
+                        <Switch onSwitchChange={handleSwitchChange}/>
+                        </div>
+                        <div className="m-4 font-bold">
+                            <label>
+                                <input
+                                    className="mr-2 leading-tight cursor-pointer"
+                                    type="checkbox"
+                                    checked={showLevelUpOnly}
+                                    onChange={handleShowLevelUpOnlyChange}
+                                />
+                                Level Up
+                            </label>
+                        </div>
+                    </div>
                     <div className="flex items-center text-lg font-semibold my-4">
-                        <span>{`Cartes découvertes : ${
-        filteredCards.filter(card => ownedCardIds.has(card.id)).length
-    } / ${filteredCards.length}`}</span>
+                        <span>{`Cartes découvertes : ${filteredCards.filter(card => ownedCardIds.has(card.id)).length
+                            } / ${filteredCards.length}`}</span>
                         <span className="relative mx-4 md:mx-8 text-black bg-white rounded-full font-bold text-xl cursor-pointer group w-10 h-10 flex items-center justify-center">
                             ?
                             <span className="tooltip-text absolute hidden group-hover:block bg-gray-700 text-white text-xs rounded p-2 bottom-full mb-2 left-1/2 transform -translate-x-1/2 w-[200px] md:w-[400px] md:text-base lg:w-[450px] 2xl:w-[500px]">
@@ -367,7 +424,7 @@ export default function Collection({ cards, errorServer }) {
                                     </button>
                                 )}
                                 {/* Button level up */}
-                                {ownedCardIds.has(selectedCard.id) && (selectedCard.evolveCost) && (
+                                {ownedCardIds.has(selectedCard.id) && (selectedCard.evolveCost) && (!ownedCardIds.has(selectedCard.id+1)) && (
                                     <button onClick={handleLevelUp} disabled={!(cardCounts[selectedCard.id] > 2 && points >= selectedCard.evolveCost)} className="w-16 md:w-24 lg:w-28 xl:w-32 absolute bottom-0 border border-yellow-500 md:bottom-0">
                                         <Image src="/images/levelUp.png" alt="next card" objectFit="contain" objectPosition="center" width={120} height={120} />
                                     </button>
@@ -402,6 +459,7 @@ export default function Collection({ cards, errorServer }) {
                                     }
                                     maxQuantity={cardCounts[selectedCard.id] - 1}
                                     cost={selectedCard.rarety === 'Rare' ? 70 : selectedCard.rarety === 'Epique' ? 150 : 30}
+                                    sell={true}
                                 />
                             )}
                             {showAlert && (
@@ -438,6 +496,7 @@ export async function getServerSideProps(context) {
             headers: {
                 'Content-Type': 'application/json',
                 Authorization: `Bearer ${session.customJwt}`,
+                cookie: context.req.headers.cookie
             }
         })
         const cards = await response.data;
