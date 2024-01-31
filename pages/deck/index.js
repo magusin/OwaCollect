@@ -11,6 +11,7 @@ import { getServerSession } from "next-auth";
 import nextAuthOptions from "../../config/nextAuthOptions";
 import Image from 'next/image';
 import Alert from "C/alert";
+import axiosInstance from '@/utils/axiosInstance';
 
 export default function Deck({ cards, deckInitial, errorServer }) {
     const [error, setError] = React.useState(errorServer || null);
@@ -37,12 +38,10 @@ export default function Deck({ cards, deckInitial, errorServer }) {
     const createDuel = async () => {
         setLoading(true);
         try {
-            const response = await axios.post('/api/duel', {
+            const response = await axiosInstance.post('/api/duel', {
                 deck
             }, {
-                headers: {
-                    Authorization: `Bearer ${session.customJwt}`,
-                },
+                customConfig: { session: session }
             });
             if (response.status === 200) {
                 const data = await response.data;
@@ -291,6 +290,7 @@ export async function getServerSideProps(context) {
             headers: {
                 'Content-Type': 'application/json',
                 Authorization: `Bearer ${session.customJwt}`,
+                cookie: context.req.headers.cookie
             }
         })
         const cards = await response.data;

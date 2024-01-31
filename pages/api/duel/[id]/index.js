@@ -86,8 +86,8 @@ export default async function handler(req, res) {
             case 'PUT':
                 const { bet } = req.body;
 
-                if (bet === null || bet === undefined) {
-                    return res.status(400).json({ message: 'Montant du duel non fourni' });
+                if (bet === null || bet === undefined || bet < 0) {
+                    return res.status(400).json({ message: 'Montant du duel non fourni ou invalide' });
                 }
                 const duelUpdate = await prisma.duels.update({
                     where: {

@@ -11,6 +11,7 @@ import Image from "next/legacy/image";
 import { useDarkMode } from "@/contexts/darkModeContext";
 import Footer from "C/footer";
 import axiosInstance from "@/utils/axiosInstance";
+import firebase from "@/utils/firebaseConfig";
 
 export default function Login() {
   const { data: session, status } = useSession();

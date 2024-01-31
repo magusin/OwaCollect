@@ -2,13 +2,28 @@ import Cors from 'cors'
 import { PrismaClient } from '@prisma/client'
 import jwt from 'jsonwebtoken';
 import { v4 as uuidv4 } from 'uuid';
+import { doc, setDoc } from "firebase/firestore";
+import { db } from '../firebaseAdmin';
+import { getToken } from "next-auth/jwt";
+import verifySignature from '../verifySignature';
+import calculatePoints from '../calculatePoints';
 
 // Initialiser le midleware Cors
-const cors = Cors({
+const allowedOrigins = [process.env.NEXTAUTH_URL]
+const corsOptions = {
     methods: ['POST', 'HEAD'],
-})
+    origin: (origin, callback) => {
+        if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
+};
 
 const prisma = new PrismaClient()
+
+const corsMiddleware = Cors(corsOptions);
 
 // Gestion des erreurs
 function onError(err, res) {
@@ -38,6 +53,15 @@ async function runMiddleware(req, res, fn) {
 
 export default async function handler(req, res) {
     try {
+        const nextToken = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+
+        if (!nextToken) {
+            return res.status(401).json({ message: 'Utilisateur non authentifié' });
+        }
+        const signature = await verifySignature(req);
+        if (!signature) {
+            return res.status(400).json({ message: 'Signature invalide' });
+        }
         const token = req.headers.authorization?.split(' ')[1]; // JWT envoyé dans le header Authorization
         if (!token) {
             return res.status(401).json({ message: 'Token non fourni' });
@@ -46,7 +70,7 @@ export default async function handler(req, res) {
         if (!decoded) {
             return res.status(401).json({ message: 'Token invalide' });
         }
-        await runMiddleware(req, res, cors)
+        await runMiddleware(req, res, corsMiddleware)
         switch (req.method) {
             case 'POST':
                 const uuid = uuidv4();
@@ -54,10 +78,20 @@ export default async function handler(req, res) {
                 const duel = await prisma.duels.create({
                     data: {
                         uuid: uuid,
-                        player1Id: decoded.id              
+                        player1Id: decoded.id
                     }
                 })
-                res.status(200).json({duel, link})
+
+                const duelRef = db.collection("duel").doc(uuid);
+
+                // Utilisation de la méthode 'set' pour écrire dans Firestore avec Firebase Admin SDK
+                await duelRef.set({
+                    duelId: uuid,
+                    player1Id: decoded.id,
+                    player2Id: null,
+                    winnerId: null
+                });
+                res.status(200).json({ duel, link })
                 break;
             default:
                 res.setHeader('Allow', ['POST'])
