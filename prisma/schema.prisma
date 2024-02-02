@@ -36,6 +36,7 @@ model pets {
   guess                       Int                 @default(0)
   quiz                        Int                 @default(0)
   pointsUsed                  Int?                @default(0)
+  messagesOC                  Int                 @default(0)
   duels_duels_player1IdTopets duels[]             @relation("duels_player1IdTopets")
   duels_duels_player2IdTopets duels[]             @relation("duels_player2IdTopets")
   duels_duels_winnerIdTopets  duels[]             @relation("duels_winnerIdTopets")
