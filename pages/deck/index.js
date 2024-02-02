@@ -48,7 +48,7 @@ export default function Deck({ cards, deckInitial, errorServer }) {
                 setLink(data.link);
             }
         } catch (error) {
-            if (error.response.status === 401) {
+            if (error.response?.status === 401) {
                 setError('Erreur Lors de la création du duel. Veuillez vous reconnecter.')
                 setTimeout(() => {
                     signOut()

@@ -82,14 +82,27 @@ export default async function handler(req, res) {
                     }
                 })
 
+                const deckP1 = await prisma.playercards.findMany({
+                    where: {
+                        petId: decoded.id,
+                        isInDeck: true
+                    },
+                    include: {
+                        card: true
+                    }
+                })
+
                 const duelRef = db.collection("duel").doc(uuid);
 
                 // Utilisation de la méthode 'set' pour écrire dans Firestore avec Firebase Admin SDK
                 await duelRef.set({
                     duelId: uuid,
+                    player1Name: decoded.name,
                     player1Id: decoded.id,
                     player2Id: null,
-                    winnerId: null
+                    winnerId: null,
+                    deckP1: deckP1,
+                    bet: 0,
                 });
                 res.status(200).json({ duel, link })
                 break;
