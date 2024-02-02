@@ -84,22 +84,22 @@ body {
   height: 200px; /* Ajustez selon la taille de vos cartes */
 }
 
-.duel-card {
+/* .duel-card {
   position: absolute;
   transform-origin: bottom center;
   transition: transform 0.3s ease;
-}
+} */
 
 .duel-card:hover {
   transform: translateY(-20px); /* Soulever la carte lors du survol */
-  scale: 1.2;
-}
+  scale: 1.1;
+} 
 
 .player {
   bottom: 0;
 }
 
-.duel-card:nth-child(1) { transform: rotate(-30deg) translateY(0px); }
-.duel-card:nth-child(2) { transform: rotate(-10deg) translateY(0px); }
-.duel-card:nth-child(3) { transform: rotate(10deg) translateY(0px); }
-.duel-card:nth-child(4) { transform: rotate(30deg) translateY(0px); }
+/* .duel-card:nth-child(1) { transform: rotate(-10deg) translateY(0px); }
+.duel-card:nth-child(2) { transform: rotate(-10deg) translateY(-80px); }
+.duel-card:nth-child(3) { transform: rotate(10deg) translateY(-80px); }
+.duel-card:nth-child(4) { transform: rotate(30deg) translateY(0px); } */

@@ -173,31 +173,42 @@ export default function Duel({ errorServer, duelInfo }) {
             if (session.user.id === duelState.player1Id || session.user.id === duelState.player2Id) {
                 return (
 
-                    <div className="flex flex-col h-screen" >
+                    <div className="flex flex-col h-screen">
                         <Header points={points} />
-                        <div className="flex-grow pt-20">
-                            <div className="flex justify-center gap-4 mt-4">
-                                {(isPlayerOne ? duelState.deckP1 : duelState.deckP2).map((card, index) => (
-                                    <div key={index} className="cursor-pointer transform transition duration-300 hover:-translate-y-2" onClick={() => handleSelectCard(card)}>
-                                        <Image src={`${card.card.picture}.png`} alt={card.card.name} width={200} height={200} />
+                        <div className="flex flex-col flex-grow pt-20 relative">
+
+                            {/* Cartes de l'adversaire en haut */}
+                            <div className="flex justify-center gap-2 md:gap-4 mt-4 absolute top-20 left-1/2 transform -translate-x-1/2">
+                                {(isPlayerOne ? duelState.deckP2 : duelState.deckP1).map((card, index) => (
+                                    <div key={index} className="w-24 h-32 bg-gray-400 transform hover:scale-110 transition duration-300 w-[100px] h-[100px] sm:w-[150px] sm:h-[150px] md:w-[200px] md:h-[200px] xl:w-[250px] xl:h-[250px]">
+                                        <Image src={`${card.card.picture_back}.png`} alt="Carte de dos" layout="fill"
+                                            objectFit="fill"
+                                            sizes="100%"
+                                            priority={true} />
                                     </div>
                                 ))}
                             </div>
 
+                            {/* Informations du duel au centre */}
                             {selectedCard && (
-                                <div className="flex flex-col items-center gap-5 m-5">
+                                <div className="flex flex-col items-center gap-5 m-5 absolute left-1/2 transform -translate-x-1/2 top-1/2 -translate-y-1/2">
                                     <Image src={`${selectedCard.card.picture}.png`} alt={selectedCard.card.name} className="w-40 h-56 object-cover border-2 border-green-500" />
                                     <button onClick={validateCard} className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600">Valider cette carte</button>
                                 </div>
                             )}
 
-                            <div className="flex justify-center gap-4">
-                                {(isPlayerOne ? duelState.deckP2 : duelState.deckP1).map((card, index) => (
-                                    <div key={index} className="w-24 h-32 bg-gray-400">
-                                        <Image src={`${card.card.picture_back}.png`} alt={card.card.name} width={200} height={200} />
+                            {/* Cartes du joueur en bas */}
+                            <div className="flex justify-center gap-2 md:gap-4 mb-4 absolute bottom-0 left-1/2 transform -translate-x-1/2">
+                                {(isPlayerOne ? duelState.deckP1 : duelState.deckP2).map((card, index) => (
+                                    <div key={index} className="relative cursor-pointer duel-card w-[100px] h-[100px] sm:w-[150px] sm:h-[150px] md:w-[200px] md:h-[200px] xl:w-[250px] xl:h-[250px]" onClick={() => handleSelectCard(card)}>
+                                        <Image src={`${card.card.picture}.png`} alt={card.card.name} layout="fill"
+                                            objectFit="fill"
+                                            sizes="100%"
+                                            priority={true} />
                                     </div>
                                 ))}
                             </div>
+
                         </div>
                         <Footer />
                     </div>
