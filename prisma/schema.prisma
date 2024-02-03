@@ -36,6 +36,7 @@ model pets {
   guess                       Int                 @default(0)
   quiz                        Int                 @default(0)
   pointsUsed                  Int?                @default(0)
+  messagesOC                  Int                 @default(0)
   duels_duels_player1IdTopets duels[]             @relation("duels_player1IdTopets")
   duels_duels_player2IdTopets duels[]             @relation("duels_player2IdTopets")
   duels_duels_winnerIdTopets  duels[]             @relation("duels_winnerIdTopets")
@@ -73,6 +74,7 @@ model card {
   dropRate     Int           @default(0)
   card         card?         @relation("cardTocard", fields: [evolvedId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "card_ibfk_1")
   other_card   card[]        @relation("cardTocard")
+  passifcards  passifcards[]
   playercards  playercards[]
 
   @@index([evolvedId], map: "evolvedId")
@@ -83,6 +85,7 @@ model playercards {
   cardId   Int
   count    Int
   isInDeck Boolean @default(false)
+  isNew    Boolean @default(false)
   card     card    @relation(fields: [cardId], references: [id], onDelete: Cascade, map: "playercards_ibfk_1")
   pets     pets    @relation(fields: [petId], references: [userId], onDelete: Cascade, map: "playercards_ibfk_2")
 
@@ -108,4 +111,44 @@ model duels {
   @@index([player2Id], map: "duels_ibfk_2")
   @@index([player1Id], map: "duels_ibfk_1")
   @@index([winnerId], map: "duels_ibfk_3")
+}
+
+model passif {
+  id               Int           @id @default(autoincrement())
+  description      String        @db.VarChar(255)
+  hit              Int           @default(0)
+  heal             Int           @default(0)
+  damagePhy        Int           @default(0)
+  damageElem       Int           @default(0)
+  damageStandard   Int           @default(0)
+  damageSlash      Int           @default(0)
+  damageStrike     Int           @default(0)
+  damagePierce     Int           @default(0)
+  damageMagique    Int           @default(0)
+  damageFire       Int           @default(0)
+  damageLightning  Int           @default(0)
+  damageHoly       Int           @default(0)
+  randomCount      Int           @default(0)
+  defensePhy       Int           @default(0)
+  defenseElem      Int           @default(0)
+  defenseStandard  Int           @default(0)
+  defenseSlash     Int           @default(0)
+  defenseStrike    Int           @default(0)
+  defensePierce    Int           @default(0)
+  defenseMagique   Int           @default(0)
+  defenseFire      Int           @default(0)
+  defenseLightning Int           @default(0)
+  defenseHoly      Int           @default(0)
+  hp               Int           @default(0)
+  passifcards      passifcards[]
+}
+
+model passifcards {
+  cardId   Int
+  passifId Int
+  name     String @db.VarChar(255)
+  card     card   @relation(fields: [cardId], references: [id], onDelete: Cascade, map: "passifcards_ibfk_1")
+  passif   passif @relation(fields: [passifId], references: [id], onDelete: Cascade, map: "passifcards_ibfk_2")
+
+  @@id([cardId, passifId])
 }

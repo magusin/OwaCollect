@@ -19,7 +19,7 @@ export default function Deck({ cards, deckInitial, errorServer }) {
     const router = useRouter();
     const { darkMode } = useDarkMode();
     const [points, setPoints] = React.useState(0);
-    const [playerCards, setPlayerCards] = React.useState(cards?.playerCards);
+    const [playerCards, setPlayerCards] = React.useState(cards);
     const [deck, setDeck] = React.useState(deckInitial);
     const [loading, setLoading] = React.useState(false);
     const [showAlert, setShowAlert] = React.useState(false);
@@ -34,6 +34,8 @@ export default function Deck({ cards, deckInitial, errorServer }) {
         newDeck[index] = parseInt(cardId, 10);
         setDeck(newDeck);
     };
+
+    console.log("playerCard:", playerCards)
 
     const createDuel = async () => {
         setLoading(true);
@@ -99,7 +101,7 @@ export default function Deck({ cards, deckInitial, errorServer }) {
                         router.push('/');
                     }, 3000);
                 } else {
-                    setError('Erreur lors du levelUp de la carte. ' + error);
+                    setError('Erreur lors de l`\'enregistrement du deck. ' + error);
                 }
             } finally {
 
@@ -293,10 +295,15 @@ export async function getServerSideProps(context) {
                 cookie: context.req.headers.cookie
             }
         })
-        const cards = await response.data;
-        const deckInitial = cards.playerCards
+        const cardsPlayer = await response.data.playerCards;
+        // filtre seulement les cartes rares et epique du tableau playerCards
+        const cards = cardsPlayer.filter(pc => pc.card.rarety === 'Rare' || pc.card.rarety === 'Epique');
+       
+        const deckInitial = cards
             .filter(pc => pc.isInDeck)
             .map(pc => pc.card.id);
+        // const cardsObj = new Map(cards.map(card => [card.id, card]));
+        // const cardsMap = Object.fromEntries(cardsObj);
 
         while (deckInitial.length < 4) {
             deckInitial.push(null);
@@ -305,7 +312,7 @@ export async function getServerSideProps(context) {
             props: { cards, deckInitial },
         };
     } catch (error) {
-        if (error.response.status === 401) {
+        if (error.response?.status === 401) {
             return {
                 props: { errorServer: 'Erreur avec votre Token ou il est expiré. Veuillez vous reconnecter.' },
             };

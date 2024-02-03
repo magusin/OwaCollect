@@ -88,7 +88,11 @@ export default async function handler(req, res) {
                         isInDeck: true
                     },
                     include: {
-                        card: true
+                        card: {
+                            include : {
+                                passifcards: true
+                            }
+                        }
                     }
                 })
 

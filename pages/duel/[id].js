@@ -12,8 +12,9 @@ import Footer from 'C/footer';
 import { doc, onSnapshot, updateDoc, getDoc } from "firebase/firestore";
 import { db } from '@/utils/firebaseConfig';
 import axiosInstance from '@/utils/axiosInstance';
+import RandomNumber from '@/components/randomNumber';
 
-export default function Duel({ errorServer, duelInfo }) {
+export default function Duel({ errorServer }) {
     const { data: session, status } = useSession();
     const router = useRouter();
     const [error, setError] = React.useState(errorServer || null);
@@ -188,7 +189,9 @@ export default function Duel({ errorServer, duelInfo }) {
                                     </div>
                                 ))}
                             </div>
-
+                            <div style={{ height: '100vh', width: '100vw' }}>
+                                <RandomNumber />
+                            </div>
                             {/* Informations du duel au centre */}
                             {selectedCard && (
                                 <div className="flex flex-col items-center gap-5 m-5 absolute left-1/2 transform -translate-x-1/2 top-1/2 -translate-y-1/2">
