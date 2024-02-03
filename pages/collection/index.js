@@ -37,6 +37,7 @@ export default function Collection({ cards, errorServer }) {
 
     const ownedCardIds = new Set(playerCards?.map(card => card.cardId));
     const allCardsName = new Map(allCard?.map(card => [card.id, card]));
+    const newCards = new Set(playerCards?.filter(card => card.isNew).map(card => card.cardId));
     // Créer un objet pour le suivi du count pour chaque cardId
     const cardCounts = playerCards?.reduce((acc, card) => {
         acc[card.cardId] = card.count;
@@ -53,6 +54,33 @@ export default function Collection({ cards, errorServer }) {
             setFilterState('possédé'); // Exemple
         }
     };
+
+    // Fonction pour enlever NEW
+    const removeNew = async (cardId) => {
+        try {
+            const response = await axiosInstance.put('/api/card/view', {cardId}, {
+                customConfig: { session: session }
+            });
+            if (response.status === 200) {
+                const data = await response.data;
+                setPlayerCards(currentCards =>
+                    currentCards.map(card =>
+                        card.cardId === cardId ? { ...card, isNew: false } : card
+                    )
+                );
+            }
+        } catch (error) {
+            if (error.response.status === 401) {
+                setError('Erreur avec votre Token ou il est expiré. Veuillez vous reconnecter.')
+                setTimeout(() => {
+                    signOut()
+                    router.push('/');
+                }, 3000);
+            } else {
+                setError('Erreur lors de la mise à jour de la carte. ' + error.response?.data?.message || error.message);
+            }
+        }
+    }
 
     // Fonction pour vendre
     const handleConfirmSell = async (selectedCard, quantity) => {
@@ -196,6 +224,9 @@ export default function Collection({ cards, errorServer }) {
     // Gestionnaire de clic pour sélectionner une carte
     const handleCardClick = (card) => {
         setSelectedCard(card);
+        if (newCards.has(card.id)) {
+            removeNew(card.id);
+        }
     };
 
     // Fonction pour gérer le changement de filtre
@@ -211,11 +242,17 @@ export default function Collection({ cards, errorServer }) {
     const nextCard = () => {
         const prevCard = filteredCards[(selectedCardIndex + 1) % filteredCards.length];
         setSelectedCard(prevCard)
+        if (newCards.has(prevCard.id)) {
+            removeNew(prevCard.id);
+        }
     };
 
     const previousCard = () => {
         const prevCard = filteredCards[selectedCardIndex === 0 ? filteredCards.length - 1 : selectedCardIndex - 1];
         setSelectedCard(prevCard)
+        if (newCards.has(prevCard.id)) {
+            removeNew(prevCard.id);
+        }
     };
 
     // Pour fermer la vue agrandie
@@ -370,6 +407,11 @@ export default function Collection({ cards, errorServer }) {
                                         {card.id}
                                     </div>
                                 </div>
+                                {newCards.has(card.id) && (
+                                    <div className="absolute top-0 right-0 bg-green-500 text-orange-500 md:text-base rounded-full px-2 py-1 text-sm font-bold">
+                                        NEW
+                                    </div>
+                                )}
                                 {cardCounts[card.id] > 1 && (
                                     <div className="absolute bottom-2 right-2 bg-red-600 text-white rounded-full px-2 py-1 text-sm font-bold">
                                         X {cardCounts[card.id]}
@@ -378,7 +420,7 @@ export default function Collection({ cards, errorServer }) {
                                 <span className="absolute bottom-2 left-2 text-black bg-white rounded-full font-bold text-xl cursor-pointer group w-5 h-5 flex items-center justify-center">
                                     ?
                                     <span className="tooltip-text absolute hidden group-hover:block bg-gray-700 text-white text-xs rounded p-2 -ml-5 -mb-6 bottom-12 left-6 md:text-base w-[100px] sm:w-[100px] md:w-[150px] lg:w-[200px] xl:w-[250px] 2xl:w-[300px]">
-                                        {card.id === 66 || card.id === 51 || card.id === 101 ? "S'obtient via un événement"
+                                        {card.id === 117 || card.id === 66 || card.id === 51 || card.id === 101 ? "S'obtient via un événement"
                                             : card.isDraw === true
                                                 ? `S'obtient via la boutique ${card.evolveCost ? "et peut level Up" : ""}`
                                                 : (!allCardsName.get(card.id - 1)?.evolvedId)

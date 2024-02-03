@@ -139,8 +139,8 @@ export default async function handler(req, res) {
 
                 await prisma.$transaction(async (prisma) => {
                     for (const card of Object.values(selectedCardsMap)) {
-                        await prisma.$executeRaw`INSERT INTO playercards (petId, cardId, count)
-                            VALUES (${decoded.id}, ${card.id}, ${card.count})
+                        await prisma.$executeRaw`INSERT INTO playercards (petId, cardId, count, isNew)
+                            VALUES (${decoded.id}, ${card.id}, ${card.count}, true)
                             ON DUPLICATE KEY UPDATE count = count + ${card.count}`;
                     }
                 });
