@@ -35,7 +35,7 @@ export default function Deck({ cards, deckInitial, errorServer }) {
         setDeck(newDeck);
     };
 
-    console.log("playerCard:", playerCards)
+    console.log("playerCards:", playerCards)
 
     const createDuel = async () => {
         setLoading(true);
@@ -207,6 +207,7 @@ export default function Deck({ cards, deckInitial, errorServer }) {
 
                         return (
                             <div key={index}>
+                                <div className="flex flex-col">
                                 {card ? (
                                     <div className="relative w-[100px] h-[100px] sm:w-[150px] sm:h-[150px] md:w-[200px] md:h-[200px] lg:w-[250px] lg:h-[250px] xl:w-[300px] xl:h-[300px] 2xl:w-[350px] 2xl:h-[350px]">
                                         <Image
@@ -236,6 +237,19 @@ export default function Deck({ cards, deckInitial, errorServer }) {
                                     ))}
                                 </select>
                             </div>
+                             {card && (
+                                <div className="flex flex-col ml-4">
+                                    <div><strong>Passifs:</strong></div>
+                                    {card.passifcards.map((passive, pIndex) => (
+                                        <div key={pIndex}>{passive.name} : {passive.passif.description}</div>
+                                    ))}
+                                    <div><strong>Compétences:</strong></div>
+                                    {/* {card.skills.map((skill, sIndex) => (
+                                        <div key={sIndex}>{skill}</div>
+                                    ))} */}
+                                </div>
+                            )}
+                        </div>
                         );
                     })}
                 </div>
@@ -288,14 +302,14 @@ export async function getServerSideProps(context) {
     }
 
     try {
-        const response = await axios.get(`${process.env.NEXTAUTH_URL}/api/user/card`, {
+        const response = await axios.get(`${process.env.NEXTAUTH_URL}/api/user/deck`, {
             headers: {
                 'Content-Type': 'application/json',
                 Authorization: `Bearer ${session.customJwt}`,
                 cookie: context.req.headers.cookie
             }
         })
-        const cardsPlayer = await response.data.playerCards;
+        const cardsPlayer = await response.data;
         // filtre seulement les cartes rares et epique du tableau playerCards
         const cards = cardsPlayer.filter(pc => pc.card.rarety === 'Rare' || pc.card.rarety === 'Epique');
        

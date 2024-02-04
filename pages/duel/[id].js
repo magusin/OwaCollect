@@ -23,6 +23,7 @@ export default function Duel({ errorServer }) {
     const [loading, setLoading] = React.useState(false);
     const [duelState, setDuelState] = React.useState(null);
     const [selectedCard, setSelectedCard] = React.useState(null);
+    const [timeLeft, setTimeLeft] = React.useState(null);
 
     const handleSelectCard = (card) => {
         setSelectedCard(card);
@@ -56,6 +57,29 @@ export default function Duel({ errorServer }) {
             if (id) {
                 const unsubscribe = onSnapshot(doc(db, "duel", id), (doc) => {
                     setDuelState(doc.data());
+                    const data = doc.data();
+                    if (data.statut === 'passif' && data.startTime) {
+                        // Convertir le timestamp Firebase en Date JavaScript
+                        const startTime = new Date(data.startTime.seconds * 1000);
+                        const duration = data.duration;
+                        const now = new Date();
+                        
+                        // Calculer le temps restant
+                        const endTime = new Date(startTime.getTime() + duration * 1000);
+                        const timeLeft = Math.max(endTime - now, 0) / 1000; // Convertir en secondes
+                        
+                        // Mettre à jour le temps restant toutes les secondes
+                        const interval = setInterval(() => {
+                            const nowUpdate = new Date();
+                            const timeLeftUpdate = Math.max(endTime - nowUpdate, 0) / 1000;
+                            setTimeLeft(timeLeftUpdate);
+                            
+                            if (timeLeftUpdate <= 0) {
+                                clearInterval(interval);
+                                // Ici, vous pouvez gérer la fin du timer
+                            }
+                        }, 1000);
+                    }
                 });
                 return () => unsubscribe();
             }
@@ -122,7 +146,7 @@ export default function Duel({ errorServer }) {
 
     if (error) {
         return (
-            <div className="flex flex-col h-screen" style={{ marginTop: "80px" }}>
+            <div className="flex flex-col h-screen">
                 <Header points={points} />
                 <div className="flex-grow flex justify-center items-center">
                     <span className="text-center text-red-500">⚠ {error}</span>
@@ -134,7 +158,7 @@ export default function Duel({ errorServer }) {
 
     if (status === "loading" || loading) {
         return (
-            <div className="flex flex-col h-screen" style={{ marginTop: "80px" }}>
+            <div className="flex flex-col h-screen">
                 <Header points={points} />
                 <div className="flex-grow flex justify-center items-center">
                     <span className="text-center"><svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24"><path fill="#1f2937" d="M12,4a8,8,0,0,1,7.89,6.7A1.53,1.53,0,0,0,21.38,12h0a1.5,1.5,0,0,0,1.48-1.75,11,11,0,0,0-21.72,0A1.5,1.5,0,0,0,2.62,12h0a1.53,1.53,0,0,0,1.49-1.3A8,8,0,0,1,12,4Z"><animateTransform attributeName="transform" dur="0.75s" repeatCount="indefinite" type="rotate" values="0 12 12;360 12 12" /></path></svg></span>
@@ -172,11 +196,22 @@ export default function Duel({ errorServer }) {
         if (duelState.player1Id && duelState.player2Id) {
             const isPlayerOne = session.user.id === duelState.player1Id;
             if (session.user.id === duelState.player1Id || session.user.id === duelState.player2Id) {
+                if (duelState.statut === 'passif') {
+                    return (
+                        <div className="flex flex-col h-screen">
+                            <Header points={points} />
+                            <div className="flex-grow flex justify-center items-center">
+                            <span className="text-center">Time: {timeLeft ? `${Math.floor(timeLeft)}s` : "Loading timer..."}</span>
+                            </div>
+                            <Footer />
+                        </div>
+                    );
+                } else {
                 return (
 
                     <div className="flex flex-col h-screen">
                         <Header points={points} />
-                        <div className="flex flex-col flex-grow pt-20 relative">
+                        <div className="flex flex-col flex-grow relative">
 
                             {/* Cartes de l'adversaire en haut */}
                             <div className="flex justify-center gap-2 md:gap-4 mt-4 absolute top-20 left-1/2 transform -translate-x-1/2">
@@ -216,6 +251,7 @@ export default function Duel({ errorServer }) {
                         <Footer />
                     </div>
                 )
+                                }
             } else {
                 return (
                     <div className="flex flex-col h-screen">

@@ -2,7 +2,7 @@ import Cors from 'cors'
 import { PrismaClient } from '@prisma/client'
 import jwt from 'jsonwebtoken';
 import { getToken } from "next-auth/jwt";
-import { db } from '../../firebaseAdmin';
+import { db, admin } from '../../firebaseAdmin';
 import verifySignature from '../../verifySignature';
 
 /// Initialiser le midleware Cors
@@ -91,18 +91,18 @@ export default async function handler(req, res) {
                     }
                 })
                 if (duelFind.player2Id != null) {
-                const cardP2 = await prisma.playercards.findMany({
-                    where: {
-                        userId: duelFind.player2Id,
-                        isInDeck: true
-                    },
-                    include: {
-                        card: true
-                    }
-                })
-                res.status(200).json({ duelFind, cardP1, cardP2 })
-                break;
-            }
+                    const cardP2 = await prisma.playercards.findMany({
+                        where: {
+                            userId: duelFind.player2Id,
+                            isInDeck: true
+                        },
+                        include: {
+                            card: true
+                        }
+                    })
+                    res.status(200).json({ duelFind, cardP1, cardP2 })
+                    break;
+                }
                 res.status(200).json({ duelFind, cardP1 })
                 break;
             case 'PUT':
@@ -122,7 +122,15 @@ export default async function handler(req, res) {
                         isInDeck: true
                     },
                     include: {
-                        card: true
+                        card: {
+                            include: {
+                                passifcards: {
+                                    include: {
+                                        passif: true
+                                    }
+                                }
+                            }
+                        }
                     }
                 })
 
@@ -154,10 +162,16 @@ export default async function handler(req, res) {
 
                 const duelRef = db.collection("duel").doc(req.query.id);
 
+                // Obtenez le timestamp actuel de Firebase
+                const now = admin.firestore.FieldValue.serverTimestamp();
+
                 await duelRef.update({
                     player2Id: decoded.id,
                     player2Name: decoded.name,
                     deckP2: deckP2,
+                    statut: 'passif',
+                    startTime: now,
+                    duration: 60
                 });
                 res.status(200).json('put ok')
                 break;

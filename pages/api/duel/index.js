@@ -89,8 +89,12 @@ export default async function handler(req, res) {
                     },
                     include: {
                         card: {
-                            include : {
-                                passifcards: true
+                            include: {
+                                passifcards: {
+                                    include: {
+                                        passif: true
+                                    }
+                                }
                             }
                         }
                     }

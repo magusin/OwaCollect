@@ -4,13 +4,15 @@ import { signOut, useSession } from "next-auth/react";
 import Image from "next/image";
 import DarkModeToggleSVG from 'C/darkModeToggleSVG';
 import { useDarkMode } from '@/contexts/darkModeContext';
+import { useRouter } from 'next/router';
 
 export default function Header({ points }) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { data: session, status } = useSession();
   const { darkMode, toggleDarkMode } = useDarkMode();
-
+  const router = useRouter();
+console.log('router', router)
 
   const handleSignOut = () => {
     // Vider le localStorage
@@ -48,7 +50,7 @@ export default function Header({ points }) {
     <>
       {session ? (
         // if session
-        <header className={`fixed top-0 left-0 right-0 z-10 transition duration-300 ease-in-out font-bold ${isScrolled ? 'backdrop-blur' : ''} ${darkMode ? 'text-black' : 'text-white'} p-4 w-full`} style={{ backgroundColor: isScrolled ? '#00990080' : '#009900' }}>
+        <header className={`${router.route === '/duel/[id]' ? '' : 'fixed'} top-0 left-0 right-0 z-10 transition duration-300 ease-in-out font-bold ${isScrolled ? 'backdrop-blur' : ''} ${darkMode ? 'text-black' : 'text-white'} p-4 w-full`} style={{ backgroundColor: isScrolled ? '#00990080' : '#009900' }}>
           <div className=" flex justify-between items-center">
             <Link href='/' className="flex items-center">
               <span className={`${darkMode ? 'border-black' : 'border-white'} mr-4 border-r-2 pr-2`}>{session.user.name}</span>
@@ -100,8 +102,8 @@ export default function Header({ points }) {
               src={"/images/owaCollect.png"}
               alt="banner owaCollect"
               priority={true}
-              width={300}
-              height={300}
+              width={200}
+              height={200}
             />
           </div>
         </header>
