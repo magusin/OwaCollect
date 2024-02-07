@@ -14,12 +14,12 @@ import Modal from "C/modal";
 import Footer from "C/footer";
 import axiosInstance from "@/utils/axiosInstance";
 
-export default function SecretShop({ cards, errorServer }) {
+export default function SecretShop({ cards, totalPoints, errorServer }) {
     const [error, setError] = React.useState(errorServer || null);
     const { data: session, status } = useSession();
     const router = useRouter();
     const [loading, setLoading] = React.useState(false);
-    const [points, setPoints] = React.useState(0);
+    const [points, setPoints] = React.useState(totalPoints || 0);
     const [allCard, setAllCard] = React.useState(cards?.cards);
     const [playerCards, setPlayerCards] = React.useState(cards?.playerCards);
     const { id } = router.query;
@@ -96,6 +96,8 @@ export default function SecretShop({ cards, errorServer }) {
 
     useEffect(() => {
 
+        localStorage.setItem('points', points);
+
         if (error === 'Erreur avec votre Token ou il est expiré. Veuillez vous reconnecter.') {
             setTimeout(() => {
                 localStorage.removeItem('userOC');
@@ -109,47 +111,8 @@ export default function SecretShop({ cards, errorServer }) {
             router.push('/');
         }
 
-        if (localStorage.getItem('points') != null) {
-            setPoints(localStorage.getItem('points'))
-        }
-
-        if (localStorage.getItem('points') === null && localStorage.getItem('userOC') != null) {
-            const user = JSON.parse(localStorage.getItem('userOC'));
-            const calculatedPoints = calculatePoints(user);
-            const totalPoints = calculatedPoints - user.pointsUsed;
-            localStorage.setItem('points', totalPoints);
-            setPoints(totalPoints);
-        }
-
-        if (localStorage.getItem('userOC') === null && session) {
-            const getUser = async () => {
-                try {
-                    const response = await axiosInstance.get('/api/user', {
-                        customConfig: { session: session }
-                    });
-                    const data = await response.data;
-                    localStorage.setItem('userOC', JSON.stringify(data));
-                    const calculatedPoints = calculatePoints(data);
-                    const totalPoints = calculatedPoints - data.pointsUsed;
-                    localStorage.setItem('points', totalPoints);
-                    setPoints(totalPoints);
-                } catch (error) {
-                    if (error.response.status === 401) {
-                        setError('Erreur avec votre Token ou il est expiré. Veuillez vous reconnecter.')
-                        setTimeout(() => {
-                            signOut()
-                            router.push('/');
-                        }, 2000);
-                    } else {
-                        setError(error.response?.data?.message || error.message);
-                    }
-                }
-            };
-            getUser();
-        }
-
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [status, session, error, router]);
+    }, [status, error, router, points]);
 
     if (error) {
         return (
@@ -303,8 +266,29 @@ export async function getServerSideProps(context) {
             }
         })
         const cards = await response.data;
+        const timestamp = new Date().getTime().toString();
+        const signature = await axios.post(`${process.env.NEXTAUTH_URL}/api/generateSignature`, {
+            timestamp: timestamp       
+        }, {
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${session.customJwt}`,
+                cookie: context.req.headers.cookie
+            }
+        });
+        const responseUser = await axios.get(`${process.env.NEXTAUTH_URL}/api/user`, {
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${session.customJwt}`,
+                cookie: context.req.headers.cookie,
+                'x-timestamp': timestamp,
+                'x-signature': signature.data.signature
+            }
+        })
+        const user = await responseUser.data;
+        const totalPoints = calculatePoints(user);
         return {
-            props: { cards },
+            props: { cards, totalPoints },
         };
     } catch (error) {
         if (error.response && error.response.status === 401) {
