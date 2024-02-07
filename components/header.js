@@ -12,7 +12,6 @@ export default function Header({ points }) {
   const { data: session, status } = useSession();
   const { darkMode, toggleDarkMode } = useDarkMode();
   const router = useRouter();
-console.log('router', router)
 
   const handleSignOut = () => {
     // Vider le localStorage

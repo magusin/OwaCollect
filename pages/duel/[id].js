@@ -24,10 +24,48 @@ export default function Duel({ errorServer }) {
     const [duelState, setDuelState] = React.useState(null);
     const [selectedCard, setSelectedCard] = React.useState(null);
     const [timeLeft, setTimeLeft] = React.useState(null);
+    const [currentCardIndex, setCurrentCardIndex] = React.useState(0);
+    const [selectedPassifs, setSelectedPassifs] = React.useState({});
+    const [currentSelected, setcurrentSelected] = React.useState(null);
 
     const handleSelectCard = (card) => {
         setSelectedCard(card);
     };
+
+    console.log('selectedPassifs: ', selectedPassifs)
+
+    const handleSelectPassif = (passif) => {
+        setcurrentSelected(passif);
+    }
+
+    const validatePassif = async () => {
+
+        setSelectedPassifs(prev => ({ ...prev, [currentCardIndex]: currentSelected }));
+        setcurrentSelected(null);
+        if (currentCardIndex === 3) {
+            setLoading(true);
+            try {
+                const reponse = await axiosInstance.post(`/api/duel/${id}/passif`, { passifs: selectedPassifs }, {
+                    customConfig: { session: session }
+                });
+                if (reponse.status === 200) {
+                    setLoading(false);
+                }
+            } catch (error) {
+                if (error.response?.status === 401) {
+                    setError('Erreur avec votre Token ou il est expiré. Veuillez vous reconnecter.')
+                    setTimeout(() => {
+                        signOut()
+                        router.push('/');
+                    }, 2000);
+                } else {
+                    setError(error.response?.data?.message || error.message);
+                }
+            }
+        } else {
+            setCurrentCardIndex(prev => prev + 1);
+        }
+    }
 
     const registerP2 = async () => {
         setLoading(true);
@@ -35,9 +73,10 @@ export default function Duel({ errorServer }) {
             const response = await axiosInstance.put(`/api/duel/${id}`, { bet: duelState.bet }, {
                 customConfig: { session: session }
             });
+            if (response.status === 200) {
             const data = await response.data;
-            console.log(data)
             setLoading(false);
+            }
         } catch (error) {
             if (error.response?.status === 401) {
                 setError('Erreur avec votre Token ou il est expiré. Veuillez vous reconnecter.')
@@ -54,7 +93,7 @@ export default function Duel({ errorServer }) {
 
     useEffect(() => {
         if (typeof window !== "undefined") {
-            if (id) {
+            if (id && session) {
                 const unsubscribe = onSnapshot(doc(db, "duel", id), (doc) => {
                     setDuelState(doc.data());
                     const data = doc.data();
@@ -62,21 +101,29 @@ export default function Duel({ errorServer }) {
                         // Convertir le timestamp Firebase en Date JavaScript
                         const startTime = new Date(data.startTime.seconds * 1000);
                         const duration = data.duration;
-                        const now = new Date();
-                        
+                        const isPlayerOne = session.user.id === data.player1Id;
                         // Calculer le temps restant
                         const endTime = new Date(startTime.getTime() + duration * 1000);
-                        const timeLeft = Math.max(endTime - now, 0) / 1000; // Convertir en secondes
-                        
+
                         // Mettre à jour le temps restant toutes les secondes
                         const interval = setInterval(() => {
                             const nowUpdate = new Date();
                             const timeLeftUpdate = Math.max(endTime - nowUpdate, 0) / 1000;
                             setTimeLeft(timeLeftUpdate);
+                            const totalCards = isPlayerOne ? data.deckP1.length : data.deckP2.length;
                             
-                            if (timeLeftUpdate <= 0) {
-                                clearInterval(interval);
-                                // Ici, vous pouvez gérer la fin du timer
+                            if (timeLeftUpdate <= 1 && Object.keys(selectedPassifs).length < 4) {                                clearInterval(interval);
+                                for (let i = 0; i < totalCards; i++) {
+                                    if (!selectedPassifs[i]) { // Si un passif n'a pas été sélectionné pour cette carte
+                                        const card = isPlayerOne ? data.deckP1[i] : data.deckP2[i];
+                                        const randomPassifIndex = Math.floor(Math.random() * card.card.passifcards.length);
+                                        const randomPassif = card.card.passifcards[randomPassifIndex];
+                                        // Mettez à jour l'état avec le passif choisi aléatoirement
+                                        setSelectedPassifs(prev => ({ ...prev, [i]: randomPassif }));
+                                        
+                                    }
+                                }
+                                return 0;
                             }
                         }, 1000);
                     }
@@ -84,7 +131,7 @@ export default function Duel({ errorServer }) {
                 return () => unsubscribe();
             }
         }
-    }, [id]);
+    }, [id, session, selectedPassifs]);
 
     useEffect(() => {
 
@@ -116,10 +163,8 @@ export default function Duel({ errorServer }) {
         if (localStorage.getItem('userOC') === null && session) {
             const getUser = async () => {
                 try {
-                    const response = await axios.get('/api/user', {
-                        headers: {
-                            Authorization: `Bearer ${session.customJwt}`,
-                        },
+                    const response = await axiosInstance.get('/api/user', {
+                        customConfig: { session: session }
                     });
                     const data = await response.data;
                     localStorage.setItem('userOC', JSON.stringify(data));
@@ -197,61 +242,90 @@ export default function Duel({ errorServer }) {
             const isPlayerOne = session.user.id === duelState.player1Id;
             if (session.user.id === duelState.player1Id || session.user.id === duelState.player2Id) {
                 if (duelState.statut === 'passif') {
+                    const currentCard = isPlayerOne ? duelState.deckP1[currentCardIndex] : duelState.deckP2[currentCardIndex];
                     return (
                         <div className="flex flex-col h-screen">
                             <Header points={points} />
-                            <div className="flex-grow flex justify-center items-center">
-                            <span className="text-center">Time: {timeLeft ? `${Math.floor(timeLeft)}s` : "Loading timer..."}</span>
+                            <div className="flex-grow flex flex-col justify-around items-center">
+                                <h1 className='font-bold text-2xl'>Choisissez un passif pour chaque carte</h1>
+                                <div className="flex justify-center items-center">
+                                    <div className="flex items-center justify-center space-x-2">
+                                        <div className="bg-indigo-500 text-white px-3 py-2 rounded shadow">
+                                            <span className="font-mono text-xl">
+                                                {timeLeft !== null ? `${Math.floor(timeLeft / 60)}:${`0${Math.floor(timeLeft % 60)}`.slice(-2)}` : '00:00'}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>                                
+                                <div className='relative w-[250px] h-[250px] md:w-[300px] md:h-[300px] xl:w-[400px] xl:h-[400px]'>
+                                    <Image src={`${currentCard.card.picture}.png`}
+                                        alt={currentCard.card.name}
+                                        layout='fill'
+                                        objectFit="fill"
+                                        sizes="100%"
+                                        className="border-2 border-green-500" />
+                                </div>
+                                <div className='mx-4'>
+                                    {currentCard.card.passifcards.map((passif, index) => (
+                                        <div key={index} className={`cursor-pointer mb-4 px-4 py-2 rounded ${passif === currentSelected ? 'bg-green-500' : 'bg-blue-500 hover:bg-blue-700'}`} onClick={() => handleSelectPassif(passif)}>
+                                            {passif.name} : {passif.passif.description}
+                                        </div>
+
+                                    ))}
+                                </div>
+                                    <button onClick={validatePassif} className="px-4 py-2 bg-green-500 rounded hover:bg-green-600">Valider</button>
+                            </div>
+                            <div>
                             </div>
                             <Footer />
                         </div>
                     );
                 } else {
-                return (
+                    return (
 
-                    <div className="flex flex-col h-screen">
-                        <Header points={points} />
-                        <div className="flex flex-col flex-grow relative">
+                        <div className="flex flex-col h-screen">
+                            <Header points={points} />
+                            <div className="flex flex-col flex-grow relative">
 
-                            {/* Cartes de l'adversaire en haut */}
-                            <div className="flex justify-center gap-2 md:gap-4 mt-4 absolute top-20 left-1/2 transform -translate-x-1/2">
-                                {(isPlayerOne ? duelState.deckP2 : duelState.deckP1).map((card, index) => (
-                                    <div key={index} className="w-24 h-32 bg-gray-400 transform hover:scale-110 transition duration-300 w-[100px] h-[100px] sm:w-[150px] sm:h-[150px] md:w-[200px] md:h-[200px] xl:w-[250px] xl:h-[250px]">
-                                        <Image src={`${card.card.picture_back}.png`} alt="Carte de dos" layout="fill"
-                                            objectFit="fill"
-                                            sizes="100%"
-                                            priority={true} />
-                                    </div>
-                                ))}
-                            </div>
-                            <div style={{ height: '100vh', width: '100vw' }}>
-                                <RandomNumber />
-                            </div>
-                            {/* Informations du duel au centre */}
-                            {selectedCard && (
-                                <div className="flex flex-col items-center gap-5 m-5 absolute left-1/2 transform -translate-x-1/2 top-1/2 -translate-y-1/2">
-                                    <Image src={`${selectedCard.card.picture}.png`} alt={selectedCard.card.name} className="w-40 h-56 object-cover border-2 border-green-500" />
-                                    <button onClick={validateCard} className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600">Valider cette carte</button>
+                                {/* Cartes de l'adversaire en haut */}
+                                <div className="flex justify-center gap-2 md:gap-4 mt-4 absolute top-20 left-1/2 transform -translate-x-1/2">
+                                    {(isPlayerOne ? duelState.deckP2 : duelState.deckP1).map((card, index) => (
+                                        <div key={index} className="w-24 h-32 bg-gray-400 transform hover:scale-110 transition duration-300 w-[100px] h-[100px] sm:w-[150px] sm:h-[150px] md:w-[200px] md:h-[200px] xl:w-[250px] xl:h-[250px]">
+                                            <Image src={`${card.card.picture_back}.png`} alt="Carte de dos" layout="fill"
+                                                objectFit="fill"
+                                                sizes="100%"
+                                                priority={true} />
+                                        </div>
+                                    ))}
                                 </div>
-                            )}
-
-                            {/* Cartes du joueur en bas */}
-                            <div className="flex justify-center gap-2 md:gap-4 mb-4 absolute bottom-0 left-1/2 transform -translate-x-1/2">
-                                {(isPlayerOne ? duelState.deckP1 : duelState.deckP2).map((card, index) => (
-                                    <div key={index} className="relative cursor-pointer duel-card w-[100px] h-[100px] sm:w-[150px] sm:h-[150px] md:w-[200px] md:h-[200px] xl:w-[250px] xl:h-[250px]" onClick={() => handleSelectCard(card)}>
-                                        <Image src={`${card.card.picture}.png`} alt={card.card.name} layout="fill"
-                                            objectFit="fill"
-                                            sizes="100%"
-                                            priority={true} />
+                                <div style={{ height: '100vh', width: '100vw' }}>
+                                    <RandomNumber />
+                                </div>
+                                {/* Informations du duel au centre */}
+                                {selectedCard && (
+                                    <div className="flex flex-col items-center gap-5 m-5 absolute left-1/2 transform -translate-x-1/2 top-1/2 -translate-y-1/2">
+                                        <Image src={`${selectedCard.card.picture}.png`} alt={selectedCard.card.name} className="w-40 h-56 object-cover border-2 border-green-500" />
+                                        <button onClick={validateCard} className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600">Valider cette carte</button>
                                     </div>
-                                ))}
-                            </div>
+                                )}
 
+                                {/* Cartes du joueur en bas */}
+                                <div className="flex justify-center gap-2 md:gap-4 mb-4 absolute bottom-0 left-1/2 transform -translate-x-1/2">
+                                    {(isPlayerOne ? duelState.deckP1 : duelState.deckP2).map((card, index) => (
+                                        <div key={index} className="relative cursor-pointer duel-card w-[100px] h-[100px] sm:w-[150px] sm:h-[150px] md:w-[200px] md:h-[200px] xl:w-[250px] xl:h-[250px]" onClick={() => handleSelectCard(card)}>
+                                            <Image src={`${card.card.picture}.png`} alt={card.card.name} layout="fill"
+                                                objectFit="fill"
+                                                sizes="100%"
+                                                priority={true} />
+                                        </div>
+                                    ))}
+                                </div>
+
+                            </div>
+                            <Footer />
                         </div>
-                        <Footer />
-                    </div>
-                )
-                                }
+                    )
+                }
             } else {
                 return (
                     <div className="flex flex-col h-screen">

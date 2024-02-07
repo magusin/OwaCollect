@@ -171,7 +171,7 @@ export default async function handler(req, res) {
                     deckP2: deckP2,
                     statut: 'passif',
                     startTime: now,
-                    duration: 60
+                    duration: 200
                 });
                 res.status(200).json('put ok')
                 break;
