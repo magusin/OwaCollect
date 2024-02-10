@@ -335,7 +335,7 @@ export default function Collection({ cards, totalPoints, errorServer }) {
                                     checked={showLevelUpOnly}
                                     onChange={handleShowLevelUpOnlyChange}
                                 />
-                                Level Up
+                                Level Up possible
                             </label>
                         </div>
                     </div>

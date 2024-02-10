@@ -135,8 +135,8 @@ export default function Blacksmith({ cards, totalPoints, errorServer }) {
                             src="/images/blacksmith.png"
                             alt="blacksmith"
                             priority={true}
-                            width={600}
-                            height={525}
+                            width={550}
+                            height={550}
                         />
                     </div>
                     <div className="flex-grow mt-4 flex flex-wrap justify-center">
@@ -156,11 +156,14 @@ export default function Blacksmith({ cards, totalPoints, errorServer }) {
                                                     objectFit="contain"
                                                     sizes="100%"
                                                 />
+                                            <div className="absolute bottom-2 right-2 bg-red-600 text-white rounded-full px-2 py-1 text-sm font-bold">
+                                        X {card.count}
+                                    </div>
                                             </div>
                                             <button
                                                 onClick={() => handleForgeCard(card.card)}
                                                 className="bg-green-500 text-white py-2 px-4 rounded mt-4">
-                                                Fabriquer
+                                                Sacrifier
                                             </button>
                                             {showModal && (
                                                 <Modal
