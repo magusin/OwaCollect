@@ -15,7 +15,6 @@ import Footer from "C/footer";
 import axiosInstance from "@/utils/axiosInstance";
 
 export default function Blacksmith({ cards, totalPoints, errorServer }) {
-    console.log(cards)
     const [error, setError] = React.useState(errorServer || null);
     const { data: session, status } = useSession();
     const router = useRouter();
@@ -54,7 +53,6 @@ export default function Blacksmith({ cards, totalPoints, errorServer }) {
                 if (response.status === 200) {
                     const data = await response.data
                     let selectedCard = data.updatedCard;
-                    console.log('gg', data)
                     setPlayerCards(data.allPlayerCards);
                     setAlertMessage(`Carte ${selectedCard.name} obtenue !`);
                     setAlertType('success');
@@ -67,7 +65,6 @@ export default function Blacksmith({ cards, totalPoints, errorServer }) {
                 }
 
             } catch (error) {
-                console.log(error)
                 if (error.response?.status === 401) {
                     setError('Erreur avec votre Token ou il est expiré. Veuillez vous reconnecter.')
                     setTimeout(() => {

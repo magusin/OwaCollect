@@ -25,7 +25,6 @@ export default function Alley() {
     }
 
     useEffect(() => {
-        console.log("Points from storage:", localStorage.getItem('points'));
 
         if (localStorage.getItem('points') != null) {
             setPoints(localStorage.getItem('points'))
