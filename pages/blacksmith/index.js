@@ -13,6 +13,7 @@ import Alert from "C/alert";
 import Modal from "C/modal";
 import Footer from "C/footer";
 import axiosInstance from "@/utils/axiosInstance";
+import Head from 'next/head';
 
 export default function Blacksmith({ cards, totalPoints, errorServer }) {
     const [error, setError] = React.useState(errorServer || null);
@@ -99,8 +100,21 @@ export default function Blacksmith({ cards, totalPoints, errorServer }) {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [status, error, router, points]);
 
+    function HeadView() {
+        return (
+            <Head>
+                <title>Forge - Owarida</title>
+                <meta name="description" content="Forgez vos cartes" />
+                <meta name="keywords" content="forge, cartes, owarida, karssi" />
+                <link rel="icon" href="/favicon.ico" />
+            </Head>
+        )
+    }
+
     if (error) {
         return (
+            <>
+            <HeadView />
             <div className="flex flex-col h-screen" style={{ marginTop: "80px" }}>
                 <Header points={points} />
                 <div className="flex-grow flex justify-center items-center">
@@ -108,11 +122,14 @@ export default function Blacksmith({ cards, totalPoints, errorServer }) {
                 </div>
                 <Footer />
             </div>
+            </>
         );
     }
 
     if (status === "loading" || loading) {
         return (
+            <>
+            <HeadView />
             <div className="flex flex-col h-screen" style={{ marginTop: "80px" }}>
                 <Header points={points} />
                 <div className="flex-grow flex justify-center items-center">
@@ -120,6 +137,7 @@ export default function Blacksmith({ cards, totalPoints, errorServer }) {
                 </div>
                 <Footer />
             </div>
+            </>
         )
     }
 
@@ -128,6 +146,7 @@ export default function Blacksmith({ cards, totalPoints, errorServer }) {
         const ownedCardIds = new Set(playerCards.map(card => card.cardId));
         return (
             <>
+            <HeadView />
                 <div className="flex flex-col h-screen" >
                     <Header points={points} />
                     <div className="flex-grow mt-4 flex flex-col items-center" style={{ marginTop: "80px" }}>

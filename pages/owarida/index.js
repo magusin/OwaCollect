@@ -11,6 +11,7 @@ import nextAuthOptions from "../../config/nextAuthOptions";
 import { useDarkMode } from "@/contexts/darkModeContext";
 import Footer from "C/footer";
 import axiosInstance from "@/utils/axiosInstance";
+import Head from 'next/head';
 
 export default function Owarida({ totalPoints, errorServer }) {
     const [error, setError] = React.useState(errorServer || null);
@@ -92,8 +93,21 @@ export default function Owarida({ totalPoints, errorServer }) {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [status, session, error, router, points]);
 
+    const HeadView = () => {
+        return (
+            <Head>
+                <title>Owarida - Stream</title>
+                <meta name="description" content="Owarida - Stream" />
+                <meta name="keywords" content="Owarida, Stream, Twitch, streameur, chaine" />
+                <link rel="icon" href="/favicon.ico" />
+            </Head>
+        );
+    }
+
     if (error) {
         return (
+            <>
+            <HeadView />
             <div className="flex flex-col h-screen" style={{ marginTop: "80px" }}>
                 <Header points={points} />
                 <div className="flex-grow flex justify-center items-center">
@@ -101,11 +115,14 @@ export default function Owarida({ totalPoints, errorServer }) {
                 </div>
                 <Footer />
             </div>
+            </>
         );
     }
 
     if (status === "loading" || loading) {
         return (
+            <>
+            <HeadView />
             <div className="flex flex-col h-screen" style={{ marginTop: "80px" }}>
                 <Header points={points} />
                 <div className="flex-grow flex justify-center items-center">
@@ -113,11 +130,14 @@ export default function Owarida({ totalPoints, errorServer }) {
                 </div>
                 <Footer />
             </div>
+            </>
         )
     }
 
     if (session) {
         return (
+            <>
+            <HeadView />
             <div className="flex flex-col h-screen" style={{ marginTop: "80px" }}>
                 <Header points={points} />
                 <div className="flex-grow flex flex-col items-center">
@@ -183,6 +203,7 @@ export default function Owarida({ totalPoints, errorServer }) {
                 )}
                 <Footer />
             </div>
+            </>
         );
     }
 }

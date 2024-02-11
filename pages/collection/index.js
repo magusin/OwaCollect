@@ -13,6 +13,7 @@ import Alert from "C/alert";
 import Footer from "@/components/footer";
 import Switch from "@/components/filterToggleSVG";
 import axiosInstance from "@/utils/axiosInstance";
+import Head from 'next/head';
 
 export default function Collection({ cards, totalPoints, errorServer }) {
    
@@ -281,8 +282,21 @@ export default function Collection({ cards, totalPoints, errorServer }) {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [status, error, router, points]);
 
+    function HeadView () {
+        return (
+            <Head>
+                <title>Collection | Owarida</title>
+                <meta name="description" content="Collection de cartes Owarida" />
+                <link rel="icon" href="/favicon.ico" />
+                <meta name="keyworlds" content="Owarida, collection, cartes, Owarida Coins, points, elden ring" />
+            </Head>
+        )
+    }
+
     if (error) {
         return (
+            <>
+            <HeadView />
             <div className="flex flex-col h-screen" style={{ marginTop: "80px" }}>
                 <Header points={points} />
                 <div className="flex-grow flex justify-center items-center">
@@ -290,11 +304,14 @@ export default function Collection({ cards, totalPoints, errorServer }) {
                 </div>
                 <Footer />
             </div>
+            </>
         );
     }
 
     if (status === "loading" || loading) {
         return (
+            <>
+            <HeadView />
             <div className="flex flex-col h-screen" style={{ marginTop: "80px" }}>
                 <Header points={points} />
                 <div className="flex-grow flex justify-center items-center">
@@ -302,11 +319,14 @@ export default function Collection({ cards, totalPoints, errorServer }) {
                 </div>
                 <Footer />
             </div>
+            </>
         )
     }
 
     if (session) {
         return (
+            <>
+            <HeadView />
             <div className="flex flex-col h-screen" style={{ marginTop: "80px" }}>
                 <Header points={points} />
                 <div className="flex-grow flex flex-col items-center">
@@ -480,6 +500,7 @@ export default function Collection({ cards, totalPoints, errorServer }) {
                 </div>
                 <Footer />
             </div>
+            </>
         );
     }
 }

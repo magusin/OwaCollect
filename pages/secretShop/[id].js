@@ -13,6 +13,7 @@ import Alert from "C/alert";
 import Modal from "C/modal";
 import Footer from "C/footer";
 import axiosInstance from "@/utils/axiosInstance";
+import Head from "next/head";
 
 export default function SecretShop({ cards, totalPoints, errorServer }) {
     const [error, setError] = React.useState(errorServer || null);
@@ -114,8 +115,21 @@ export default function SecretShop({ cards, totalPoints, errorServer }) {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [status, error, router, points]);
 
+    function HeadView() {
+        return (
+            <Head>
+                <title>OW | Boutique secrète</title>
+                <meta name="description" content="Boutique secrète d'OWarida" />
+                <meta name="keywords" content="OWarida, boutique, secrète, cartes, points" />
+                <link rel="icon" href="/favicon.ico" />
+            </Head>
+        );
+    }
+
     if (error) {
         return (
+            <>
+            <HeadView />
             <div className="flex flex-col h-screen" style={{ marginTop: "80px" }}>
                 <Header points={points} />
                 <div className="flex-grow flex justify-center items-center">
@@ -123,11 +137,14 @@ export default function SecretShop({ cards, totalPoints, errorServer }) {
                 </div>
                 <Footer />
             </div>
+            </>
         );
     }
 
     if (status === "loading" || loading) {
         return (
+            <>
+            <HeadView />
             <div className="flex flex-col h-screen" style={{ marginTop: "80px" }}>
                 <Header points={points} />
                 <div className="flex-grow flex justify-center items-center">
@@ -135,6 +152,7 @@ export default function SecretShop({ cards, totalPoints, errorServer }) {
                 </div>
                 <Footer />
             </div>
+            </>
         )
     }
 
@@ -145,6 +163,7 @@ export default function SecretShop({ cards, totalPoints, errorServer }) {
             const secretCardsToBuy = [74, 99, 100].filter(id => !ownedCardIds.has(id));
             return (
                 <>
+            <HeadView />
                 <div className="flex flex-col h-screen" >
                     <Header points={points} />
                     <div className="flex-grow mt-4 flex flex-col items-center" style={{ marginTop: "80px" }}>
@@ -221,6 +240,7 @@ export default function SecretShop({ cards, totalPoints, errorServer }) {
         } else {
             return (
                 <>
+                <HeadView />
                 <div className="flex flex-col h-screen">
                     <Header points={points} />
                     <div className="flex-grow items-start justify-center" >

@@ -61,7 +61,7 @@ export default function Contact() {
         return (
             <Head>
                 <title>Owarida - Contact</title>
-                <meta name="description" content="Contactez Owarida pour toutes questions relatives au site." />
+                <meta name="description" content="Contacte d'Owarida et Hugo JACQUES pour toutes questions relatives au site." />
                 <meta name="keywords" content="Owarida, contact, mail, twitch, youtube" />
                 <link rel="icon" href="/favicon.ico" />
             </Head>

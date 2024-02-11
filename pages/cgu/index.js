@@ -6,6 +6,7 @@ import Footer from 'C/footer';
 import { useEffect } from 'react';
 import axiosInstance from "@/utils/axiosInstance";
 import calculatePoints from '@/utils/calculatePoints';
+import Head from 'next/head';
 
 export default function CGU() {
     const { data: session, status } = useSession();
@@ -56,8 +57,20 @@ export default function CGU() {
         }
     }, [status, session]);
 
+    function HeadView() {
+        return (
+            <Head>
+                <title>CGU - Owarida</title>
+                <meta name="description" content="Conditions Générales d'Utilisation du site Owarida" />
+                <meta name="keywords" content="owarida, cgu, conditions générales d'utilisation, twitch, hugo jacques" />
+            </Head>
+        )
+    }
+
     if (status === 'loading') {
         return (
+            <>
+            <HeadView />
             <div className="flex flex-col h-screen" style={{ marginTop: "80px" }}>
                 <Header points={points} />
                 <div className="flex-grow flex justify-center items-center">
@@ -65,11 +78,14 @@ export default function CGU() {
                 </div>
                 <Footer />
             </div>
+            </>
         )
     }
 
     if (session) {
         return (
+            <>
+            <HeadView />
             <div className="flex flex-col min-h-screen" style={{ marginTop: "80px" }}>
                 <Header points={points} />
                 <div className="p-4 md:px-8 xl:px-12">
@@ -172,6 +188,7 @@ export default function CGU() {
                 </div>
                 <Footer />
             </div>
+            </>
         )
     }
 

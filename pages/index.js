@@ -11,6 +11,7 @@ import Image from "next/legacy/image";
 import { useDarkMode } from "@/contexts/darkModeContext";
 import Footer from "C/footer";
 import axiosInstance from "@/utils/axiosInstance";
+import Head from 'next/head';
 
 export default function Login() {
   const { data: session, status } = useSession();
@@ -59,8 +60,21 @@ export default function Login() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session]);
 
+  function HeadView() {
+    return (
+      <Head>
+        <title>Connexion</title>
+        <meta name="description" content="Connexion avec Twitch, Owarida accueil" />
+        <meta nn="keywords" content="Owarida, connexion, twitch, accueil, owarida coins, stream, elden ring" />
+        <link rel="icon" href="/favicon.ico" />
+      </Head>
+    )
+  }
+
   if (status === "loading" || loading) {
     return (
+      <>
+      <HeadView />
       <div className="flex flex-col h-screen">
         <Header points={points} />
         <div className="flex-grow flex justify-center items-center">
@@ -68,11 +82,14 @@ export default function Login() {
         </div>
         <Footer />
       </div>
+      </>
     )
   }
 
   if (error) {
     return (
+      <>
+      <HeadView />
       <div className="flex flex-col h-screen">
         <Header points={points} />
         <div className="flex-grow flex justify-center items-center">
@@ -80,6 +97,7 @@ export default function Login() {
         </div>
         <Footer />
       </div>
+      </>
     );
   }
 
@@ -87,6 +105,7 @@ export default function Login() {
 
     return (
       <>
+      <HeadView />
         <div className="flex flex-col min-h-screen">
           <Header points={points} />
 

@@ -14,7 +14,7 @@ import { getServerSession } from "next-auth";
 import nextAuthOptions from "../../config/nextAuthOptions";
 import Footer from 'C/footer';
 import axiosInstance from '@/utils/axiosInstance';
-
+import Head from 'next/head';
 
 export default function Shop({ productsData, totalPoints, errorServer }) {
     const { data: session, status } = useSession();
@@ -107,8 +107,21 @@ export default function Shop({ productsData, totalPoints, errorServer }) {
 
     }, [status, router, error, points]);
 
+    function HeadView() {
+        return (
+            <Head>
+                <title>Shop | Owarida</title>
+                <meta name="description" content="Achetez des packs de cartes dans le shop à Owarida" />
+                <meta name="keywords" content="Owarida, shop, cartes, packs, points, elden ring" />
+                <link rel="icon" href="/favicon.ico" />
+            </Head>
+        )
+    }
+
     if (status === "loading" || loading) {
         return (
+            <>
+            <HeadView />
             <div className="flex flex-col h-screen" style={{ marginTop: "80px" }}>
                 <Header points={points} />
                 <div className="flex-grow flex justify-center items-center">
@@ -116,11 +129,14 @@ export default function Shop({ productsData, totalPoints, errorServer }) {
                 </div>
                 <Footer />
             </div>
+            </>
         )
     }
 
     if (error) {
         return (
+            <>
+            <HeadView />
             <div className="flex flex-col h-screen" style={{ marginTop: "80px" }}>
                 <Header points={points} />
                 <div className="flex-grow flex justify-center items-center">
@@ -128,12 +144,14 @@ export default function Shop({ productsData, totalPoints, errorServer }) {
                 </div>
                 <Footer />
             </div>
+            </>
         );
     }
 
 
     return (
         <>
+            <HeadView />
             <div className="flex flex-col min-h-screen">
                 <Header points={points} />
                 <div className="flex-grow container text-black mx-auto px-4 md:my-8 my-4" style={{ marginTop: "80px" }}>
