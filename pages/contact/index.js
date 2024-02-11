@@ -6,6 +6,7 @@ import Footer from 'C/footer';
 import { useEffect } from 'react';
 import calculatePoints from '@/utils/calculatePoints';
 import axiosInstance from "@/utils/axiosInstance";
+import Head from 'next/head';
 
 export default function Contact() {
     const { data: session, status } = useSession();
@@ -56,8 +57,21 @@ export default function Contact() {
         }
     }, [status, session]);
 
+    function HeadView () {
+        return (
+            <Head>
+                <title>Owarida - Contact</title>
+                <meta name="description" content="Contactez Owarida pour toutes questions relatives au site." />
+                <meta name="keywords" content="Owarida, contact, mail, twitch, youtube" />
+                <link rel="icon" href="/favicon.ico" />
+            </Head>
+        )
+    }
+
     if (status === 'loading') {
         return (
+            <>
+            <HeadView />
             <div className="flex flex-col h-screen" style={{ marginTop: "80px" }}>
                 <Header points={points} />
                 <div className="flex-grow flex justify-center items-center">
@@ -65,11 +79,14 @@ export default function Contact() {
                 </div>
                 <Footer />
             </div>
+            </>
         )
     }
 
     if (session) {
         return (
+            <>
+            <HeadView />
             <div className="flex flex-col min-h-screen">
                 <Header points={points} />
                 <div className="flex-grow p-4 md:px-8 xl:px-12" style={{ marginTop: "80px" }}>
@@ -99,7 +116,7 @@ export default function Contact() {
                 </div>
                 <Footer />
             </div>
+            </>
         )
     }
-
 }
