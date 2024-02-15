@@ -65,7 +65,7 @@ export default function Login() {
       <Head>
         <title>Connexion</title>
         <meta name="description" content="Connexion avec Twitch, Owarida accueil" />
-        <meta nn="keywords" content="Owarida, connexion, twitch, accueil, owarida coins, stream, elden ring" />
+        <meta nn="keywords" content="owarida, owarida collect, connexion, twitch, owarida coins, stream, elden ring" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
     )
@@ -142,6 +142,8 @@ export default function Login() {
 
   if (!session) {
     return (
+      <>
+    <HeadView />
       <div className="flex flex-col content-center items-center h-screen">
         <Header />
         <div className="flex flex-col h-full w-full justify-center items-center" style={{ background: 'radial-gradient(circle, #CCCCCC, #0f171b)' }}>
@@ -155,6 +157,7 @@ export default function Login() {
           </button>
         </div>
       </div>
+    </>
     );
   }
 }

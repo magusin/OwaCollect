@@ -63,6 +63,7 @@ export default function CGU() {
                 <title>CGU - Owarida</title>
                 <meta name="description" content="Conditions Générales d'Utilisation du site Owarida" />
                 <meta name="keywords" content="owarida, cgu, conditions générales d'utilisation, twitch, hugo jacques" />
+                <link rel="icon" href="/favicon.ico" />
             </Head>
         )
     }
