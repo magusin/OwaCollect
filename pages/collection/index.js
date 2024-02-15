@@ -232,11 +232,6 @@ export default function Collection({ cards, totalPoints, errorServer }) {
     };
 
     // Fonction pour gérer le changement de filtre
-    const handleShowOwnedOnlyChange = (event) => {
-        setShowOwnedOnly(event.target.checked);
-    };
-
-    // Fonction pour gérer le changement de filtre
     const handleShowLevelUpOnlyChange = (event) => {
         setShowLevelUpOnly(event.target.checked);
     };
@@ -388,7 +383,7 @@ export default function Collection({ cards, totalPoints, errorServer }) {
                                 </div>
                                 <div className={`absolute inset-0 flex items-center justify-center rounded-full ${ownedCardIds.has(card.id) ? "hidden" : ""}`}>
                                     <div className="bg-white/80 backdrop-blur-sm rounded-full px-2 py-1 md:px-4 md:py-2 text-lg font-semibold shadow-xl border border-gray-300">
-                                        {card.id}
+                                        {card.number}
                                     </div>
                                 </div>
                                 {newCards.has(card.id) && (
