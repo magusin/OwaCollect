@@ -5,6 +5,9 @@ import Header from 'C/header';
 import Footer from 'C/footer';
 import Image from "next/image";
 import { signOut, useSession } from 'next-auth/react';
+import calculatePoints from '@/utils/calculatePoints';
+import axiosInstance from '@/utils/axiosInstance';
+import Head from 'next/head';
 
 export default function Alley() {
     const router = useRouter();
@@ -22,6 +25,16 @@ export default function Alley() {
     const handleRandomNavigation = () => {
         const randomString = generateRandomString();
         router.push(`/secretShop/${randomString}`);
+    }
+
+    function HeadView() {
+        return (
+            <Head>
+                <title>Allée : Owarida</title>
+                <meta name="description" content="Conditions Générales d'Utilisation du site Owarida" />
+                <meta name="keywords" content="owarida, owarida collect, twitch, elden ring" />
+            </Head>
+        )
     }
 
     useEffect(() => {
@@ -82,6 +95,8 @@ export default function Alley() {
     }, [status, session]);
 
     return (
+        <>
+            <HeadView />
         <div className="flex flex-col h-screen">
             <Header points={points}/>
             <div className="relative flex-grow flex justify-center">
@@ -94,5 +109,6 @@ export default function Alley() {
             </div>
             <Footer />
         </div>
+        </>
     );
 }
