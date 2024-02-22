@@ -290,7 +290,7 @@ export default function Collection({ cards, totalPoints, errorServer }) {
                 <title>Collection | Owarida</title>
                 <meta name="description" content="Collection de cartes Owarida" />
                 <link rel="icon" href="/favicon.ico" />
-                <meta name="keyworlds" content="Owarida, collection, cartes, Owarida Coins, points, elden ring" />
+                <meta name="keyworlds" content="Owarida, collection, cartes, Owarida Coins, points, elden ring, owarida collect, owacollect" />
             </Head>
         )
     }
@@ -332,6 +332,11 @@ export default function Collection({ cards, totalPoints, errorServer }) {
                 <div className="flex flex-col h-screen" style={{ marginTop: "80px" }}>
                     <Header points={points} />
                     <div className="flex-grow flex flex-col items-center">
+                            {!selectedCategory && (
+                                <h1 className="flex flex-wrap justify-center font-bold text-xl m-4">
+                                   Sélectionnez une catégorie
+                                </h1>
+                            )}
                         <div className="flex flex-wrap justify-center">
                             <div className="cursor-pointer relative w-16 w-[200px] h-[100px] sm:w-[250px] md:w-[300px] lg:w-[350px] xl:w-[400px] 2xl:w-[450px] m-4" onClick={() => handleCategoryChange('Elden Ring')} >
                                 <Image
@@ -354,6 +359,7 @@ export default function Collection({ cards, totalPoints, errorServer }) {
                                 />
                             </div>
                         </div>
+                        {selectedCategory && (
                         <div>
                             <button className="bg-green-500 hover:bg-green-700 font-bold py-2 px-4 rounded-full mx-1" onClick={() => handleRarityChange('Toutes')}>Toutes</button>
                             <button className="bg-gray-500 hover:bg-gray-700 font-bold py-2 px-4 rounded-full mx-1" onClick={() => handleRarityChange('Commune')}>Commune</button>
@@ -374,6 +380,7 @@ export default function Collection({ cards, totalPoints, errorServer }) {
                                 </label>
                             </div>
                         </div>
+                        )}
                         <div className="flex items-center text-lg font-semibold my-4">
                             <span>{`Cartes découvertes : ${filteredCards.filter(card => ownedCardIds.has(card.id)).length
                                 } / ${filteredCards.length}`}</span>
@@ -426,7 +433,7 @@ export default function Collection({ cards, totalPoints, errorServer }) {
                                                         ? "Vendu par un mystérieux marchand"
                                                         : `S'obtient via le level Up de ${ownedCardIds.has(card.id - 1)
                                                             ? allCardsName.get(card.id - 1)?.name
-                                                            : card.id - 1
+                                                            : card.number - 1
                                                         }`
                                             }
                                         </span>
