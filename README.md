@@ -43,3 +43,8 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/deploym
 ### ORM Prisma Command
 npx prisma db pull
 npx prisma generate
+
+SiteMap
+
+npm run postbuild
+npx next-sitemap 

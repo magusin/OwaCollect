@@ -8,7 +8,7 @@ import calculatePoints from '../../calculatePoints';
 // Initialiser le midleware Cors
 const allowedOrigins = [process.env.NEXTAUTH_URL]
 const corsOptions = {
-    methods: ['GET', 'HEAD'],
+    methods: ['GET', 'PUT', 'HEAD'],
     origin: (origin, callback) => {
         if (!origin || allowedOrigins.indexOf(origin) !== -1) {
             callback(null, true);

@@ -8,7 +8,7 @@ import calculatePoints from '../../../calculatePoints';
 // Initialiser le midleware Cors
 const allowedOrigins = [process.env.NEXTAUTH_URL]
 const corsOptions = {
-    methods: ['POST', 'HEAD'],
+    methods: ['PUT', 'HEAD'],
     origin: (origin, callback) => {
       if (!origin || allowedOrigins.indexOf(origin) !== -1) {
         callback(null, true);
@@ -70,63 +70,100 @@ export default async function handler(req, res) {
         await runMiddleware(req, res, corsMiddleware)
         switch (req.method) {
             case 'PUT':
-                const { id, cost } = req.body;
+                const { id } = req.body;
 
                 if (!id) {
                     return res.status(400).json({ message: 'Id de la carte non fourni' });
                 }
 
-                if (!cost) {
-                    return res.status(400).json({ message: 'Coût de l\'oppération non fourni' });
-                }
-
-                if (typeof id !== 'number' || typeof cost !== 'number') {
+                if (typeof id !== 'number') {
                     return res.status(400).json({ message: 'Invalid input types' });
                 }
 
-                if (cost !== 500) {
-                    return res.status(400).json({ message: 'Coût invalide' });
-                }
-
-                if (id != 74 && id != 99 && id != 100) {
-                    return res.status(400).json({ message: 'Id invalide' });
-                }
-
-                // Vérifier si le joueur a assez de points
-                const player = await prisma.pets.findUnique({
+                // Vérifier que la carte à minimum 4 exemplaires
+                const card = await prisma.playercards.findFirst({
                     where: {
-                        userId: decoded.id
-                    }
-                });
-
-                // Calculer les points disponibles
-                const availablePoints = await calculatePoints(player);
-
-                if (availablePoints < cost) {
-                    return res.status(400).json({ message: 'Points insuffisants' });
-                }
-
-                // créer la carte dans la table playercards
-                const playerCreateCard = await prisma.playercards.create({
-                    data: {
                         petId: decoded.id,
-                        cardId: id,
-                        count: 1,
-                        isNew: true
+                        cardId: id
+                    },
+                    include: {
+                        card: true
                     }
                 });
 
-                // Déduire les points du joueur
-                const userData = await prisma.pets.update({
+                if (!card) {
+                    return res.status(400).json({ message: 'Carte non possédée par le joueur' });
+                }
+
+                if (card.card.count < 4) {
+                    return res.status(400).json({ message: 'Nombre de cartes insuffisant pour la forge' });
+                }
+
+                // Tirer une carte aléatoire de rareté égale à la carte sacrifiée
+                const rarety = card.card.rarety;
+                const category = card.card.category;
+
+                const eligibleCards = await prisma.card.findMany({
                     where: {
-                        userId: decoded.id
+                        AND: [
+                            { rarety: rarety },
+                            { isDraw: true },
+                            { category: category },
+                            { id: { not: id } } // Exclure l'id de la carte sacrifiée
+                        ]
+                    }
+                });
+
+                const randomCard = eligibleCards[Math.floor(Math.random() * eligibleCards.length)];
+
+                // Supprimer 3 exemplaires de la carte sacrifiée
+                await prisma.playercards.update({
+                    where: {
+                        petId_cardId: {
+                            petId: decoded.id,
+                            cardId: id
+                        }
                     },
                     data: {
-                        pointsUsed: {
-                            increment: cost
+                        count: {
+                            decrement: 3
                         }
                     }
                 });
+
+                // Ajouter la nouvelle carte
+                const existingCard = await prisma.playercards.findFirst({
+                    where: {
+                        petId: decoded.id,
+                        cardId: randomCard.id
+                    }
+                });
+
+                if (existingCard) {
+                    await prisma.playercards.update({
+                        where: {
+                            petId_cardId: {
+                                petId: decoded.id,
+                                cardId: randomCard.id
+                            }
+                        },
+                        data: {
+                            count: {
+                                increment: 1
+                            }
+                        }
+                    });
+                } else {
+                    await prisma.playercards.create({
+                        data: {
+                            petId: decoded.id,
+                            cardId: randomCard.id,
+                            count: 1,
+                            isNew: true
+                        }
+                    });
+                }
+           
 
                 // Récupérer toutes les cartes du joueur
                 const allPlayerCards = await prisma.playercards.findMany({
@@ -138,7 +175,7 @@ export default async function handler(req, res) {
                     }
                 });
 
-                return res.status(200).json({ updatedCard: playerCreateCard, allPlayerCards, userData });
+                return res.status(200).json({ updatedCard: randomCard, allPlayerCards });
             default:
                 res.status(405).end(`Method ${req.method} Not Allowed`)
         }

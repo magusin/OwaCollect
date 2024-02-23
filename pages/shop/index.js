@@ -14,15 +14,15 @@ import { getServerSession } from "next-auth";
 import nextAuthOptions from "../../config/nextAuthOptions";
 import Footer from 'C/footer';
 import axiosInstance from '@/utils/axiosInstance';
+import Head from 'next/head';
 
-
-export default function Shop({ productsData, errorServer }) {
+export default function Shop({ productsData, totalPoints, errorServer }) {
     const { data: session, status } = useSession();
     const router = useRouter();
     const [products, setProducts] = React.useState(productsData);
     const [loading, setLoading] = React.useState(false);
     const [error, setError] = React.useState(errorServer || null);
-    const [points, setPoints] = React.useState(0);
+    const [points, setPoints] = React.useState(totalPoints || 0);
     const [showModal, setShowModal] = React.useState(false);
     const [drawnCards, setDrawnCards] = React.useState([]);
     const [showModalCards, setShowModalCards] = React.useState(false);
@@ -89,6 +89,9 @@ export default function Shop({ productsData, errorServer }) {
     };
 
     useEffect(() => {
+
+        localStorage.setItem('points', points);
+
         if (error === 'Erreur avec votre Token ou il est expiré. Veuillez vous reconnecter.') {
             setTimeout(() => {
                 localStorage.removeItem('userOC');
@@ -102,49 +105,23 @@ export default function Shop({ productsData, errorServer }) {
             router.push('/');
         }
 
-        if (localStorage.getItem('points') != null) {
-            setPoints(localStorage.getItem('points'))
-        }
+    }, [status, router, error, points]);
 
-        if (localStorage.getItem('points') === null && localStorage.getItem('userOC') != null) {
-            const user = JSON.parse(localStorage.getItem('userOC'));
-            const calculatedPoints = calculatePoints(user);
-            const totalPoints = calculatedPoints - user.pointsUsed;
-            localStorage.setItem('points', totalPoints);
-            setPoints(totalPoints);
-        }
-
-        if (localStorage.getItem('userOC') === null && session) {
-            const getUser = async () => {
-                try {
-                    const response = await axiosInstance.get('/api/user', {
-                        customConfig: { session: session }
-                    });
-                    const data = await response.data;
-                    localStorage.setItem('userOC', JSON.stringify(data));
-                    const calculatedPoints = calculatePoints(data);
-                    const totalPoints = calculatedPoints - data.pointsUsed;
-                    localStorage.setItem('points', totalPoints);
-                    setPoints(totalPoints);
-                } catch (error) {
-                    
-                    if (error.response.status === 401) {
-                        setError('Erreur avec votre Token ou il est expiré. Veuillez vous reconnecter.')
-                        setTimeout(() => {
-                            signOut()
-                            router.push('/');
-                        }, 2000);
-                    } else {
-                        setError(error.response?.data?.message || error.message);
-                    }
-                }
-            };
-            getUser();
-        }
-    }, [status, router, session, error]);
+    function HeadView() {
+        return (
+            <Head>
+                <title>Shop | Owarida</title>
+                <meta name="description" content="Achetez des packs de cartes dans le shop à Owarida" />
+                <meta name="keywords" content="Owarida, shop, cartes, packs, points, elden ring" />
+                <link rel="icon" href="/favicon.ico" />
+            </Head>
+        )
+    }
 
     if (status === "loading" || loading) {
         return (
+            <>
+            <HeadView />
             <div className="flex flex-col h-screen" style={{ marginTop: "80px" }}>
                 <Header points={points} />
                 <div className="flex-grow flex justify-center items-center">
@@ -152,11 +129,14 @@ export default function Shop({ productsData, errorServer }) {
                 </div>
                 <Footer />
             </div>
+            </>
         )
     }
 
     if (error) {
         return (
+            <>
+            <HeadView />
             <div className="flex flex-col h-screen" style={{ marginTop: "80px" }}>
                 <Header points={points} />
                 <div className="flex-grow flex justify-center items-center">
@@ -164,12 +144,14 @@ export default function Shop({ productsData, errorServer }) {
                 </div>
                 <Footer />
             </div>
+            </>
         );
     }
 
 
     return (
         <>
+            <HeadView />
             <div className="flex flex-col min-h-screen">
                 <Header points={points} />
                 <div className="flex-grow container text-black mx-auto px-4 md:my-8 my-4" style={{ marginTop: "80px" }}>
@@ -243,8 +225,29 @@ export async function getServerSideProps(context) {
             }
         })
         const productsData = await response.data;
+        const timestamp = new Date().getTime().toString();
+        const signature = await axios.post(`${process.env.NEXTAUTH_URL}/api/generateSignature`, {
+            timestamp: timestamp       
+        }, {
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${session.customJwt}`,
+                cookie: context.req.headers.cookie
+            }
+        });
+        const responseUser = await axios.get(`${process.env.NEXTAUTH_URL}/api/user`, {
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${session.customJwt}`,
+                cookie: context.req.headers.cookie,
+                'x-timestamp': timestamp,
+                'x-signature': signature.data.signature
+            }
+        })
+        const user = await responseUser.data;
+        const totalPoints = calculatePoints(user);
         return {
-            props: { productsData },
+            props: { productsData, totalPoints },
         };
     } catch (error) {
         if (error.response.status === 401) {

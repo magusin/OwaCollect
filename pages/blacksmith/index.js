@@ -13,9 +13,9 @@ import Alert from "C/alert";
 import Modal from "C/modal";
 import Footer from "C/footer";
 import axiosInstance from "@/utils/axiosInstance";
-import Head from "next/head";
+import Head from 'next/head';
 
-export default function SecretShop({ cards, totalPoints, errorServer }) {
+export default function Blacksmith({ cards, totalPoints, errorServer }) {
     const [error, setError] = React.useState(errorServer || null);
     const { data: session, status } = useSession();
     const router = useRouter();
@@ -23,18 +23,17 @@ export default function SecretShop({ cards, totalPoints, errorServer }) {
     const [points, setPoints] = React.useState(totalPoints || 0);
     const [allCard, setAllCard] = React.useState(cards?.cards);
     const [playerCards, setPlayerCards] = React.useState(cards?.playerCards);
-    const { id } = router.query;
     const { darkMode } = useDarkMode();
     const [alertMessage, setAlertMessage] = React.useState('');
     const [showAlert, setShowAlert] = React.useState(false);
     const [alertType, setAlertType] = React.useState(null);
     const [showModal, setShowModal] = React.useState(false);
     const [selectedCard, setSelectedCard] = React.useState(null);
-    const [cardToBuy, setCardToBuy] = React.useState(null);
+    const [cardToForge, setCardToForge] = React.useState(null);
 
-    const handleBuyCard = (cardId) => {
-        // Mise à jour de l'état pour la carte sélectionnée
-        setCardToBuy(cardId);
+    const handleForgeCard = (card) => {
+        // Afficher modal
+        setCardToForge(card);
         setShowModal(true);
     };
 
@@ -43,32 +42,27 @@ export default function SecretShop({ cards, totalPoints, errorServer }) {
         setSelectedCard(null);
     };
 
-    const handleConfirmBuyCard = async (id, cost) => {
+    const handleConfirmForgeCard = async (id) => {
         setLoading(true);
         setShowModal(false);
-        if (points >= cost) {
             try {
-                const response = await axiosInstance.put('/api/user/card/buy', { 
-                    id, 
-                    cost }, {
-                        customConfig: { session: session }
-                    });
+                const response = await axiosInstance.put('/api/user/card/forge', {
+                    id
+                }, {
+                    customConfig: { session: session }
+                });
                 if (response.status === 200) {
                     const data = await response.data
-                    localStorage.setItem('userOC', JSON.stringify(data.userData));
-                    const totalPoints = calculatePoints(data.userData);
-                    localStorage.setItem('points', totalPoints);
-                    setPoints(totalPoints);
+                    let selectedCard = data.updatedCard;
                     setPlayerCards(data.allPlayerCards);
-                    setAlertMessage(`Carte ${id} achetée !`);
+                    setAlertMessage(`Carte ${selectedCard.name} obtenue !`);
                     setAlertType('success');
                     setShowAlert(true);
                     setTimeout(() => {
                         setShowAlert(false);
                     }, 5000);
 
-                    let selectedCard = data.allPlayerCards.find(card => card.card.id === data.updatedCard.cardId);
-                    setSelectedCard(selectedCard.card)  
+                    setSelectedCard(selectedCard)
                 }
 
             } catch (error) {
@@ -79,26 +73,17 @@ export default function SecretShop({ cards, totalPoints, errorServer }) {
                         router.push('/');
                     }, 3000);
                 } else {
-                    setError('Erreur lors de l\'achat. ' + error.response?.data?.message || error.message);
+                    setError('Erreur lors de la forge. ' + error.response?.data?.message || error.message);
                 }
             } finally {
                 setLoading(false);
             }
-        } else {
-            setAlertMessage(`Vous n'avez pas assez de points pour acheter cette carte.`);
-            setAlertType('error');
-            setShowAlert(true);
-            setTimeout(() => {
-                setShowAlert(false);
-            }, 5000);
-            setLoading(false);
-        }
     }
 
     useEffect(() => {
-
-        localStorage.setItem('points', points);
-
+        if (localStorage.getItem('points') != null) {
+            localStorage.setItem('points', points);
+        }
         if (error === 'Erreur avec votre Token ou il est expiré. Veuillez vous reconnecter.') {
             setTimeout(() => {
                 localStorage.removeItem('userOC');
@@ -118,12 +103,12 @@ export default function SecretShop({ cards, totalPoints, errorServer }) {
     function HeadView() {
         return (
             <Head>
-                <title>OW | Boutique secrète</title>
-                <meta name="description" content="Boutique secrète d'OWarida" />
-                <meta name="keywords" content="OWarida, boutique, secrète, cartes, points" />
+                <title>Forge - Owarida</title>
+                <meta name="description" content="Forgez vos cartes" />
+                <meta name="keywords" content="forge, cartes, owarida, karssi" />
                 <link rel="icon" href="/favicon.ico" />
             </Head>
-        );
+        )
     }
 
     if (error) {
@@ -157,90 +142,105 @@ export default function SecretShop({ cards, totalPoints, errorServer }) {
     }
 
     if (session) {
-        const secretShopLink = localStorage.getItem('secretShopLink');
-        if (secretShopLink != null && secretShopLink === id) {
-            const ownedCardIds = new Set(playerCards.map(card => card.cardId));
-            const secretCardsToBuy = [74, 99, 100].filter(id => !ownedCardIds.has(id));
-            return (
-                <>
+
+        const ownedCardIds = new Set(playerCards.map(card => card.cardId));
+        return (
+            <>
             <HeadView />
                 <div className="flex flex-col h-screen" >
                     <Header points={points} />
                     <div className="flex-grow mt-4 flex flex-col items-center" style={{ marginTop: "80px" }}>
                         <Image
-                            src="/images/salesman.png"
-                            alt="salesman"
+                            src="/images/blacksmith.png"
+                            alt="blacksmith"
                             priority={true}
-                            width={600}
-                            height={525}
+                            width={550}
+                            height={550}
                         />
                     </div>
                     <div className="flex-grow mt-4 flex flex-wrap justify-center">
-                        {secretCardsToBuy.map(cardId => (
-                            <div key={cardId} className={`p-4 border-2 ${darkMode ? 'border-white' : 'border-black'} rounded-lg m-2 text-center max-w-xs md:max-w-sm lg:max-w-md xl:max-w-lg`}>
-                                <h3 className="font-bold mb-4">Carte {cardId}</h3>
-                                <p className="mb-4">Prix: <b>500 OC</b></p>
-                                <button
-                                    className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700 transition duration-300"
-                                    onClick={() => handleBuyCard(cardId)}
-                                >
-                                    Acheter
-                                </button>
-                                {showModal && (
-                                    <Modal
-                                        setShowModal={setShowModal}
-                                        handleConfirm={() => handleConfirmBuyCard(cardToBuy, 500)}
-                                        title="Confirmation d'achat"
-                                        message={
-                                            <>
-                                                {/* eslint-disable-next-line react/no-unescaped-entities */}
-                                                Êtes-vous sûr de vouloir acheter la carte {cardToBuy} pour <b>500 OC</b> ?
-                                            </>
-                                        }
-                                    />
-                                )}
+                        <div className="flex flex-col justify-center my-4">
+                            <p className="text-center text-xl font-bold">Bienvenue chez le forgeron !</p>
+                            <p className="text-center text-lg">Vous pouvez donner 3 cartes identiques au forgeron et il vous fabriquera une autre carte de même collection et rareté.</p>
+                            <div className="flex flex-wrap justify-center">
+                                {playerCards.map((card, index) => (
+                                    card.count > 3 ? (
+                                        <div key={index} className="flex flex-col items-center p-4">
+                                            <div className="relative w-[100px] h-[100px] sm:w-[150px] sm:h-[150px] md:w-[200px] md:h-[200px] lg:w-[250px] lg:h-[250px] xl:w-[300px] xl:h-[300px] 2xl:w-[350px] 2xl:h-[350px]">
+                                                <Image
+                                                    priority={true}
+                                                    src={`${card.card.picture}.png`}
+                                                    alt={card.name}
+                                                    layout="fill"
+                                                    objectFit="contain"
+                                                    sizes="100%"
+                                                />
+                                            <div className="absolute bottom-2 right-2 bg-red-600 text-white rounded-full px-2 py-1 text-sm font-bold">
+                                        X {card.count}
+                                    </div>
+                                            </div>
+                                            <button
+                                                onClick={() => handleForgeCard(card.card)}
+                                                className="bg-green-500 text-white py-2 px-4 rounded mt-4">
+                                                Sacrifier
+                                            </button>
+                                            {showModal && (
+                                                <Modal
+                                                    setShowModal={setShowModal}
+                                                    title="Confirmation de fabrication de carte"
+                                                    message={
+                                                        <>
+                                                        Voulez-vous fabriquer une nouvelle carte <b>{cardToForge.rarety}</b> en sacrifiant 3 exemplaire de <b>{cardToForge.name}</b> ?
+                                                        </>
+                                                    }
+                                                    handleConfirm={() => handleConfirmForgeCard(cardToForge.id)}
+                                                />
+                                            )}
+                                        </div>
+                                    ) : null
+                                ))}
                             </div>
-                        ))}
+
+                        </div>
                     </div>
                     {selectedCard && (
                         <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 px-4 py-6 overflow-y-auto h-full w-full">
-                        <div className="flex flex-wrap flex-row p-4 h-full w-full items-center justify-center md:flex-col">
-                            {/* Image card */}
-                            <div className="relative h-full" style={{ width: '100%', maxWidth: '100vh' }}>
-                                <div className="aspect-w-1 aspect-h-1 ">
-                                    <Image
-                                        priority={true}
-                                        src={`${selectedCard.picture}.png`}
-                                        alt={'Dos de la carte ' + selectedCard.id}
-                                        layout="fill"
-                                        objectFit="contain"
-                                        sizes="100%"
-                                    />
+                            <div className="flex flex-wrap flex-row p-4 h-full w-full items-center justify-center md:flex-col">
+                                {/* Image card */}
+                                <div className="relative h-full" style={{ width: '100%', maxWidth: '100vh' }}>
+                                    <div className="aspect-w-1 aspect-h-1 ">
+                                        <Image
+                                            priority={true}
+                                            src={`${selectedCard.picture}.png`}
+                                            alt={'Dos de la carte ' + selectedCard.id}
+                                            layout="fill"
+                                            objectFit="contain"
+                                            sizes="100%"
+                                        />
+                                    </div>
                                 </div>
+
+                                {/* Button close */}
+                                <button onClick={closeEnlargeView} className="w-full sm:w-auto bg-red-500 text-white py-2 px-4 rounded mt-4 sm:mt-0 sm:absolute sm:top-2 sm:right-2">
+                                    Fermer
+                                </button>
                             </div>
-                            
-                            {/* Button close */}
-                            <button onClick={closeEnlargeView} className="w-full sm:w-auto bg-red-500 text-white py-2 px-4 rounded mt-4 sm:mt-0 sm:absolute sm:top-2 sm:right-2">
-                                Fermer
-                            </button>
                         </div>
-                    </div>
                     )}
                     {showAlert && (
                         <Alert
-                        type={alertType}
-                        message={alertMessage}
-                        close={setShowAlert}
+                            type={alertType}
+                            message={alertMessage}
+                            close={setShowAlert}
                         />
-                        )}
-                        <Footer />
+                    )}
+                    <Footer />
                 </div>
-                        </>
-            );
-        } else {
-            return (
-                <>
-                <HeadView />
+            </>
+        );
+    } else {
+        return (
+            <>
                 <div className="flex flex-col h-screen">
                     <Header points={points} />
                     <div className="flex-grow items-start justify-center" >
@@ -257,9 +257,8 @@ export default function SecretShop({ cards, totalPoints, errorServer }) {
                     </div>
                     <Footer />
                 </div>
-                    </>
-            );
-        }
+            </>
+        );
     }
 }
 
@@ -276,7 +275,7 @@ export async function getServerSideProps(context) {
         };
     }
 
-    
+
     try {
         const response = await axios.get(`${process.env.NEXTAUTH_URL}/api/user/card`, {
             headers: {
@@ -288,7 +287,7 @@ export async function getServerSideProps(context) {
         const cards = await response.data;
         const timestamp = new Date().getTime().toString();
         const signature = await axios.post(`${process.env.NEXTAUTH_URL}/api/generateSignature`, {
-            timestamp: timestamp       
+            timestamp: timestamp
         }, {
             headers: {
                 'Content-Type': 'application/json',

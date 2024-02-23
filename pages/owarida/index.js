@@ -1,20 +1,24 @@
 import React from "react";
 import { useEffect } from "react";
 import { signOut, useSession } from 'next-auth/react';
+import axios from 'axios'
 import { useRouter } from 'next/router';
 import Header from 'C/header';
 import Image from 'next/legacy/image';
 import calculatePoints from "@/utils/calculatePoints";
+import { getServerSession } from "next-auth";
+import nextAuthOptions from "../../config/nextAuthOptions";
 import { useDarkMode } from "@/contexts/darkModeContext";
 import Footer from "C/footer";
 import axiosInstance from "@/utils/axiosInstance";
+import Head from 'next/head';
 
-export default function Owarida() {
-    const [error, setError] = React.useState(null);
+export default function Owarida({ totalPoints, errorServer }) {
+    const [error, setError] = React.useState(errorServer || null);
     const { data: session, status } = useSession();
     const router = useRouter();
     const [loading, setLoading] = React.useState(false);
-    const [points, setPoints] = React.useState(0);
+    const [points, setPoints] = React.useState(totalPoints || 0);
     const [showInput, setShowInput] = React.useState(false);
     const inputRef = React.useRef(null);
     const [code, setCode] = React.useState('');
@@ -64,6 +68,7 @@ export default function Owarida() {
 
     useEffect(() => {
 
+        localStorage.setItem('points', points);
         // Ajout de l'écouteur d'événement
         document.addEventListener("mousedown", handleClickOutside);
 
@@ -80,55 +85,29 @@ export default function Owarida() {
             router.push('/');
         }
 
-        if (localStorage.getItem('points') != null) {
-            setPoints(localStorage.getItem('points'))
-        }
-
-        if (localStorage.getItem('points') === null && localStorage.getItem('userOC') != null) {
-            const user = JSON.parse(localStorage.getItem('userOC'));
-            const calculatedPoints = calculatePoints(user);
-            const totalPoints = calculatedPoints - user.pointsUsed;
-            localStorage.setItem('points', totalPoints);
-            setPoints(totalPoints);
-        }
-
-        if (localStorage.getItem('userOC') === null && session) {
-            const getUser = async () => {
-                try {
-                    const response = await axiosInstance.get('/api/user', {
-                        customConfig: { session: session }
-                    });
-                    const data = await response.data;
-                    localStorage.setItem('userOC', JSON.stringify(data));
-                    const calculatedPoints = calculatePoints(data);
-                    const totalPoints = calculatedPoints - data.pointsUsed;
-                    localStorage.setItem('points', totalPoints);
-                    setPoints(totalPoints);
-                } catch (error) {
-                    if (error.response.status === 401) {
-                        setError('Erreur avec votre Token ou il est expiré. Veuillez vous reconnecter.')
-                        setTimeout(() => {
-                            signOut()
-                            router.push('/');
-                        }, 2000);
-                    } else {
-                        setError(error.response?.data?.message || error.message);
-                    }
-                }
-            };
-            getUser();
-
             return () => {
                 // Nettoyage de l'écouteur d'événement
                 document.removeEventListener("mousedown", handleClickOutside);
             };
-        }
 
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [status, session, error, router]);
+    }, [status, session, error, router, points]);
+
+    const HeadView = () => {
+        return (
+            <Head>
+                <title>Owarida - Stream</title>
+                <meta name="description" content="Owarida - Stream" />
+                <meta name="keywords" content="Owarida, Stream, Twitch, streameur, chaine" />
+                <link rel="icon" href="/favicon.ico" />
+            </Head>
+        );
+    }
 
     if (error) {
         return (
+            <>
+            <HeadView />
             <div className="flex flex-col h-screen" style={{ marginTop: "80px" }}>
                 <Header points={points} />
                 <div className="flex-grow flex justify-center items-center">
@@ -136,11 +115,14 @@ export default function Owarida() {
                 </div>
                 <Footer />
             </div>
+            </>
         );
     }
 
     if (status === "loading" || loading) {
         return (
+            <>
+            <HeadView />
             <div className="flex flex-col h-screen" style={{ marginTop: "80px" }}>
                 <Header points={points} />
                 <div className="flex-grow flex justify-center items-center">
@@ -148,11 +130,14 @@ export default function Owarida() {
                 </div>
                 <Footer />
             </div>
+            </>
         )
     }
 
     if (session) {
         return (
+            <>
+            <HeadView />
             <div className="flex flex-col h-screen" style={{ marginTop: "80px" }}>
                 <Header points={points} />
                 <div className="flex-grow flex flex-col items-center">
@@ -218,9 +203,58 @@ export default function Owarida() {
                 )}
                 <Footer />
             </div>
+            </>
         );
     }
+}
 
+export async function getServerSideProps(context) {
+    const session = await getServerSession(
+        context?.req,
+        context?.res,
+        nextAuthOptions
+    );
 
+    if (!session) {
+        return {
+            props: { errorServer: 'Session expirée reconnectez-vous' },
+        };
+    }
 
+    try {
+        const timestamp = new Date().getTime().toString();
+        const signature = await axios.post(`${process.env.NEXTAUTH_URL}/api/generateSignature`, {
+            timestamp: timestamp       
+        }, {
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${session.customJwt}`,
+                cookie: context.req.headers.cookie
+            }
+        });
+        const responseUser = await axios.get(`${process.env.NEXTAUTH_URL}/api/user`, {
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${session.customJwt}`,
+                cookie: context.req.headers.cookie,
+                'x-timestamp': timestamp,
+                'x-signature': signature.data.signature
+            }
+        })
+        const user = await responseUser.data;
+        const totalPoints = calculatePoints(user);
+        return {
+            props: { totalPoints },
+        };
+    } catch (error) {
+        if (error.response?.status === 401) {
+            return {
+                props: { errorServer: 'Erreur avec votre Token ou il est expiré. Veuillez vous reconnecter.' },
+            };
+        }
+
+        return {
+            props: { errorServer: error.message },
+        };
+    }
 }

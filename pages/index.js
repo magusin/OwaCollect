@@ -12,6 +12,7 @@ import { useDarkMode } from "@/contexts/darkModeContext";
 import Footer from "C/footer";
 import axiosInstance from "@/utils/axiosInstance";
 import firebase from "@/utils/firebaseConfig";
+import Head from 'next/head';
 
 export default function Login() {
   const { data: session, status } = useSession();
@@ -60,8 +61,21 @@ export default function Login() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session]);
 
+  function HeadView() {
+    return (
+      <Head>
+        <title>Connexion</title>
+        <meta name="description" content="Connexion avec Twitch, Owarida accueil" />
+        <meta nn="keywords" content="owarida, owarida collect, connexion, twitch, owarida coins, stream, elden ring" />
+        <link rel="icon" href="/favicon.ico" />
+      </Head>
+    )
+  }
+
   if (status === "loading" || loading) {
     return (
+      <>
+      <HeadView />
       <div className="flex flex-col h-screen">
         <Header points={points} />
         <div className="flex-grow flex justify-center items-center">
@@ -69,11 +83,14 @@ export default function Login() {
         </div>
         <Footer />
       </div>
+      </>
     )
   }
 
   if (error) {
     return (
+      <>
+      <HeadView />
       <div className="flex flex-col h-screen">
         <Header points={points} />
         <div className="flex-grow flex justify-center items-center">
@@ -81,6 +98,7 @@ export default function Login() {
         </div>
         <Footer />
       </div>
+      </>
     );
   }
 
@@ -88,6 +106,7 @@ export default function Login() {
 
     return (
       <>
+      <HeadView />
         <div className="flex flex-col min-h-screen">
           <Header points={points} />
 
@@ -124,6 +143,8 @@ export default function Login() {
 
   if (!session) {
     return (
+      <>
+    <HeadView />
       <div className="flex flex-col content-center items-center h-screen">
         <Header />
         <div className="flex flex-col h-full w-full justify-center items-center" style={{ background: 'radial-gradient(circle, #CCCCCC, #0f171b)' }}>
@@ -137,6 +158,7 @@ export default function Login() {
           </button>
         </div>
       </div>
+    </>
     );
   }
 }

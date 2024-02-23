@@ -55,11 +55,12 @@ export default function Header({ points }) {
               <span className={`${darkMode ? 'border-black' : 'border-white'} mr-4 border-r-2 pr-2`}>{session.user.name}</span>
               <span className="mr-4">{points ? points : 0} OC</span>
             </Link>
-            <nav className="hidden md:flex space-x-16 px-4">
+            <nav className="hidden md:flex space-x-6 xl:space-x-16 px-4">
               <Link href="/collection" className="hover:text-gray-300">Collection</Link>
               <Link href="/deck" className="hover:text-gray-300">Deck</Link>
               <Link href="/shop" className="hover:text-gray-300">Boutique</Link>
               <Link href="/owarida" className="hover:text-gray-300">Owarida</Link>
+              <Link href="/alley9-3/4" className="hover:text-gray-300">Ruelle</Link>
             </nav>
             <div className='flex'>
             <button onClick={toggleDarkMode} className="hidden md:block text-white py-2 px-4 rounded mr-4">
@@ -83,7 +84,7 @@ export default function Header({ points }) {
               <Link href="/deck" className="text-center hover:text-gray-300 block">Deck</Link>
               <Link href="/shop" className="text-center hover:text-gray-300 block">Boutique</Link>
               <Link href="/owarida" className="text-center hover:text-gray-300 block">Owarida</Link>
-              
+              <Link href="/alley9-3/4" className="text-center hover:text-gray-300 block">Ruelle</Link>
               <button onClick={toggleDarkMode} className="w-full py-2 px-4 rounded flex justify-center items-center">
               <DarkModeToggleSVG isDarkMode={darkMode} />
             </button>

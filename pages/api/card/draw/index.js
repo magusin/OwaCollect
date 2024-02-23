@@ -129,14 +129,6 @@ export default async function handler(req, res) {
                     return acc;
                 }, {});
 
-
-                // let query = "INSERT INTO playercards (petId, cardId, count) VALUES ";
-                // const values = Object.values(selectedCardsMap).map(card => `(${decoded.id}, ${card.id}, ${card.count})`);
-                // query += values.join(", ");
-                // query += " ON DUPLICATE KEY UPDATE count = VALUES(count)";
-
-                // await prisma.$executeRawUnsafe(query);
-
                 await prisma.$transaction(async (prisma) => {
                     for (const card of Object.values(selectedCardsMap)) {
                         await prisma.$executeRaw`INSERT INTO playercards (petId, cardId, count, isNew)
