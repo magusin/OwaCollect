@@ -36,8 +36,15 @@ export default function Collection({ cards, totalPoints, errorServer }) {
     const [showLevelUpOnly, setShowLevelUpOnly] = React.useState(false);
     const [filteredCards, setFilteredCards] = React.useState(allCard);
     const [filterState, setFilterState] = React.useState("none");
-    const [selectedCategory, setSelectedCategory] = React.useState(null);
-
+    const [selectedCategory, setSelectedCategory] = React.useState(
+        () => {
+            if (typeof localStorage !== 'undefined') {
+                return localStorage.getItem('categoryOC') || null;
+            } else {
+                return null;
+            }
+        }
+    );
     const ownedCardIds = new Set(playerCards?.map(card => card.cardId));
     const allCardsName = new Map(allCard?.map(card => [card.id, card]));
     const newCards = new Set(playerCards?.filter(card => card.isNew).map(card => card.cardId));
@@ -129,8 +136,6 @@ export default function Collection({ cards, totalPoints, errorServer }) {
             setLoading(false);
         }
     }
-
-    console.log('selectedCategory', selectedCategory)
 
     // Mettre à jour les cartes filtrées lorsque le filtre change
     useEffect(() => {
@@ -226,6 +231,9 @@ export default function Collection({ cards, totalPoints, errorServer }) {
     };
 
     const handleCategoryChange = (category) => {
+        if (typeof localStorage !== 'undefined') {
+            localStorage.setItem('categoryOC', category);
+        }
         setSelectedCategory(category);
     };
 
@@ -332,11 +340,11 @@ export default function Collection({ cards, totalPoints, errorServer }) {
                 <div className="flex flex-col h-screen" style={{ marginTop: "80px" }}>
                     <Header points={points} />
                     <div className="flex-grow flex flex-col items-center">
-                            {!selectedCategory && (
-                                <h1 className="flex flex-wrap justify-center font-bold text-xl m-4">
-                                   Sélectionnez une catégorie
-                                </h1>
-                            )}
+                        {!selectedCategory && (
+                            <h1 className="flex flex-wrap justify-center font-bold text-xl m-4">
+                                Sélectionnez une catégorie
+                            </h1>
+                        )}
                         <div className="flex flex-wrap justify-center">
                             <div className="cursor-pointer relative w-16 w-[200px] h-[100px] sm:w-[250px] md:w-[300px] lg:w-[350px] xl:w-[400px] 2xl:w-[450px] m-4" onClick={() => handleCategoryChange('Elden Ring')} >
                                 <Image
@@ -360,26 +368,26 @@ export default function Collection({ cards, totalPoints, errorServer }) {
                             </div>
                         </div>
                         {selectedCategory && (
-                        <div>
-                            <button className="bg-green-500 hover:bg-green-700 font-bold py-2 px-4 rounded-full mx-1" onClick={() => handleRarityChange('Toutes')}>Toutes</button>
-                            <button className="bg-gray-500 hover:bg-gray-700 font-bold py-2 px-4 rounded-full mx-1" onClick={() => handleRarityChange('Commune')}>Commune</button>
-                            <button className="bg-blue-500 hover:bg-blue-700 font-bold py-2 px-4 rounded-full mx-1" onClick={() => handleRarityChange('Rare')}>Rare</button>
-                            <button className="bg-teal-500 hover:bg-teal-700 font-bold py-2 px-4 rounded-full mx-1" onClick={() => handleRarityChange('Epique')}>Épique</button>
                             <div>
-                                <Switch onSwitchChange={handleSwitchChange} />
+                                <button className="bg-green-500 hover:bg-green-700 font-bold py-2 px-4 rounded-full mx-1" onClick={() => handleRarityChange('Toutes')}>Toutes</button>
+                                <button className="bg-gray-500 hover:bg-gray-700 font-bold py-2 px-4 rounded-full mx-1" onClick={() => handleRarityChange('Commune')}>Commune</button>
+                                <button className="bg-blue-500 hover:bg-blue-700 font-bold py-2 px-4 rounded-full mx-1" onClick={() => handleRarityChange('Rare')}>Rare</button>
+                                <button className="bg-teal-500 hover:bg-teal-700 font-bold py-2 px-4 rounded-full mx-1" onClick={() => handleRarityChange('Epique')}>Épique</button>
+                                <div>
+                                    <Switch onSwitchChange={handleSwitchChange} />
+                                </div>
+                                <div className="m-4 font-bold">
+                                    <label>
+                                        <input
+                                            className="mr-2 leading-tight cursor-pointer"
+                                            type="checkbox"
+                                            checked={showLevelUpOnly}
+                                            onChange={handleShowLevelUpOnlyChange}
+                                        />
+                                        Level Up possible
+                                    </label>
+                                </div>
                             </div>
-                            <div className="m-4 font-bold">
-                                <label>
-                                    <input
-                                        className="mr-2 leading-tight cursor-pointer"
-                                        type="checkbox"
-                                        checked={showLevelUpOnly}
-                                        onChange={handleShowLevelUpOnlyChange}
-                                    />
-                                    Level Up possible
-                                </label>
-                            </div>
-                        </div>
                         )}
                         <div className="flex items-center text-lg font-semibold my-4">
                             <span>{`Cartes découvertes : ${filteredCards.filter(card => ownedCardIds.has(card.id)).length
