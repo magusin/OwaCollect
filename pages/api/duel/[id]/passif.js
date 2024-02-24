@@ -77,6 +77,10 @@ export default async function handler(req, res) {
         }
 
         const duelData = duelDoc.data();
+        if (duelData.statut !== 'passif') {
+            return res.status(403).json({ message: 'Ce n\'est pas le moment de choisir vos passifs' });
+        }
+        
         const isPlayerOne = decoded.id === duelData.player1Id;
         const isPlayerTwo = decoded.id === duelData.player2Id;
 
