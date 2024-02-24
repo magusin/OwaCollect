@@ -13,6 +13,7 @@ import { doc, onSnapshot, updateDoc, getDoc } from "firebase/firestore";
 import { db } from '@/utils/firebaseConfig';
 import axiosInstance from '@/utils/axiosInstance';
 import RandomNumber from '@/components/randomNumber';
+import { validate } from 'uuid';
 
 export default function Duel({ errorServer }) {
     const { data: session, status } = useSession();
@@ -39,10 +40,12 @@ export default function Duel({ errorServer }) {
     }
 
     const validatePassif = async () => {
-
+        console.log('currentSelected:', currentSelected)
         setSelectedPassifs(prev => ({ ...prev, [currentCardIndex]: currentSelected }));
         setcurrentSelected(null);
+        console.log('currentCard:',currentCardIndex)
         if (currentCardIndex === 3) {
+            
             setLoading(true);
             try {
                 const reponse = await axiosInstance.post(`/api/duel/${id}/passif`, { passifs: selectedPassifs }, {
@@ -74,8 +77,8 @@ export default function Duel({ errorServer }) {
                 customConfig: { session: session }
             });
             if (response.status === 200) {
-            const data = await response.data;
-            setLoading(false);
+                const data = await response.data;
+                setLoading(false);
             }
         } catch (error) {
             if (error.response?.status === 401) {
@@ -111,16 +114,28 @@ export default function Duel({ errorServer }) {
                             const timeLeftUpdate = Math.max(endTime - nowUpdate, 0) / 1000;
                             setTimeLeft(timeLeftUpdate);
                             const totalCards = isPlayerOne ? data.deckP1.length : data.deckP2.length;
-                            
-                            if (timeLeftUpdate <= 1 && Object.keys(selectedPassifs).length < 4) {                                clearInterval(interval);
+
+                            if (timeLeftUpdate < 1 && Object.keys(selectedPassifs).length < 4) {
+                                clearInterval(interval);
                                 for (let i = 0; i < totalCards; i++) {
                                     if (!selectedPassifs[i]) { // Si un passif n'a pas été sélectionné pour cette carte
                                         const card = isPlayerOne ? data.deckP1[i] : data.deckP2[i];
                                         const randomPassifIndex = Math.floor(Math.random() * card.card.passifcards.length);
                                         const randomPassif = card.card.passifcards[randomPassifIndex];
+                                        console.log('randomPassif:', randomPassif)
                                         // Mettez à jour l'état avec le passif choisi aléatoirement
-                                        setSelectedPassifs(prev => ({ ...prev, [i]: randomPassif }));
-                                        
+                                        if (i === 3) {
+                                            setcurrentSelected(randomPassif);
+                                            // Différer l'appel à validatePassif pour laisser le temps à currentSelected d'être défini
+                                            setTimeout(() => {
+                                              validatePassif();
+                                            }, 100);
+                                        } else {
+                                            setSelectedPassifs(prev => ({ ...prev, [i]: randomPassif }));
+                                            setCurrentCardIndex(prev => prev + 1);
+                                            setcurrentSelected(randomPassif);
+                                        }
+
                                     }
                                 }
                                 return 0;
@@ -241,7 +256,7 @@ export default function Duel({ errorServer }) {
         if (duelState.player1Id && duelState.player2Id) {
             const isPlayerOne = session.user.id === duelState.player1Id;
             if (session.user.id === duelState.player1Id || session.user.id === duelState.player2Id) {
-                if (duelState.statut === 'passif') {
+                if (duelState.statut === 'passif' && duelState.deckP1[currentCardIndex] || duelState.deckP2[currentCardIndex]) {
                     const currentCard = isPlayerOne ? duelState.deckP1[currentCardIndex] : duelState.deckP2[currentCardIndex];
                     return (
                         <div className="flex flex-col h-screen">
@@ -256,7 +271,7 @@ export default function Duel({ errorServer }) {
                                             </span>
                                         </div>
                                     </div>
-                                </div>                                
+                                </div>
                                 <div className='relative w-[250px] h-[250px] md:w-[300px] md:h-[300px] xl:w-[400px] xl:h-[400px]'>
                                     <Image src={`${currentCard.card.picture}.png`}
                                         alt={currentCard.card.name}
@@ -273,7 +288,7 @@ export default function Duel({ errorServer }) {
 
                                     ))}
                                 </div>
-                                    <button onClick={validatePassif} className="px-4 py-2 bg-green-500 rounded hover:bg-green-600">Valider</button>
+                                <button onClick={validatePassif} className="px-4 py-2 bg-green-500 rounded hover:bg-green-600">Valider</button>
                             </div>
                             <div>
                             </div>
