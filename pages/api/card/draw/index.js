@@ -4,6 +4,7 @@ import jwt from 'jsonwebtoken';
 import { getToken } from "next-auth/jwt";
 import verifySignature from '../../verifySignature';
 import calculatePoints from '../../calculatePoints';
+import { refreshAccessToken } from '../../auth/[...nextauth]';
 
 // Initialiser le midleware Cors
 const allowedOrigins = [process.env.NEXTAUTH_URL]
@@ -54,6 +55,10 @@ export default async function handler(req, res) {
 
         if (!nextToken) {
             return res.status(401).json({ message: 'Utilisateur non authentifié' });
+        }
+        let accessToken = nextToken.accessToken;
+        if (!accessToken) {
+            return res.status(401).json({ message: 'Token non fourni' });
         }
         const signature = await verifySignature(req);
         if (!signature) {

@@ -144,7 +144,6 @@ export default function Collection({ cards, totalPoints, errorServer }) {
             const canLevelUp = cardCounts[card.id] >= 3 && points >= card.evolveCost && card.evolveCost !== null && !ownedCardIds.has(card.id + 1);
             const isCorrectRarity = selectedRarity === 'Toutes' || card.rarety === selectedRarity;
             const category = card.category === selectedCategory;
-            console.log(category)
             // Logique de filtrage basée sur la position du switch
             if (filterState === 'non possédé' && cardOwned) return false; // Si le switch est à gauche, exclure les cartes possédées
             if (filterState === 'possédé' && !cardOwned) return false; // Si le switch est à droite, exclure les cartes non possédées

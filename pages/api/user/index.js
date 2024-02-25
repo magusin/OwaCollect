@@ -54,6 +54,12 @@ export default async function handler(req, res) {
         if (!nextToken) {
             return res.status(401).json({ message: 'Utilisateur non authentifié' });
         }
+  
+        let accessToken = nextToken.accessToken;
+        if (!accessToken) {
+            return res.status(401).json({ message: 'Token non fourni' });
+        }
+        
         const signature = await verifySignature(req);
         if (!signature) {
             return res.status(400).json({ message: 'Signature invalide' });
