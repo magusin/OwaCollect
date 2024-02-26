@@ -63,9 +63,9 @@ export default function Login() {
   function HeadView() {
     return (
       <Head>
-        <title>Connexion</title>
-        <meta name="description" content="Connexion avec Twitch, Owarida accueil" />
-        <meta nn="keywords" content="owarida, owarida collect, connexion, twitch, owarida coins, stream, elden ring" />
+        <title>Owarida Collect | Connectez-vous avec Twitch et gagnez des owarida coins</title>
+        <meta name="description" content="Collectez des owarida coins en regardant les streams Twitch d'Owarida et échangez-les contre des cartes de vos jeux." />
+        <meta name="keywords" content="owarida, owarida collect, connexion, twitch, owarida coins, stream, elden ring" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
     )
