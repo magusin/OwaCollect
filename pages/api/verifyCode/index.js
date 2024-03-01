@@ -72,11 +72,34 @@ export default async function handler(req, res) {
             case 'POST':
                 const userCode = req.body.code;
                 const secretCode = process.env.SECRET_CODE;
-                if (userCode.toLowerCase() === secretCode) {
+                if (!userCode) {
+                    return res.status(400).json({ message: 'Code non fourni' });
+                }
+                if (userCode.toLowerCase() === 'sesame' || userCode.toLowerCase() === 'sésame') {
+                    const user = await prisma.pets.findUnique({
+                        where: { userId: decoded.id },
+                    });
+                    if (!user.secret1) {
+                        await prisma.pets.update({
+                            where: { userId: decoded.id },
+                            data: {
+                                secret1: true,
+                                pointsUsed: {
+                                    decrement : 500
+                                }
+                            }
+                        });
+                    } else {
+                        return res.status(200).json({ success: false, message: 'Vous avez déjà eu cette récompense'});
+                    }
+                    
+                    return res.status(200).json({ success: true, message: 'Code correct ! Vous avez débloqué la première récompense', secret1: true })
+                }
+                else if (userCode.toLowerCase() === secretCode) {
                     const secretShopLink = uuidv4();
                     return res.status(200).json({ success: true, secretShopLink: secretShopLink });
                 } else {
-                    return res.status(200).json({ success: false });
+                    return res.status(200).json({ success: false, message: 'Code incorrect'});
                 }
             default:
                 res.setHeader('Allow', ['POST'])
