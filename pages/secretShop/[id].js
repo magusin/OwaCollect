@@ -118,7 +118,7 @@ export default function SecretShop({ cards, totalPoints, errorServer }) {
     function HeadView() {
         return (
             <Head>
-                <title>OW | Boutique secrète</title>
+                <title>Boutique secrète - Owarida</title>
                 <meta name="description" content="Boutique secrète d'OWarida" />
                 <meta name="keywords" content="OWarida, boutique, secrète, cartes, points" />
                 <link rel="icon" href="/favicon.ico" />
@@ -244,7 +244,9 @@ export default function SecretShop({ cards, totalPoints, errorServer }) {
                 <div className="flex flex-col h-screen">
                     <Header points={points} />
                     <div className="flex-grow items-start justify-center" >
-                        <div className="w-full h-screen">
+                        <div className="relative w-full h-screen">
+                        <button className='absolute z-50 right-5 top-1/2 -translate-y-1/2 bg-white bg-opacity-20 hover:bg-opacity-50 md:text-xl text-white font-bold py-2 px-4 rounded-full'
+                    onClick={() => router.push('/scribe')}>Scribe</button>
                             <Image
                                 src="/images/closed.png"
                                 alt="Fond"

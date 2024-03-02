@@ -38,7 +38,16 @@ export default function Owarida({ totalPoints, errorServer }) {
                 router.push(`/secretShop/${response.data.secretShopLink}`)
             } else if (response.data.success && response.data.secret1) {
                 setMessage(response.data.message);
-                setPoints(points - 500);
+                setPoints(points + 500);
+            } else if (response.data.success && response.data.secret2) {
+                setMessage(response.data.message);
+                setPoints(points + 500);
+            } else if (response.data.success && response.data.secret3) {
+                setMessage(response.data.message);
+                setPoints(points + 500);
+            } else if (response.data.success && response.data.secret4) {
+                setMessage(response.data.message);
+                setPoints(points + 500);
             } else {
                 setMessage(response.data.message);
             }
@@ -75,6 +84,14 @@ export default function Owarida({ totalPoints, errorServer }) {
         localStorage.setItem('points', points);
         // Ajout de l'écouteur d'événement
         document.addEventListener("mousedown", handleClickOutside);
+
+        if (status === 'unauthenticated') {
+            router.push('/');
+        }
+
+        if (localStorage.getItem('points') != null) {
+            setPoints(localStorage.getItem('points'))
+        }
 
         if (error === 'Erreur avec votre Token ou il est expiré. Veuillez vous reconnecter.') {
             setTimeout(() => {
