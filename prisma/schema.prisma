@@ -41,6 +41,8 @@ model pets {
   secret2                     Boolean             @default(false)
   secret3                     Boolean             @default(false)
   secret4                     Boolean             @default(false)
+  secret5                     Boolean             @default(false)
+  secret6                     Boolean             @default(false)
   duels_duels_player1IdTopets duels[]             @relation("duels_player1IdTopets")
   duels_duels_player2IdTopets duels[]             @relation("duels_player2IdTopets")
   duels_duels_winnerIdTopets  duels[]             @relation("duels_winnerIdTopets")

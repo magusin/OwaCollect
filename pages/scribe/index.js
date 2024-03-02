@@ -82,7 +82,7 @@ export default function Scribe() {
             <>
                 <HeadView />
                 <div className="flex flex-col min-h-screen">
-                    <Header />
+                    <Header points={points}/>
                     <div style={{
                         backgroundImage: `url('/images/paper-scribe.png')`,
                         backgroundSize: 'cover',
@@ -96,9 +96,10 @@ export default function Scribe() {
                                     <h1 className="text-4xl text-center font-bold my-4">Les écrits du scribe</h1>
                                     <p className="text-center">Le scribe a laissé d&apos;étranges écrits.</p>
                                     <p>Il semble que chaque page parle d'un thème.</p>
-                                    <p className="italic">Si vous pensez avoir trouvé un thème ou un code dans cette page rendez-vous sur la page Owarida et rentrez-le en cliquant sur l'image d'Owarida.</p>
+                                    <p className="italic">Si vous pensez avoir trouvé un thème ou un code rendez-vous sur la page Owarida et rentrez-le en cliquant sur l'image d'Owarida.</p>
                                     <button style={{ fontFamily: 'Style Script, cursive' }} className='font-bold text-xl p-2 rounded-lg mt-4' onClick={() => setPage(1)} >Page 1 (01 / 12 / 04 - RQWZQI)</button>
                                     <button style={{ fontFamily: 'Style Script, cursive' }} className='font-bold text-xl p-2 rounded-lg mt-4' onClick={() => setPage(2)} >Page 2 (17 / 02 / 06 - TKIRFG)</button>
+                                    <button style={{ fontFamily: 'Style Script, cursive' }} className='font-bold text-xl p-2 rounded-lg mt-4' onClick={() => setPage(3)} >Page 3 (23 / 05 / 11 - BVTDUL)</button>
                                 </div>
                             )}
                             {page === 1 && (
@@ -128,6 +129,31 @@ export default function Scribe() {
                                 </div>
                             )}
                             {page === 2 && (
+                                <div className="flex flex-col text-2xl leading-9" style={{ fontFamily: 'Style Script, cursive' }}>
+                                    <ul className="my-4 mx-8">
+                                        <li>Certain en parle mais jamais personne ne le vois.</li>
+                                        <li>Grand Toleur A une dernière quête pour le traquer.</li>
+                                        <li>Comment une si grosse bête peut être si discrète ?</li>
+                                        <li>Plus qu'une légende moderne il continue d'inspirer.</li>
+                                        <li>Sa dernière position semble être en Amérique du Nord.</li>
+                                        <li>Je crois que Sam et Dean l'ont finalement trouvé.</li>
+                                    </ul>
+                                    <button style={{ fontFamily: 'Style Script, cursive' }} className='font-bold text-xl p-2 rounded-lg mt-4' onClick={() => setPage(0)} >Retourner aux notes</button>
+                                    <div className="flex justify-center my-4">
+                                        <button onClick={() => setPage(page - 1)} className="absolute left-0 top-1/2 transform -translate-y-1/2 text-black-600 hover:text-black-800 focus:outline-none">
+                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                                            </svg>
+                                        </button>
+                                        <button onClick={() => setPage(page + 1)} className="absolute right-0 top-1/2 transform -translate-y-1/2 text-black-600 hover:text-black-800 focus:outline-none">
+                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+                            {page === 3 && (
                                 <div className="flex flex-col text-2xl leading-9" style={{ fontFamily: 'Style Script, cursive' }}>
                                     <ul className="my-4 mx-8">
                                         <li>Dans le métro j'ai trébuché, j'ai cru que j'allais noclip pendant un instant.</li>
