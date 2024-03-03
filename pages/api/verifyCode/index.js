@@ -76,128 +76,160 @@ export default async function handler(req, res) {
                     return res.status(400).json({ message: 'Code non fourni' });
                 }
                 if (userCode.toLowerCase() === 'sesame' || userCode.toLowerCase() === 'sésame') {
-                    const user = await prisma.pets.findUnique({
-                        where: { userId: decoded.id },
+                    const secretAlreadyDiscovered = await prisma.secretsdiscovered.findUnique({
+                        where: { userId_secretId: { userId: decoded.id, secretId: 1 } }
                     });
-                    if (!user.secret1) {
-                        await prisma.pets.update({
+                
+                    if (!secretAlreadyDiscovered) { 
+                        await prisma.secretsdiscovered.create({ 
+                            data: {
+                                userId: decoded.id,
+                                secretId: 1
+                            }
+                        });
+                        await prisma.pets.update({ 
                             where: { userId: decoded.id },
                             data: {
-                                secret1: true,
                                 pointsUsed: {
-                                    decrement : 500
+                                    decrement: 500
                                 }
                             }
                         });
+                        return res.status(200).json({ success: true, message: 'Code correct ! Vous avez débloqué la récompense: 500 OC', secret1: true });
                     } else {
-                        return res.status(200).json({ success: false, message: 'Vous avez déjà eu cette récompense'});
+                        return res.status(200).json({ success: false, message: 'Vous avez déjà eu cette récompense' });
                     }
-                    
-                    return res.status(200).json({ success: true, message: 'Code correct ! Vous avez débloqué la récompense: 500 OC', secret1: true })
                 }
                 else if (userCode.toLowerCase() === 'streamer' || userCode.toLowerCase() === 'streameur') {
-                    const user = await prisma.pets.findUnique({
-                        where: { userId: decoded.id },
+                    const secretAlreadyDiscovered = await prisma.secretsdiscovered.findUnique({
+                        where: { userId_secretId: { userId: decoded.id, secretId: 2 } }
                     });
-                    if (!user.secret2) {
-                        await prisma.pets.update({
+                
+                    if (!secretAlreadyDiscovered) { 
+                        await prisma.secretsdiscovered.create({ 
+                            data: {
+                                userId: decoded.id,
+                                secretId: 2
+                            }
+                        });
+                        await prisma.pets.update({ 
                             where: { userId: decoded.id },
                             data: {
-                                secret2: true,
                                 pointsUsed: {
-                                    decrement : 500
+                                    decrement: 500
                                 }
                             }
                         });
+                        return res.status(200).json({ success: true, message: 'Code correct ! Vous avez débloqué la récompense: 500 OC', secret2: true });
                     } else {
-                        return res.status(200).json({ success: false, message: 'Vous avez déjà eu cette récompense'});
+                        return res.status(200).json({ success: false, message: 'Vous avez déjà eu cette récompense' });
                     }
-                    
-                    return res.status(200).json({ success: true, message: 'Code correct ! Vous avez débloqué la récompense: 500 OC', secret2: true })
                 }
                 else if (userCode.toLowerCase() === 'cicada') {
-                    const user = await prisma.pets.findUnique({
-                        where: { userId: decoded.id },
+                    const secretAlreadyDiscovered = await prisma.secretsdiscovered.findUnique({
+                        where: { userId_secretId: { userId: decoded.id, secretId: 3 } }
                     });
-                    if (!user.secret3) {
-                        await prisma.pets.update({
+                
+                    if (!secretAlreadyDiscovered) { 
+                        await prisma.secretsdiscovered.create({ 
+                            data: {
+                                userId: decoded.id,
+                                secretId: 3
+                            }
+                        });
+                        await prisma.pets.update({ 
                             where: { userId: decoded.id },
                             data: {
-                                secret3: true,
                                 pointsUsed: {
-                                    decrement : 500
+                                    decrement: 500
                                 }
                             }
                         });
+                        return res.status(200).json({ success: true, message: 'Code correct ! Vous avez débloqué la récompense: 500 OC', secret3: true });
                     } else {
-                        return res.status(200).json({ success: false, message: 'Vous avez déjà eu cette récompense'});
+                        return res.status(200).json({ success: false, message: 'Vous avez déjà eu cette récompense' });
                     }
-                    
-                    return res.status(200).json({ success: true, message: 'Code correct ! Vous avez débloqué la récompense: 500 OC', secret3: true })
                 }
                 else if (userCode.toLowerCase() === 'backrooms' || userCode.toLowerCase() === 'backroom') {
-                    const user = await prisma.pets.findUnique({
-                        where: { userId: decoded.id },
+                    const secretAlreadyDiscovered = await prisma.secretsdiscovered.findUnique({
+                        where: { userId_secretId: { userId: decoded.id, secretId: 4 } }
                     });
-                    if (!user.secret4) {
-                        await prisma.pets.update({
+                
+                    if (!secretAlreadyDiscovered) { 
+                        await prisma.secretsdiscovered.create({ 
+                            data: {
+                                userId: decoded.id,
+                                secretId: 4
+                            }
+                        });
+                        await prisma.pets.update({ 
                             where: { userId: decoded.id },
                             data: {
-                                secret4: true,
                                 pointsUsed: {
-                                    decrement : 500
+                                    decrement: 500
                                 }
                             }
                         });
+                        return res.status(200).json({ success: true, message: 'Code correct ! Vous avez débloqué la récompense: 500 OC', secret4: true });
                     } else {
-                        return res.status(200).json({ success: false, message: 'Vous avez déjà eu cette récompense'});
+                        return res.status(200).json({ success: false, message: 'Vous avez déjà eu cette récompense' });
                     }
-                    
-                    return res.status(200).json({ success: true, message: 'Code correct ! Vous avez débloqué la récompense: 500 OC', secret4: true })
                 }
                 else if (userCode.toLowerCase() === 'enigma') {
-                    const user = await prisma.pets.findUnique({
-                        where: { userId: decoded.id },
+                    const secretAlreadyDiscovered = await prisma.secretsdiscovered.findUnique({
+                        where: { userId_secretId: { userId: decoded.id, secretId: 5 } } // Vérifie si le secret 5 a déjà été découvert par cet utilisateur
                     });
-                    if (!user.secret5) {
-                        await prisma.pets.update({
+                
+                    if (!secretAlreadyDiscovered) { // Si le secret n'a pas encore été découvert
+                        await prisma.secretsdiscovered.create({ // Ajouter une nouvelle entrée dans la table secretsdiscovered
+                            data: {
+                                userId: decoded.id,
+                                secretId: 5
+                            }
+                        });
+                        await prisma.pets.update({ // Mettre à jour d'autres données dans la table pets si nécessaire
                             where: { userId: decoded.id },
                             data: {
-                                secret5: true,
                                 pointsUsed: {
-                                    decrement : 500
+                                    decrement: 500
                                 }
                             }
                         });
+                        return res.status(200).json({ success: true, message: 'Code correct ! Vous avez débloqué la récompense: 500 OC', secret5: true });
                     } else {
-                        return res.status(200).json({ success: false, message: 'Vous avez déjà eu cette récompense'});
+                        return res.status(200).json({ success: false, message: 'Vous avez déjà eu cette récompense' });
                     }
-                    
-                    return res.status(200).json({ success: true, message: 'Code correct ! Vous avez débloqué la récompense: 500 OC', secret5: true })
                 }
                 else if (userCode.toLowerCase() === 'bigfoot') {
-                    const user = await prisma.pets.findUnique({
-                        where: { userId: decoded.id },
+                    const secretAlreadyDiscovered = await prisma.secretsdiscovered.findUnique({
+                        where: { userId_secretId: { userId: decoded.id, secretId: 6 } }
                     });
-                    if (!user.secret6) {
-                        await prisma.pets.update({
+                
+                    if (!secretAlreadyDiscovered) { 
+                        await prisma.secretsdiscovered.create({ 
+                            data: {
+                                userId: decoded.id,
+                                secretId: 6
+                            }
+                        });
+                        await prisma.pets.update({ 
                             where: { userId: decoded.id },
                             data: {
-                                secret6: true,
                                 pointsUsed: {
-                                    decrement : 500
+                                    decrement: 500
                                 }
                             }
                         });
+                        return res.status(200).json({ success: true, message: 'Code correct ! Vous avez débloqué la récompense: 500 OC', secret6: true });
                     } else {
-                        return res.status(200).json({ success: false, message: 'Vous avez déjà eu cette récompense'});
+                        return res.status(200).json({ success: false, message: 'Vous avez déjà eu cette récompense' });
                     }
-                    
-                    return res.status(200).json({ success: true, message: 'Code correct ! Vous avez débloqué la récompense: 500 OC', secret6: true })
                 }
                 else if (userCode.toLowerCase() === secretCode) {
                     const secretShopLink = uuidv4();
                     return res.status(200).json({ success: true, secretShopLink: secretShopLink });
+                } else if (userCode.toLowerCase() === '5') {
+                    return res.status(200).json({ success: false, message: 'Les 5 sont en réalité des 8' });
                 } else {
                     return res.status(200).json({ success: false, message: 'Code incorrect'});
                 }
