@@ -29,12 +29,17 @@ export default function Shop({ productsData, totalPoints, errorServer }) {
     const [showAlert, setShowAlert] = React.useState(false);
     const [alertMessage, setAlertMessage] = React.useState('');
     const [alertType, setAlertType] = React.useState(null);
+    const [selectedProduct, setSelectedProduct] = React.useState(null);
     
-    const handleBuyPack = () => {
+    const handleBuyPack = (product) => {
         setShowModal(true);
+        setSelectedProduct(product);
     };
 
+    
+
     const handleConfirmPurchase = async (selectedProduct, quantity) => {
+        console.log('selectedProduct', selectedProduct);
         setLoading(true);
         setShowModal(false);
         const totalPointsCost = selectedProduct.price * quantity;
@@ -166,20 +171,20 @@ export default function Shop({ productsData, totalPoints, errorServer }) {
                                     <h2 className="text-xl font-semibold">{product.name}</h2>
                                     <p className="mt-1">{product.name}</p>
                                     <div className="mt-2 font-bold">Prix : {product.price} OC</div>
-                                    <button onClick={handleBuyPack} className={`mt-4 bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 ${points < product.price ? "opacity-50 cursor-not-allowed" : ""}`} disabled={points < product.price}>Acheter</button>
+                                    <button onClick={() => handleBuyPack(product)} className={`mt-4 bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 ${points < product.price ? "opacity-50 cursor-not-allowed" : ""}`} disabled={points < product.price}>Acheter</button>
                                 </div>
                                 {showModal && (
                                     <Modal
                                         setShowModal={setShowModal}
-                                        handleConfirm={(quantity) => handleConfirmPurchase(product, quantity)}
+                                        handleConfirm={(quantity) => handleConfirmPurchase(selectedProduct, quantity)}
                                         title="Confirmation d'Achat"
                                         message={
                                             <>
-                                                Êtes-vous sûr de vouloir acheter <b>{product.name}</b> pack pour <b>{product.price} OC</b> ?
+                                                Êtes-vous sûr de vouloir acheter <b>{selectedProduct.name}</b> pack pour <b>{selectedProduct.price} OC</b> ?
                                             </>
                                         }
-                                        maxQuantity={Math.floor(points / product.price) > 5 ? 5 : Math.floor(points / product.price)}
-                                        cost={product.price}
+                                        maxQuantity={Math.floor(points / selectedProduct.price) > 5 ? 5 : Math.floor(points / selectedProduct.price)}
+                                        cost={selectedProduct.price}
                                         buy={true}
                                     />
                                 )}
