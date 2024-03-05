@@ -10,6 +10,8 @@ import TwitchUserInfo from "C/twitchUserInfo";
 import Image from "next/legacy/image";
 import { useDarkMode } from "@/contexts/darkModeContext";
 import Footer from "C/footer";
+import axiosInstance from "@/utils/axiosInstance";
+import Head from 'next/head';
 
 export default function Login() {
   const { data: session, status } = useSession();
@@ -27,10 +29,8 @@ export default function Login() {
       //  add flag if create user for cancel multiple call
       const getUser = async () => {
         try {
-          const response = await axios.get(`/api/user`, {
-            headers: {
-              Authorization: `Bearer ${session.customJwt}`,
-            },
+          const response = await axiosInstance.get(`/api/user`, {
+              customConfig: { session: session }
           });
           const data = await response.data;
           localStorage.setItem('userOC', JSON.stringify(data));
@@ -46,7 +46,7 @@ export default function Login() {
               router.push('/');
             }, 2000);
           } else {
-            setError('Erreur lors de la récupération des données utilisateur. ' + error);
+            setError('Erreur lors de la récupération des données utilisateur. ' + error.response?.data?.message || error.message);
           }
         } finally {
           setLoading(false);
@@ -60,8 +60,21 @@ export default function Login() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session]);
 
+  function HeadView() {
+    return (
+      <Head>
+        <title>Owarida Collect | Connectez-vous avec Twitch et gagnez des owarida coins</title>
+        <meta name="description" content="Collectez des owarida coins en regardant les streams Twitch d'Owarida et échangez-les contre des cartes de vos jeux." />
+        <meta name="keywords" content="owarida, owarida collect, connexion, twitch, owarida coins, stream, elden ring" />
+        <link rel="icon" href="/favicon.ico" />
+      </Head>
+    )
+  }
+
   if (status === "loading" || loading) {
     return (
+      <>
+      <HeadView />
       <div className="flex flex-col h-screen">
         <Header points={points} />
         <div className="flex-grow flex justify-center items-center">
@@ -69,11 +82,14 @@ export default function Login() {
         </div>
         <Footer />
       </div>
+      </>
     )
   }
 
   if (error) {
     return (
+      <>
+      <HeadView />
       <div className="flex flex-col h-screen">
         <Header points={points} />
         <div className="flex-grow flex justify-center items-center">
@@ -81,6 +97,7 @@ export default function Login() {
         </div>
         <Footer />
       </div>
+      </>
     );
   }
 
@@ -88,6 +105,7 @@ export default function Login() {
 
     return (
       <>
+      <HeadView />
         <div className="flex flex-col min-h-screen">
           <Header points={points} />
 
@@ -124,6 +142,8 @@ export default function Login() {
 
   if (!session) {
     return (
+      <>
+    <HeadView />
       <div className="flex flex-col content-center items-center h-screen">
         <Header />
         <div className="flex flex-col h-full w-full justify-center items-center" style={{ background: 'radial-gradient(circle, #CCCCCC, #0f171b)' }}>
@@ -132,6 +152,7 @@ export default function Login() {
           
         </div>
       </div>
+    </>
     );
   }
 }

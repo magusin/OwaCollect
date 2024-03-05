@@ -1,0 +1,9 @@
+# *
+User-agent: *
+Allow: /
+
+# Host
+Host: https://owarida.fr
+
+# Sitemaps
+Sitemap: https://owarida.fr/sitemap.xml

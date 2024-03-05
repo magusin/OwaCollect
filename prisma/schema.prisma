@@ -23,21 +23,26 @@ model achievements {
 }
 
 model pets {
-  id                Int                 @id @default(autoincrement())
-  userId            String              @unique(map: "userId") @db.VarChar(255)
-  name              String              @db.VarChar(255)
-  imageUrl          String              @db.VarChar(1024)
-  xp                Int?                @default(0)
-  level             Int?                @default(1)
-  subs              Int                 @default(0)
-  gifts             Int                 @default(0)
-  messages          Int                 @default(0)
-  bits              Int                 @default(0)
-  guess             Int                 @default(0)
-  quiz              Int                 @default(0)
-  pointsUsed        Int?                @default(0)
-  playercards       playercards[]
-  user_achievements user_achievements[]
+  id                          Int                 @id @default(autoincrement())
+  userId                      String              @unique(map: "userId") @db.VarChar(255)
+  name                        String              @db.VarChar(255)
+  imageUrl                    String              @db.VarChar(1024)
+  xp                          Int?                @default(0)
+  level                       Int?                @default(1)
+  subs                        Int                 @default(0)
+  gifts                       Int                 @default(0)
+  messages                    Int                 @default(0)
+  bits                        Int                 @default(0)
+  guess                       Int                 @default(0)
+  quiz                        Int                 @default(0)
+  pointsUsed                  Int?                @default(0)
+  messagesOC                  Int                 @default(0)
+  duels_duels_player1IdTopets duels[]             @relation("duels_player1IdTopets")
+  duels_duels_player2IdTopets duels[]             @relation("duels_player2IdTopets")
+  duels_duels_winnerIdTopets  duels[]             @relation("duels_winnerIdTopets")
+  playercards                 playercards[]
+  secretsdiscovered           secretsdiscovered[]
+  user_achievements           user_achievements[]
 }
 
 model user_achievements {
@@ -68,19 +73,98 @@ model card {
   category     String        @db.VarChar(55)
   rarety       String        @db.VarChar(55)
   dropRate     Int           @default(0)
+  number       Int?
   card         card?         @relation("cardTocard", fields: [evolvedId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "card_ibfk_1")
   other_card   card[]        @relation("cardTocard")
+  passifcards  passifcards[]
   playercards  playercards[]
 
   @@index([evolvedId], map: "evolvedId")
 }
 
 model playercards {
-  petId  String @db.VarChar(255)
-  cardId Int
-  count  Int
-  card   card   @relation(fields: [cardId], references: [id], onUpdate: Restrict, map: "playercards_ibfk_1")
-  pets   pets   @relation(fields: [petId], references: [userId], onUpdate: Restrict, map: "playercards_ibfk_2")
+  petId    String  @db.VarChar(255)
+  cardId   Int
+  count    Int
+  isInDeck Boolean @default(false)
+  isNew    Boolean @default(false)
+  card     card    @relation(fields: [cardId], references: [id], onDelete: Cascade, map: "playercards_ibfk_1")
+  pets     pets    @relation(fields: [petId], references: [userId], onDelete: Cascade, map: "playercards_ibfk_2")
 
   @@id([petId, cardId])
+  @@index([cardId], map: "playercards_ibfk_1")
+}
+
+model duels {
+  uuid                       String    @id @db.VarChar(255)
+  player1Id                  String?   @db.VarChar(255)
+  player2Id                  String?   @db.VarChar(255)
+  winnerId                   String?   @db.VarChar(255)
+  bet                        Int       @default(0)
+  status                     String    @default("waiting") @db.VarChar(255)
+  isOnP1                     Int       @default(0) @db.TinyInt
+  isOnP2                     Int       @default(0) @db.TinyInt
+  lastTimeP1                 DateTime? @db.Timestamp(0)
+  lastTimeP2                 DateTime? @db.Timestamp(0)
+  pets_duels_player1IdTopets pets?     @relation("duels_player1IdTopets", fields: [player1Id], references: [userId], onDelete: Cascade, map: "duels_ibfk_1")
+  pets_duels_player2IdTopets pets?     @relation("duels_player2IdTopets", fields: [player2Id], references: [userId], onDelete: Cascade, map: "duels_ibfk_2")
+  pets_duels_winnerIdTopets  pets?     @relation("duels_winnerIdTopets", fields: [winnerId], references: [userId], onDelete: Cascade, map: "duels_ibfk_3")
+
+  @@index([player1Id], map: "duels_ibfk_1")
+  @@index([player2Id], map: "duels_ibfk_2")
+  @@index([winnerId], map: "duels_ibfk_3")
+}
+
+model passif {
+  id               Int           @id @default(autoincrement())
+  description      String        @db.VarChar(255)
+  hit              Int           @default(0)
+  heal             Int           @default(0)
+  damagePhy        Int           @default(0)
+  damageElem       Int           @default(0)
+  damageStandard   Int           @default(0)
+  damageSlash      Int           @default(0)
+  damageStrike     Int           @default(0)
+  damagePierce     Int           @default(0)
+  damageMagique    Int           @default(0)
+  damageFire       Int           @default(0)
+  damageLightning  Int           @default(0)
+  damageHoly       Int           @default(0)
+  randomCount      Int           @default(0)
+  defensePhy       Int           @default(0)
+  defenseElem      Int           @default(0)
+  defenseStandard  Int           @default(0)
+  defenseSlash     Int           @default(0)
+  defenseStrike    Int           @default(0)
+  defensePierce    Int           @default(0)
+  defenseMagique   Int           @default(0)
+  defenseFire      Int           @default(0)
+  defenseLightning Int           @default(0)
+  defenseHoly      Int           @default(0)
+  hp               Int           @default(0)
+  passifcards      passifcards[]
+}
+
+model passifcards {
+  cardId   Int
+  passifId Int
+  name     String @db.VarChar(255)
+  card     card   @relation(fields: [cardId], references: [id], onDelete: Cascade, map: "passifcards_ibfk_1")
+  passif   passif @relation(fields: [passifId], references: [id], onDelete: Cascade, map: "passifcards_ibfk_2")
+
+  @@id([cardId, passifId])
+}
+
+model secrets {
+  secretId   Int    @id @default(autoincrement())
+  secretName String @db.VarChar(255)
+}
+
+model secretsdiscovered {
+  userId   String @db.VarChar(255)
+  secretId Int
+  pets     pets   @relation(fields: [userId], references: [userId], onUpdate: Restrict, map: "secretsdiscovered_ibfk_1")
+
+  @@id([userId, secretId])
+  @@index([secretId], map: "secretId")
 }
