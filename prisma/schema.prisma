@@ -41,6 +41,7 @@ model pets {
   duels_duels_player2IdTopets duels[]             @relation("duels_player2IdTopets")
   duels_duels_winnerIdTopets  duels[]             @relation("duels_winnerIdTopets")
   playercards                 playercards[]
+  secretsdiscovered           secretsdiscovered[]
   user_achievements           user_achievements[]
 }
 
@@ -152,4 +153,18 @@ model passifcards {
   passif   passif @relation(fields: [passifId], references: [id], onDelete: Cascade, map: "passifcards_ibfk_2")
 
   @@id([cardId, passifId])
+}
+
+model secrets {
+  secretId   Int    @id @default(autoincrement())
+  secretName String @db.VarChar(255)
+}
+
+model secretsdiscovered {
+  userId   String @db.VarChar(255)
+  secretId Int
+  pets     pets   @relation(fields: [userId], references: [userId], onUpdate: Restrict, map: "secretsdiscovered_ibfk_1")
+
+  @@id([userId, secretId])
+  @@index([secretId], map: "secretId")
 }

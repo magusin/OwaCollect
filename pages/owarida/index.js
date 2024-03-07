@@ -32,12 +32,18 @@ export default function Owarida({ totalPoints, errorServer }) {
                 customConfig: { session: session }
             });
            
-            if (response.data.success) {
+            if (response.data.success && response.data.secretShopLink) {
                 setMessage('Code correct !');
                 localStorage.setItem('secretShopLink', response.data.secretShopLink);
                 router.push(`/secretShop/${response.data.secretShopLink}`)
+            } else if (response.data.success && response.data.secret1 || response.data.success && response.data.secret2 || response.data.success && response.data.secret3 || response.data.success && response.data.secret4 || response.data.success && response.data.secret5 || response.data.success && response.data.secret6) {
+                setMessage(response.data.message);
+                const currentPoints = parseInt(points); // Convertit points en nombre entier
+                const totalPoints = currentPoints + 500;
+                localStorage.setItem('points', totalPoints);
+                setPoints(totalPoints);
             } else {
-                setMessage('Code incorrect.');
+                setMessage(response.data.message);
             }
         } catch (error) {
             if (error.response.status === 401) {
@@ -53,6 +59,7 @@ export default function Owarida({ totalPoints, errorServer }) {
             setLoading(false);
         }
     };
+
     // Gestionnaire pour afficher/masquer l'input
     const handleImageClick = () => {
         setShowInput(true);
@@ -71,6 +78,14 @@ export default function Owarida({ totalPoints, errorServer }) {
         localStorage.setItem('points', points);
         // Ajout de l'écouteur d'événement
         document.addEventListener("mousedown", handleClickOutside);
+
+        if (status === 'unauthenticated') {
+            router.push('/');
+        }
+
+        if (localStorage.getItem('points') != null) {
+            setPoints(localStorage.getItem('points'))
+        }
 
         if (error === 'Erreur avec votre Token ou il est expiré. Veuillez vous reconnecter.') {
             setTimeout(() => {
@@ -189,7 +204,7 @@ export default function Owarida({ totalPoints, errorServer }) {
                 </div>
                 {showInput && (
                     <div className="text-black fixed bottom-0 w-full px-4" ref={inputRef}>
-                        <p className={message != '' && message != 'Code correct !' ? "text-red-500" : "text-green-500"}>{message != '' ? message : 'Vous avez un code pour Owarida ?'}</p>
+                        <p className={message != '' && message.includes('Code correct !') ? "text-green-500 bg-white" : "text-red-500 bg-white"}>{message != '' ? message : 'Vous avez un code pour Owarida ?'}</p>
                         <div className="flex">
                         <input
                             className="border-2 w-full border p-2"

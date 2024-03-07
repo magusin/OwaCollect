@@ -30,7 +30,7 @@ export default function Alley() {
     function HeadView() {
         return (
             <Head>
-                <title>Allée : Owarida</title>
+                <title>Allée - Owarida</title>
                 <meta name="description" content="Conditions Générales d'Utilisation du site Owarida" />
                 <meta name="keywords" content="owarida, owarida collect, twitch, elden ring" />
             </Head>

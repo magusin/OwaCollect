@@ -5,7 +5,7 @@ export default function OwaGif() {
         <div className="relative w-full h-1/2 content-center">
         <Image
             src="/images/owa.png"
-            alt="OWA"
+            alt="Owarida collect"
             priority={true}
             objectFit="contain"
             objectPosition="center"
