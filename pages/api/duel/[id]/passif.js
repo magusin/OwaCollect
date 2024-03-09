@@ -46,7 +46,7 @@ async function runMiddleware(req, res, fn) {
     })
 }
 
-// GET api/duel/[id]/status
+// GET api/duel/[id]/passif
 export default async function handler(req, res) {
     try {
         const nextToken = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });

@@ -13,7 +13,6 @@ import { doc, onSnapshot, updateDoc, getDoc } from "firebase/firestore";
 import { db } from '@/utils/firebaseConfig';
 import axiosInstance from '@/utils/axiosInstance';
 import RandomNumber from '@/components/randomNumber';
-import { validate } from 'uuid';
 
 export default function Duel({ errorServer }) {
     const { data: session, status } = useSession();
