@@ -75,7 +75,13 @@ export default async function handler(req, res) {
                 if (!userCode) {
                     return res.status(400).json({ message: 'Code non fourni' });
                 }
-                if (userCode.toLowerCase() === 'sesame' || userCode.toLowerCase() === 'sésame') {
+                if (userCode.toLowerCase() === '5') {
+                    return res.status(200).json({ success: false, message: 'Les 5 mentent se sont des 8' });
+                }
+                else if (userCode.toLowerCase() === 'chien' || userCode.toLowerCase() === 'dog') {
+                    return res.status(200).json({ success: false, message: 'Je suis de la team chat' });
+                }
+                else if (userCode.toLowerCase() === 'sesame' || userCode.toLowerCase() === 'sésame') {
                     const secretAlreadyDiscovered = await prisma.secretsdiscovered.findUnique({
                         where: { userId_secretId: { userId: decoded.id, secretId: 1 } }
                     });
@@ -221,6 +227,56 @@ export default async function handler(req, res) {
                             }
                         });
                         return res.status(200).json({ success: true, message: 'Code correct ! Vous avez débloqué la récompense: 500 OC', secret6: true });
+                    } else {
+                        return res.status(200).json({ success: false, message: 'Vous avez déjà eu cette récompense' });
+                    }
+                }
+                else if (userCode.toLowerCase() === 'taured') {
+                    const secretAlreadyDiscovered = await prisma.secretsdiscovered.findUnique({
+                        where: { userId_secretId: { userId: decoded.id, secretId: 7 } }
+                    });
+                
+                    if (!secretAlreadyDiscovered) { 
+                        await prisma.secretsdiscovered.create({ 
+                            data: {
+                                userId: decoded.id,
+                                secretId: 7
+                            }
+                        });
+                        await prisma.pets.update({ 
+                            where: { userId: decoded.id },
+                            data: {
+                                pointsUsed: {
+                                    decrement: 500
+                                }
+                            }
+                        });
+                        return res.status(200).json({ success: true, message: 'Code correct ! Vous avez débloqué la récompense: 500 OC', secret7: true });
+                    } else {
+                        return res.status(200).json({ success: false, message: 'Vous avez déjà eu cette récompense' });
+                    }
+                }
+                else if (userCode.toLowerCase() === 'sin') {
+                    const secretAlreadyDiscovered = await prisma.secretsdiscovered.findUnique({
+                        where: { userId_secretId: { userId: decoded.id, secretId: 8 } }
+                    });
+                
+                    if (!secretAlreadyDiscovered) { 
+                        await prisma.secretsdiscovered.create({ 
+                            data: {
+                                userId: decoded.id,
+                                secretId: 8
+                            }
+                        });
+                        await prisma.pets.update({ 
+                            where: { userId: decoded.id },
+                            data: {
+                                pointsUsed: {
+                                    decrement: 500
+                                }
+                            }
+                        });
+                        return res.status(200).json({ success: true, message: 'Code correct ! Vous avez débloqué la récompense: 500 OC', secret8: true });
                     } else {
                         return res.status(200).json({ success: false, message: 'Vous avez déjà eu cette récompense' });
                     }
