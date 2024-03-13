@@ -8,34 +8,40 @@ import { signOut, useSession } from 'next-auth/react';
 import calculatePoints from '@/utils/calculatePoints';
 import axiosInstance from '@/utils/axiosInstance';
 import Head from 'next/head';
+import Link from "next/link";
 
 export default function Alley() {
     const router = useRouter();
     const { data: session, status } = useSession();
     const [points, setPoints] = React.useState(0);
     const [error, setError] = React.useState(null);
+    const [isMobile, setIsMobile] = React.useState(false);
 
-    // Fonction pour générer une chaîne aléatoire
-    const generateRandomString = (length = 10) => {
-        // Génère une chaîne de caractères aléatoires de la longueur spécifiée
-        return [...Array(length)].map(() => (Math.random() * 36 | 0).toString(36)).join('');
-    }
-
-    // Gestionnaire onClick qui utilise la chaîne aléatoire pour naviguer
-    const handleRandomNavigation = () => {
-        const randomString = generateRandomString();
-        router.push(`/secretShop/${randomString}`);
-    }
 
     function HeadView() {
         return (
             <Head>
-                <title>Allée - Owarida</title>
-                <meta name="description" content="Lien vers d'autre page" />
+                <title>404 - Owarida</title>
+                <meta name="description" content="Page 404" />
                 <meta name="keywords" content="owarida, owarida collect, twitch, elden ring, dark souls" />
             </Head>
         )
     }
+
+    useEffect(() => {
+        const handleResize = () => {
+          setIsMobile(window.innerWidth < 1024);
+        };
+    
+        // Vérifier la taille de l'écran au montage du composant
+        handleResize();
+    
+        // Ajouter l'écouteur d'événements pour les redimensionnements de fenêtre
+        window.addEventListener('resize', handleResize);
+    
+        // Nettoyer l'écouteur d'événements lors du démontage du composant
+        return () => window.removeEventListener('resize', handleResize);
+      }, []);
 
     useEffect(() => {
 
@@ -100,12 +106,24 @@ export default function Alley() {
         <div className="flex flex-col h-screen">
             <Header points={points}/>
             <div className="relative flex-grow flex justify-center">
-                <button className='absolute z-50 right-5 top-1/2 -translate-y-1/2 bg-white bg-opacity-20 hover:bg-opacity-50 md:text-xl text-white font-bold py-2 px-4 rounded-full'
-                    onClick={handleRandomNavigation}>Marchand</button>
-                {/* Pour centrer à gauche */}
-                <button className='absolute z-50 left-5 top-1/2 -translate-y-1/2 bg-white bg-opacity-20 hover:bg-opacity-50 md:text-xl text-white font-bold py-2 px-4 rounded-full'
-                    onClick={() => router.push('/blacksmith')}>Forgeron</button>
-                <Image src="/images/alley.png" alt="Alley 9-3/4" fill priority={true} />
+            {isMobile ? (
+            <Image src="/images/404.png" alt="404" fill priority={true} />
+            ) : (
+            <Image src="/images/404-2.png" alt="404" fill priority={true} />
+            )}
+            <div className="absolute inset-0 flex items-center justify-center p-4 text-center">
+        <p className="mb-8 text-black text-3xl md:text-4xl shadow-lg font-bold bg-black/5">
+          Vous aussi vous vous perdez facilement comme Owa ?
+        </p>
+        </div>
+        <div className='absolute p-4 bottom-8 flex items-center text-center justify-center'>
+
+        <Link href="/"
+          className="text-lg md:text-xl bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+            Retour à l&apos;accueil
+          
+        </Link>
+              </div>
             </div>
             <Footer />
         </div>
