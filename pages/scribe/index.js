@@ -96,7 +96,7 @@ export default function Scribe() {
                                     <h1 className="text-4xl text-center font-bold my-4">Les écrits du scribe</h1>
                                     <p className="text-center">Le scribe a laissé d&apos;étranges écrits.</p>
                                     <p>Il semble que chaque page parle d'un thème.</p>
-                                    <p className="italic">Si vous pensez avoir trouvé un thème ou un code rendez-vous sur la page Owarida et rentrez-le en cliquant sur l'image d'Owarida.</p>
+                                    <p className="italic">Si vous pensez avoir trouvé un thème ou un code, rendez-vous sur la page Owarida et rentrez-le en cliquant sur l'image d'Owarida.</p>
                                     <button style={{ fontFamily: 'Style Script, cursive' }} className='font-bold text-xl p-2 rounded-lg mt-4' onClick={() => setPage(1)} >Page 1 (01 / 12 / 04 - RQWZQI)</button>
                                     <button style={{ fontFamily: 'Style Script, cursive' }} className='font-bold text-xl p-2 rounded-lg mt-4' onClick={() => setPage(2)} >Page 2 (17 / 02 / 06 - TKIRFG)</button>
                                     <button style={{ fontFamily: 'Style Script, cursive' }} className='font-bold text-xl p-2 rounded-lg mt-4' onClick={() => setPage(3)} >Page 3 (23 / 05 / 11 - BVTDUL)</button>
@@ -108,7 +108,7 @@ export default function Scribe() {
                                     <ul className="my-4 mx-8">
                                         <li>O2014-11-19 : Je n'aime pas les framboises, ça fait de moi une mauvaise personne ?</li>
                                         <li>F2012-02-02 : Il est jaloux d'un de mes talents qu'il n'aura jamais; perdre aux jeux.</li>
-                                        <li>E2022-03-22 : Pourquoi ce flux vidéo m'insulte tout le temps ? Tant de chanson offensante ...</li>
+                                        <li>E2022-03-22 : Pourquoi ce flux vidéo m'insulte tout le temps ? Tant de chansons offensantes ...</li>
                                         <li>K2013-07-31 : Il pourrait forger mais il préfère sporter.</li>
                                         <li>K2014-09-15 : Tellement de force P = m x g</li>
                                         <li>G2020-04-06 : La riritude aiguë est très contagieuse.</li>
@@ -132,10 +132,10 @@ export default function Scribe() {
                             {page === 2 && (
                                 <div className="flex flex-col text-2xl leading-9" style={{ fontFamily: 'Style Script, cursive' }}>
                                     <ul className="my-4 mx-8">
-                                        <li>Certain en parle mais jamais personne ne le vois.</li>
+                                        <li>Certains en parlent mais jamais personne ne le voit.</li>
                                         <li>GTA a une dernière quête pour le traquer.</li>
                                         <li>Comment une si grosse bête peut être si discrète ?</li>
-                                        <li>Plus qu'une légende moderne il continue d'inspirer.</li>
+                                        <li>Plus qu'une légende moderne, il continue d'inspirer.</li>
                                         <li>Sa dernière position semble être en Amérique du Nord.</li>
                                         <li>Je crois que Sam et Dean l'ont finalement trouvé.</li>
                                     </ul>
@@ -161,8 +161,8 @@ export default function Scribe() {
                                         <li>L'eau d'amande m'aide grandement à ne pas perdre l'esprit.</li>
                                         <li>Level 0 : Je suis seul, cette tapisserie jaunâtre m'écoeure, tout se ressemble et je ne sais où aller.</li>
                                         <li>Level 4 : Ce bureau est vide, chaque espace liminale me semble étrange, m'apaise mais renforce ma solitude.</li>
-                                        <li>Level 54 : Cet escalier ne fini jamais ? Je monte ou je descend ?</li>
-                                        <li>Level 100 : Cette plage est agréable, je ne réponds pas aux voix ni ne regarde les sourires insistant mais je sais que le rôdeur de l'ombre viendra la nuit tombée.</li>
+                                        <li>Level 54 : Cet escalier ne finit jamais ? Je monte ou je descends ?</li>
+                                        <li>Level 100 : Cette plage est agréable, je ne réponds pas aux voix ni ne regarde les sourires insistants mais je sais que le rôdeur de l'ombre viendra la nuit tombée.</li>
                                     </ul>
                                     <button style={{ fontFamily: 'Style Script, cursive' }} className='font-bold text-xl p-2 rounded-lg mt-4' onClick={() => setPage(0)} >Retourner aux notes</button>
                                     <div className="flex justify-center my-4">
