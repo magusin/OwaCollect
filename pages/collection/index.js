@@ -490,7 +490,7 @@ export default function Collection({ cards, totalPoints, errorServer }) {
                                     )}
                                     {/* Button level up */}
                                     {ownedCardIds.has(selectedCard.id) && (selectedCard.evolveCost) && (!ownedCardIds.has(selectedCard.id + 1)) && (
-                                        <button onClick={handleLevelUp} disabled={!(cardCounts[selectedCard.id] > 2 && points >= selectedCard.evolveCost)} className="w-16 md:w-24 lg:w-28 xl:w-32 absolute bottom-0 border border-yellow-500 md:bottom-0">
+                                        <button onClick={handleLevelUp} disabled={!(cardCounts[selectedCard.id] > 2 && points >= selectedCard.evolveCost)} className={`w-16 md:w-24 lg:w-28 xl:w-32 absolute bottom-0 ${cardCounts[selectedCard.id] > 2 ? "border border-yellow-500" : ""}  md:bottom-0 z-10`}>
                                             <Image src="/images/levelUp.png" alt="next card" objectFit="contain" objectPosition="center" width={120} height={120} />
                                         </button>
                                     )}
