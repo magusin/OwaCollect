@@ -143,7 +143,7 @@ export default function Leaderboard({ totalPoints, errorServer, leaderboard }) {
                                 <div key={index} className="flex flex-col items-center p-4 bg-white rounded-lg shadow">
                                     <div className="flex items-center justify-center relative">
                                         <div className="flex absolute left-0 justify-center items-center" style={{ height: '200px', width: '50px', marginLeft: '-60px' }}>
-                                            <span className="font-bold text-xl">#{player.originalIndex +1}</span>
+                                            <span className="font-bold text-xl text-black">#{player.originalIndex +1}</span>
                                         </div>
                                         <div className="relative justify-center items-center" style={{ height: '200px', width: '200px' }}>
                                             <div className="absolute z-0">
@@ -154,8 +154,8 @@ export default function Leaderboard({ totalPoints, errorServer, leaderboard }) {
                                             </div>
                                         </div>
                                     </div>
-                                    <p className="mt-2 font-semibold">{player.name}</p>
-                                    <p>{player.cardCount} cartes</p>
+                                    <p className="mt-2 font-semibold text-black">{player.name}</p>
+                                    <p className="text-black">{player.cardCount} cartes</p>
                                 </div>
                             ))}
                         </div>
