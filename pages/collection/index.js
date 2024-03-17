@@ -339,6 +339,16 @@ export default function Collection({ cards, totalPoints, errorServer }) {
                 <div className="flex flex-col h-screen" style={{ marginTop: "80px" }}>
                     <Header points={points} />
                     <div className="flex-grow flex flex-col items-center">
+                    <div className="cursor-pointer relative w-16 w-[200px] h-[200px] sm:w-[250px] md:w-[300px] lg:w-[350px] xl:w-[400px] 2xl:w-[450px] m-4" onClick={() => router.push('/leaderboard')} >
+                                <Image
+                                    src="/images/bannière-leaderboard.png"
+                                    alt="Leaderboard Banner"
+                                    layout="fill"
+                                    objectFit="contain"
+                                    sizes="100%"
+                                    priority={true}
+                                />
+                            </div>
                         {!selectedCategory && (
                             <h1 className="flex flex-wrap justify-center font-bold text-xl m-4">
                                 Sélectionnez une catégorie
