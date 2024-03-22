@@ -36,6 +36,7 @@ export default function Collection({ cards, totalPoints, errorServer }) {
     const [showLevelUpOnly, setShowLevelUpOnly] = React.useState(false);
     const [filteredCards, setFilteredCards] = React.useState(allCard);
     const [filterState, setFilterState] = React.useState("none");
+    const [showNewOnly, setShowNewOnly] = React.useState(false);
     const [selectedCategory, setSelectedCategory] = React.useState(
         () => {
             if (typeof localStorage !== 'undefined') {
@@ -141,20 +142,21 @@ export default function Collection({ cards, totalPoints, errorServer }) {
     useEffect(() => {
         let newFilteredCards = allCard?.filter(card => {
             const cardOwned = ownedCardIds.has(card.id);
+            const isNew = newCards.has(card.id);
             const canLevelUp = cardCounts[card.id] >= 3 && points >= card.evolveCost && card.evolveCost !== null && !ownedCardIds.has(card.id + 1);
             const isCorrectRarity = selectedRarity === 'Toutes' || card.rarety === selectedRarity;
             const category = card.category === selectedCategory;
             // Logique de filtrage basée sur la position du switch
+            if (showNewOnly && !isNew) return false;
             if (filterState === 'non possédé' && cardOwned) return false; // Si le switch est à gauche, exclure les cartes possédées
             if (filterState === 'possédé' && !cardOwned) return false; // Si le switch est à droite, exclure les cartes non possédées
-
             if (showOwnedOnly && !cardOwned) return false;
             if (showLevelUpOnly && !canLevelUp) return false;
             return isCorrectRarity && (category);
         });
         setFilteredCards(newFilteredCards);
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [showOwnedOnly, allCard, selectedRarity, showLevelUpOnly, selectedCard, filterState, selectedCategory]);
+    }, [showOwnedOnly, allCard, selectedRarity, showLevelUpOnly, selectedCard, filterState, selectedCategory, showNewOnly]);
 
     // fonction de level up de la carte
     const handleConfirmLevelUp = async (selectedCard) => {
@@ -248,6 +250,10 @@ export default function Collection({ cards, totalPoints, errorServer }) {
     // Fonction pour gérer le changement de filtre
     const handleShowLevelUpOnlyChange = (event) => {
         setShowLevelUpOnly(event.target.checked);
+    };
+
+    const handleShowNewOnlyChange = (event) => {
+        setShowNewOnly(event.target.checked);
     };
 
     const nextCard = () => {
@@ -386,7 +392,7 @@ export default function Collection({ cards, totalPoints, errorServer }) {
                                     <Switch onSwitchChange={handleSwitchChange} />
                                 </div>
                                 <div className="m-4 font-bold">
-                                    <label>
+                                    <label className="m-2">
                                         <input
                                             className="mr-2 leading-tight cursor-pointer"
                                             type="checkbox"
@@ -394,6 +400,15 @@ export default function Collection({ cards, totalPoints, errorServer }) {
                                             onChange={handleShowLevelUpOnlyChange}
                                         />
                                         Level Up possible
+                                    </label>
+                                    <label>
+                                        <input
+                                            className="mr-2 leading-tight cursor-pointer"
+                                            type="checkbox"
+                                            checked={showNewOnly}
+                                            onChange={handleShowNewOnlyChange}
+                                        />
+                                        Nouvelle carte
                                     </label>
                                 </div>
                             </div>
