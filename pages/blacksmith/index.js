@@ -168,7 +168,7 @@ export default function Blacksmith({ cards, totalPoints, errorServer }) {
                             <p className="text-center text-xl font-bold">Bienvenue chez le forgeron !</p>
                             <p className="text-center text-lg">Vous pouvez donner 3 cartes identiques au forgeron et il vous fabriquera une autre carte de même collection et rareté.</p>
                             <div className="m-4 flex flex-wrap justify-center">
-                            <div className={`cursor-pointer relative w-16 w-[200px] h-[100px] sm:w-[250px] md:w-[300px] lg:w-[350px] xl:w-[400px] 2xl:w-[450px] m-4 opacity-50 ${selectedCategory === 'Elden Ring' ? 'opacity-100' : ''}`} onClick={() => handleCategoryChange('Elden Ring')} >
+                            <div className={`cursor-pointer relative w-16 w-[200px] h-[100px] sm:w-[250px] md:w-[300px] lg:w-[350px] xl:w-[400px] 2xl:w-[450px] m-4 ${selectedCategory === 'Elden Ring' ? 'opacity-100' : 'opacity-50'}`} onClick={() => handleCategoryChange('Elden Ring')} >
                                 <Image
                                     src="/images/elden-ring-banner.png"
                                     alt="Elden Ring Banner"
@@ -178,7 +178,7 @@ export default function Blacksmith({ cards, totalPoints, errorServer }) {
                                     priority={true}
                                 />
                             </div>
-                            <div className={`cursor-pointer relative w-[200px] h-[100px] sm:w-[250px]  md:w-[300px] lg:w-[350px] xl:w-[400px] 2xl:w-[450px] m-4 opacity-50 ${selectedCategory === 'Dark Souls' ? 'opacity-100' : ''}`} onClick={() => handleCategoryChange('Dark Souls')}>
+                            <div className={`cursor-pointer relative w-[200px] h-[100px] sm:w-[250px]  md:w-[300px] lg:w-[350px] xl:w-[400px] 2xl:w-[450px] m-4 ${selectedCategory === 'Dark Souls' ? 'opacity-100' : 'opacity-50'}`} onClick={() => handleCategoryChange('Dark Souls')}>
                                 <Image
                                     src="/images/dark-souls-banner.png"
                                     alt="Dark Souls Banner"

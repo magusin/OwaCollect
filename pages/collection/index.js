@@ -361,7 +361,7 @@ export default function Collection({ cards, totalPoints, errorServer }) {
                             </h1>
                         )}
                         <div className="flex flex-wrap justify-center">
-                            <div className={`cursor-pointer relative w-16 w-[200px] h-[100px] sm:w-[250px] md:w-[300px] lg:w-[350px] xl:w-[400px] 2xl:w-[450px] m-4 opacity-50 ${selectedCategory === 'Elden Ring' ? 'opacity-100' : ''}`} onClick={() => handleCategoryChange('Elden Ring')} >
+                            <div className={`cursor-pointer relative w-16 w-[200px] h-[100px] sm:w-[250px] md:w-[300px] lg:w-[350px] xl:w-[400px] 2xl:w-[450px] m-4 ${selectedCategory === 'Elden Ring' ? 'opacity-100' : 'opacity-50'}`} onClick={() => handleCategoryChange('Elden Ring')} >
                                 <Image
                                     src="/images/elden-ring-banner.png"
                                     alt="Elden Ring Banner"
@@ -371,7 +371,7 @@ export default function Collection({ cards, totalPoints, errorServer }) {
                                     priority={true}
                                 />
                             </div>
-                            <div className={`cursor-pointer relative w-[200px] h-[100px] sm:w-[250px]  md:w-[300px] lg:w-[350px] xl:w-[400px] 2xl:w-[450px] m-4 opacity-50 ${selectedCategory === 'Dark Souls' ? 'opacity-100' : ''}`} onClick={() => handleCategoryChange('Dark Souls')}>
+                            <div className={`cursor-pointer relative w-[200px] h-[100px] sm:w-[250px]  md:w-[300px] lg:w-[350px] xl:w-[400px] 2xl:w-[450px] m-4 ${selectedCategory === 'Dark Souls' ? 'opacity-100' : 'opacity-50'}`} onClick={() => handleCategoryChange('Dark Souls')}>
                                 <Image
                                     src="/images/dark-souls-banner.png"
                                     alt="Dark Souls Banner"
@@ -385,10 +385,10 @@ export default function Collection({ cards, totalPoints, errorServer }) {
                         {selectedCategory && (
                             <div>
                                 {/* Ajout des filter ici (opacity pour définir sélection) */}
-                                <button className={`bg-green-500 hover:bg-green-700 font-bold py-2 px-4 rounded-full mx-1 opacity-50 ${selectedRarity === 'Toutes' ? 'opacity-100' : ''}`} onClick={() => handleRarityChange('Toutes')}>Toutes</button>
-                                <button className={`bg-gray-500 hover:bg-gray-700 font-bold py-2 px-4 rounded-full mx-1 opacity-50 ${selectedRarity === 'Commune' ? 'opacity-100' : ''}`} onClick={() => handleRarityChange('Commune')}>Commune</button>
-                                <button className={`bg-blue-500 hover:bg-blue-700 font-bold py-2 px-4 rounded-full mx-1 opacity-50 ${selectedRarity === 'Rare' ? 'opacity-100' : ''}`} onClick={() => handleRarityChange('Rare')}>Rare</button>
-                                <button className={`bg-teal-500 hover:bg-teal-700 font-bold py-2 px-4 rounded-full mx-1 opacity-50 ${selectedRarity === 'Epique' ? 'opacity-100' : ''}`} onClick={() => handleRarityChange('Epique')}>Épique</button>
+                                <button className={`bg-green-500 hover:bg-green-700 font-bold py-2 px-4 rounded-full mx-1 ${selectedRarity === 'Toutes' ? 'opacity-100' : 'opacity-50'}`} onClick={() => handleRarityChange('Toutes')}>Toutes</button>
+                                <button className={`bg-gray-500 hover:bg-gray-700 font-bold py-2 px-4 rounded-full mx-1 ${selectedRarity === 'Commune' ? 'opacity-100' : 'opacity-50'}`} onClick={() => handleRarityChange('Commune')}>Commune</button>
+                                <button className={`bg-blue-500 hover:bg-blue-700 font-bold py-2 px-4 rounded-full mx-1 ${selectedRarity === 'Rare' ? 'opacity-100' : 'opacity-50'}`} onClick={() => handleRarityChange('Rare')}>Rare</button>
+                                <button className={`bg-teal-500 hover:bg-teal-700 font-bold py-2 px-4 rounded-full mx-1 ${selectedRarity === 'Epique' ? 'opacity-100' : 'opacity-50'}`} onClick={() => handleRarityChange('Epique')}>Épique</button>
                                 <div>
                                     <Switch onSwitchChange={handleSwitchChange} />
                                 </div>
