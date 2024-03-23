@@ -30,6 +30,7 @@ export default function Blacksmith({ cards, totalPoints, errorServer }) {
     const [showModal, setShowModal] = React.useState(false);
     const [selectedCard, setSelectedCard] = React.useState(null);
     const [cardToForge, setCardToForge] = React.useState(null);
+    const [selectedCategory, setSelectedCategory] = React.useState('Elden Ring');
 
     const handleForgeCard = (card) => {
         // Afficher modal
@@ -40,6 +41,10 @@ export default function Blacksmith({ cards, totalPoints, errorServer }) {
     // Pour fermer la vue agrandie
     const closeEnlargeView = () => {
         setSelectedCard(null);
+    };
+
+    const handleCategoryChange = (category) => {
+        setSelectedCategory(category);
     };
 
     const handleConfirmForgeCard = async (id) => {
@@ -143,7 +148,7 @@ export default function Blacksmith({ cards, totalPoints, errorServer }) {
 
     if (session) {
 
-        const ownedCardIds = new Set(playerCards.map(card => card.cardId));
+        // const ownedCardIds = new Set(playerCards.map(card => card.cardId));
         return (
             <>
             <HeadView />
@@ -162,8 +167,32 @@ export default function Blacksmith({ cards, totalPoints, errorServer }) {
                         <div className="flex flex-col justify-center my-4">
                             <p className="text-center text-xl font-bold">Bienvenue chez le forgeron !</p>
                             <p className="text-center text-lg">Vous pouvez donner 3 cartes identiques au forgeron et il vous fabriquera une autre carte de même collection et rareté.</p>
+                            <div className="m-4 flex flex-wrap justify-center">
+                            <div className={`cursor-pointer relative w-16 w-[200px] h-[100px] sm:w-[250px] md:w-[300px] lg:w-[350px] xl:w-[400px] 2xl:w-[450px] m-4 opacity-50 ${selectedCategory === 'Elden Ring' ? 'opacity-100' : ''}`} onClick={() => handleCategoryChange('Elden Ring')} >
+                                <Image
+                                    src="/images/elden-ring-banner.png"
+                                    alt="Elden Ring Banner"
+                                    layout="fill"
+                                    objectFit="contain"
+                                    sizes="100%"
+                                    priority={true}
+                                />
+                            </div>
+                            <div className={`cursor-pointer relative w-[200px] h-[100px] sm:w-[250px]  md:w-[300px] lg:w-[350px] xl:w-[400px] 2xl:w-[450px] m-4 opacity-50 ${selectedCategory === 'Dark Souls' ? 'opacity-100' : ''}`} onClick={() => handleCategoryChange('Dark Souls')}>
+                                <Image
+                                    src="/images/dark-souls-banner.png"
+                                    alt="Dark Souls Banner"
+                                    layout="fill"
+                                    objectFit="contain"
+                                    sizes="100%"
+                                    priority={true}
+                                />
+                            </div>
+                            </div>
                             <div className="flex flex-wrap justify-center">
-                                {playerCards.map((card, index) => (
+                                {playerCards.filter(card => 
+                                    card.card.category === selectedCategory
+                                    ).map((card, index) => (
                                     card.count > 3 ? (
                                         <div key={index} className="flex flex-col items-center p-4">
                                             <div className="relative w-[100px] h-[100px] sm:w-[150px] sm:h-[150px] md:w-[200px] md:h-[200px] lg:w-[250px] lg:h-[250px] xl:w-[300px] xl:h-[300px] 2xl:w-[350px] 2xl:h-[350px]">
