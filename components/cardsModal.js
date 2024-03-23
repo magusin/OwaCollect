@@ -53,10 +53,10 @@ function Card({ card, index, flipped, onClick }) {
         <div className="card relative mx-auto cursor-pointer w-[100px] h-[100px] sm:w-[150px] sm:h-[150px] md:w-[200px] md:h-[200px] lg:w-[250px] lg:h-[250px] xl:w-[300px] xl:h-[300px] 2xl:w-[300px] 2xl:h-[300px]" onClick={onClick} >
             <div className={`card-inner ${flipped ? 'flipped' : ''}`}>
                 <div className="absolute inset-0 rounded-lg card-front">
-                    <Image src={`${card.picture_back}.png`} alt={`Dos de la carte ${index}`} layout="fill" objectFit="fill" className="rounded-lg" priority={true} />
+                    <Image src={`${card.picture_back}`} alt={`Dos de la carte ${index}`} layout="fill" objectFit="fill" className="rounded-lg" priority={true} />
                 </div>
                 <div className={`card-back absolute inset-0 transform ${flipped ? 'rotate-y-180' : ''}`}>
-                    <Image src={`${card.picture}.png`} alt={`Carte ${index}`} layout="fill" objectFit="fill" className="rounded-lg" priority={true} />
+                    <Image src={`${card.picture}`} alt={`Carte ${index}`} layout="fill" objectFit="fill" className="rounded-lg" priority={true} />
                 </div>
             </div>
         </div>

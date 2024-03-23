@@ -433,7 +433,7 @@ export default function Collection({ cards, totalPoints, errorServer }) {
                                     <div className="relative w-[100px] h-[100px] sm:w-[150px] sm:h-[150px] md:w-[200px] md:h-[200px] lg:w-[250px] lg:h-[250px] xl:w-[300px] xl:h-[300px] 2xl:w-[350px] 2xl:h-[350px]">
                                         <Image
                                             priority={true}
-                                            src={ownedCardIds.has(card.id) ? `${card.picture}.png` : `${card.picture_back}.png`}
+                                            src={ownedCardIds.has(card.id) ? `${card.picture}` : `${card.picture_back}`}
                                             alt={ownedCardIds.has(card.id) ? card.name : 'Dos de la carte ' + card.id}
                                             layout="fill"
                                             objectFit="contain"
@@ -485,7 +485,7 @@ export default function Collection({ cards, totalPoints, errorServer }) {
                                         <div className="aspect-w-1 aspect-h-1 ">
                                             <Image
                                                 priority={true}
-                                                src={ownedCardIds.has(selectedCard.id) ? `${selectedCard.picture}.png` : `${selectedCard.picture_back}.png`}
+                                                src={ownedCardIds.has(selectedCard.id) ? `${selectedCard.picture}` : `${selectedCard.picture_back}`}
                                                 alt={ownedCardIds.has(selectedCard.id) ? selectedCard.name : 'Dos de la carte ' + selectedCard.id}
                                                 layout="fill"
                                                 objectFit="contain"

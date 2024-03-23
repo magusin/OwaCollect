@@ -169,7 +169,7 @@ export default function Blacksmith({ cards, totalPoints, errorServer }) {
                                             <div className="relative w-[100px] h-[100px] sm:w-[150px] sm:h-[150px] md:w-[200px] md:h-[200px] lg:w-[250px] lg:h-[250px] xl:w-[300px] xl:h-[300px] 2xl:w-[350px] 2xl:h-[350px]">
                                                 <Image
                                                     priority={true}
-                                                    src={`${card.card.picture}.png`}
+                                                    src={`${card.card.picture}`}
                                                     alt={card.name}
                                                     layout="fill"
                                                     objectFit="contain"
@@ -211,7 +211,7 @@ export default function Blacksmith({ cards, totalPoints, errorServer }) {
                                     <div className="aspect-w-1 aspect-h-1 ">
                                         <Image
                                             priority={true}
-                                            src={`${selectedCard.picture}.png`}
+                                            src={`${selectedCard.picture}`}
                                             alt={'Dos de la carte ' + selectedCard.id}
                                             layout="fill"
                                             objectFit="contain"
