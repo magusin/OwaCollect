@@ -281,6 +281,31 @@ export default async function handler(req, res) {
                         return res.status(200).json({ success: false, message: 'Vous avez déjà eu cette récompense' });
                     }
                 }
+                else if (userCode.toLowerCase() === 'hélium' || userCode.toLowerCase() === 'helium') {
+                    const secretAlreadyDiscovered = await prisma.secretsdiscovered.findUnique({
+                        where: { userId_secretId: { userId: decoded.id, secretId: 9 } }
+                    });
+                
+                    if (!secretAlreadyDiscovered) { 
+                        await prisma.secretsdiscovered.create({ 
+                            data: {
+                                userId: decoded.id,
+                                secretId: 9
+                            }
+                        });
+                        await prisma.pets.update({ 
+                            where: { userId: decoded.id },
+                            data: {
+                                pointsUsed: {
+                                    decrement: 1000
+                                }
+                            }
+                        });
+                        return res.status(200).json({ success: true, message: 'Code correct ! Vous avez débloqué la récompense: 1000 OC', secret9: true });
+                    } else {
+                        return res.status(200).json({ success: false, message: 'Vous avez déjà eu cette récompense' });
+                    }
+                }
                 else if (userCode.toLowerCase() === secretCode) {
                     const secretShopLink = uuidv4();
                     return res.status(200).json({ success: true, secretShopLink: secretShopLink });
