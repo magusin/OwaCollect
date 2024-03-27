@@ -28,20 +28,35 @@ export default function Leaderboard({ totalPoints, errorServer, leaderboard }) {
     const [displayedLeaderboard, setDisplayedLeaderboard] = React.useState([]);
 
     useEffect(() => {
-        if (!searchTerm) {
-            // Affiche les 100 premiers par défaut
-            setDisplayedLeaderboard(leaderboard.slice(0, 100).map((player, index) => ({ ...player, originalIndex: index })));
-        } else {
-            // Recherche dans tous les joueurs
-            const searchResults = leaderboard
-            .filter(player => player.name.toLowerCase().includes(searchTerm.toLowerCase()))
-            .map((player) => ({
+        let rank = 1;
+        let prevCardCount = null;
+        const initialRankedLeaderboard = leaderboard.map((player, index) => {
+            if (index === 0 || player.cardCount !== prevCardCount) {
+                rank = index + 1; // Commencez le rang à 1 et ajustez seulement si le nombre de cartes change
+            }
+            prevCardCount = player.cardCount; // Mettez à jour le précédent nombre de cartes pour la prochaine itération
+            return {
                 ...player,
-                originalIndex: leaderboard.findIndex(p => p.petId === player.petId)
-            }));
-        setDisplayedLeaderboard(searchResults);
-    }
+                rank, // Utilisez le rang ajusté
+            };
+        });
+
+        // Ajustement pour les résultats de recherche pour maintenir le classement original
+        if (!searchTerm) {
+            setDisplayedLeaderboard(initialRankedLeaderboard.slice(0, 100)); // Affiche les 100 premiers
+        } else {
+            const searchResults = leaderboard
+                .filter(player => player.name.toLowerCase().includes(searchTerm.toLowerCase()))
+                .map(player => ({
+                    ...player,
+                    rank: initialRankedLeaderboard.find(p => p.petId === player.petId).rank // Trouve le rang initial basé sur petId
+                }));
+
+            setDisplayedLeaderboard(searchResults);
+        }
     }, [searchTerm, leaderboard]);
+
+    console.log(leaderboard)
 
     useEffect(() => {
 
@@ -73,17 +88,17 @@ export default function Leaderboard({ totalPoints, errorServer, leaderboard }) {
 
     const getAvatarImage = (index) => {
         if (index >= 0 && index < 10) {
-          return `/images/avatar${index + 1}.png`;
+            return `/images/avatar${index + 1}.png`;
         } else if (index >= 10 && index < 20) {
-          return `/images/avatar11.png`;
+            return `/images/avatar11.png`;
         } else if (index >= 20 && index < 50) {
-          return `/images/avatar12.png`;
+            return `/images/avatar12.png`;
         } else if (index >= 50 && index < 100) {
-          return `/images/avatar13.png`;
+            return `/images/avatar13.png`;
         } else {
-          return `/images/avatar14.png`;
+            return `/images/avatar14.png`;
         }
-      };
+    };
 
     const HeadView = () => {
         return (
@@ -132,7 +147,7 @@ export default function Leaderboard({ totalPoints, errorServer, leaderboard }) {
                 <Header points={points} />
                 <div className="container mx-auto flex flex-col items-center p-4" style={{ marginTop: "80px" }}>
                     <input
-                        className="border p-2 rounded mb-4"
+                        className="border p-2 rounded mb-4 text-black"
                         placeholder="Recherche par nom..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
@@ -140,22 +155,22 @@ export default function Leaderboard({ totalPoints, errorServer, leaderboard }) {
                     {displayedLeaderboard.length > 0 ? (
                         <div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                             {displayedLeaderboard.map((player, index) => (
-                                <div key={index} className="flex flex-col items-center p-4 bg-white rounded-lg shadow">
+                                <div key={index} className={`flex flex-col items-center p-4 ${darkMode ? 'bg-gray-700' : 'bg-white'} rounded-lg shadow`}>
                                     <div className="flex items-center justify-center relative">
                                         <div className="flex absolute left-0 justify-center items-center" style={{ height: '200px', width: '50px', marginLeft: '-60px' }}>
-                                            <span className="font-bold text-xl text-black">#{player.originalIndex +1}</span>
+                                            <span className="font-bold text-xl">#{player.rank}</span>
                                         </div>
                                         <div className="relative justify-center items-center" style={{ height: '200px', width: '200px' }}>
                                             <div className="absolute z-0">
-                                                <Image src={getAvatarImage(player.originalIndex)} alt="Avatar Border" width={200} height={200} />
+                                                <Image src={getAvatarImage(player.rank -1)} alt="Avatar Border" width={200} height={200} />
                                             </div>
                                             <div className="z-10" style={{ paddingTop: "50px", marginLeft: "50px" }}>
                                                 <Image src={player.imageUrl} alt={player.name} width={100} height={100} className="rounded-full" />
                                             </div>
                                         </div>
                                     </div>
-                                    <p className="mt-2 font-semibold text-black">{player.name}</p>
-                                    <p className="text-black">{player.cardCount} cartes</p>
+                                    <p className="mt-2 font-semibold">{player.name}</p>
+                                    <p className="">{player.cardCount} cartes</p>
                                 </div>
                             ))}
                         </div>
