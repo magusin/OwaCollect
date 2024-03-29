@@ -347,7 +347,7 @@ export default function Collection({ cards, totalPoints, errorServer }) {
                     <div className="flex-grow flex flex-col items-center">
                     <div className="cursor-pointer relative w-16 w-[200px] h-[200px] sm:w-[250px] md:w-[300px] lg:w-[350px] xl:w-[400px] 2xl:w-[450px] m-4" onClick={() => router.push('/leaderboard')} >
                                 <Image
-                                    src="/images/bannière-leaderboard.png"
+                                    src="/images/bannière-leaderboard.webp"
                                     alt="Leaderboard Banner"
                                     layout="fill"
                                     objectFit="contain"
@@ -363,7 +363,7 @@ export default function Collection({ cards, totalPoints, errorServer }) {
                         <div className="flex flex-wrap justify-center">
                             <div className={`cursor-pointer relative w-16 w-[200px] h-[100px] sm:w-[250px] md:w-[300px] lg:w-[350px] xl:w-[400px] 2xl:w-[450px] m-4 ${selectedCategory === 'Elden Ring' ? 'opacity-100' : 'opacity-50'}`} onClick={() => handleCategoryChange('Elden Ring')} >
                                 <Image
-                                    src="/images/elden-ring-banner.png"
+                                    src="/images/elden-ring-banner.webp"
                                     alt="Elden Ring Banner"
                                     layout="fill"
                                     objectFit="contain"
@@ -373,7 +373,7 @@ export default function Collection({ cards, totalPoints, errorServer }) {
                             </div>
                             <div className={`cursor-pointer relative w-[200px] h-[100px] sm:w-[250px]  md:w-[300px] lg:w-[350px] xl:w-[400px] 2xl:w-[450px] m-4 ${selectedCategory === 'Dark Souls' ? 'opacity-100' : 'opacity-50'}`} onClick={() => handleCategoryChange('Dark Souls')}>
                                 <Image
-                                    src="/images/dark-souls-banner.png"
+                                    src="/images/dark-souls-banner.webp"
                                     alt="Dark Souls Banner"
                                     layout="fill"
                                     objectFit="contain"

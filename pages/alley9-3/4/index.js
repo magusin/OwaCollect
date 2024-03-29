@@ -105,7 +105,7 @@ export default function Alley() {
                 {/* Pour centrer à gauche */}
                 <button className='absolute z-50 left-5 top-1/2 -translate-y-1/2 bg-white bg-opacity-20 hover:bg-opacity-50 md:text-xl text-white font-bold py-2 px-4 rounded-full'
                     onClick={() => router.push('/blacksmith')}>Forgeron</button>
-                <Image src="/images/alley.png" alt="Alley 9-3/4" fill priority={true} />
+                <Image src="/images/alley.webp" alt="Alley 9-3/4" fill priority={true} />
             </div>
             <Footer />
         </div>

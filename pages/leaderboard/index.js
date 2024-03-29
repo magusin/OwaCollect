@@ -88,15 +88,15 @@ export default function Leaderboard({ totalPoints, errorServer, leaderboard }) {
 
     const getAvatarImage = (index) => {
         if (index >= 0 && index < 10) {
-            return `/images/avatar${index + 1}.png`;
+            return `/images/avatar${index + 1}.webp`;
         } else if (index >= 10 && index < 20) {
-            return `/images/avatar11.png`;
+            return `/images/avatar11.webp`;
         } else if (index >= 20 && index < 50) {
-            return `/images/avatar12.png`;
+            return `/images/avatar12.webp`;
         } else if (index >= 50 && index < 100) {
-            return `/images/avatar13.png`;
+            return `/images/avatar13.webp`;
         } else {
-            return `/images/avatar14.png`;
+            return `/images/avatar14.webp`;
         }
     };
 

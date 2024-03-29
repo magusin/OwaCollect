@@ -107,9 +107,9 @@ export default function Alley() {
             <Header points={points}/>
             <div className="relative flex-grow flex justify-center">
             {isMobile ? (
-            <Image src="/images/404.png" alt="404" fill priority={true} />
+            <Image src="/images/404.webp" alt="404" fill priority={true} />
             ) : (
-            <Image src="/images/404-2.png" alt="404" fill priority={true} />
+            <Image src="/images/404-2.webp" alt="404" fill priority={true} />
             )}
             <div className="absolute inset-0 flex items-center justify-center p-4 text-center">
         <p className="mb-8 text-black text-3xl md:text-4xl shadow-lg font-bold bg-black/5">
