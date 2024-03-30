@@ -31,11 +31,16 @@ export default function SecretShop({ cards, totalPoints, errorServer }) {
     const [showModal, setShowModal] = React.useState(false);
     const [selectedCard, setSelectedCard] = React.useState(null);
     const [cardToBuy, setCardToBuy] = React.useState(null);
+    const [selectedCategory, setSelectedCategory] = React.useState('Elden Ring');
 
     const handleBuyCard = (cardId) => {
         // Mise à jour de l'état pour la carte sélectionnée
         setCardToBuy(cardId);
         setShowModal(true);
+    };
+
+    const handleCategoryChange = (category) => {
+        setSelectedCategory(category);
     };
 
     // Pour fermer la vue agrandie
@@ -160,7 +165,26 @@ export default function SecretShop({ cards, totalPoints, errorServer }) {
         const secretShopLink = localStorage.getItem('secretShopLink');
         if (secretShopLink != null && secretShopLink === id) {
             const ownedCardIds = new Set(playerCards.map(card => card.cardId));
-            const secretCardsToBuy = [74, 99, 100].filter(id => !ownedCardIds.has(id));
+            // const secretCardsToBuy = [74, 99, 100].filter(number => !ownedCardIds.has(number));
+            const secretCardsToBuy = [];
+                if (selectedCategory === "Elden Ring") {
+                    const eldenRingCardsIds = [74, 99, 100];
+                    for (const id of eldenRingCardsIds) {
+                        const card = ownedCardIds.has(id)
+                        if (!card) {
+                            secretCardsToBuy.push({ card: { cardId: id, number: id } });
+                        }
+                    }
+                } else if (selectedCategory === "Dark Souls") {
+                    const darkSoulsCardsIds = [170];
+                    for (const id of darkSoulsCardsIds) {
+                        const card = ownedCardIds.has(id)
+                        if (!card) {
+                            secretCardsToBuy.push({ card: { cardId: id, number: 49 } });
+                        }
+                    }
+                }   
+            
             return (
                 <>
             <HeadView />
@@ -175,14 +199,36 @@ export default function SecretShop({ cards, totalPoints, errorServer }) {
                             height={525}
                         />
                     </div>
+                    <div className="flex flex-wrap justify-center">
+                            <div className={`cursor-pointer relative w-16 w-[200px] h-[100px] sm:w-[250px] md:w-[300px] lg:w-[350px] xl:w-[400px] 2xl:w-[450px] m-4 ${selectedCategory === 'Elden Ring' ? 'opacity-100' : 'opacity-50'}`} onClick={() => handleCategoryChange('Elden Ring')} >
+                                <Image
+                                    src="/images/elden-ring-banner.webp"
+                                    alt="Elden Ring Banner"
+                                    layout="fill"
+                                    objectFit="contain"
+                                    sizes="100%"
+                                    priority={true}
+                                />
+                            </div>
+                            <div className={`cursor-pointer relative w-[200px] h-[100px] sm:w-[250px]  md:w-[300px] lg:w-[350px] xl:w-[400px] 2xl:w-[450px] m-4 ${selectedCategory === 'Dark Souls' ? 'opacity-100' : 'opacity-50'}`} onClick={() => handleCategoryChange('Dark Souls')}>
+                                <Image
+                                    src="/images/dark-souls-banner.webp"
+                                    alt="Dark Souls Banner"
+                                    layout="fill"
+                                    objectFit="contain"
+                                    sizes="100%"
+                                    priority={true}
+                                />
+                            </div>
+                        </div>
                     <div className="flex-grow mt-4 flex flex-wrap justify-center">
-                        {secretCardsToBuy.map(cardId => (
-                            <div key={cardId} className={`p-4 border-2 ${darkMode ? 'border-white' : 'border-black'} rounded-lg m-2 text-center max-w-xs md:max-w-sm lg:max-w-md xl:max-w-lg`}>
-                                <h3 className="font-bold mb-4">Carte {cardId}</h3>
+                        {secretCardsToBuy.map(card => (
+                            <div key={card.card.cardId} className={`p-4 border-2 ${darkMode ? 'border-white' : 'border-black'} rounded-lg m-2 text-center max-w-xs md:max-w-sm lg:max-w-md xl:max-w-lg`}>
+                                <h3 className="font-bold mb-4">Carte {card.card.number}</h3>
                                 <p className="mb-4">Prix: <b>500 OC</b></p>
                                 <button
                                     className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700 transition duration-300"
-                                    onClick={() => handleBuyCard(cardId)}
+                                    onClick={() => handleBuyCard(card.card.cardId)}
                                 >
                                     Acheter
                                 </button>
