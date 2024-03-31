@@ -19,6 +19,29 @@ export default function Scribe() {
     const router = useRouter();
     const [points, setPoints] = React.useState(0);
     const [page, setPage] = React.useState(0);
+    const [currentDate, setCurrentDate] = React.useState('');
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+          // Fonction pour obtenir la date actuelle côté client
+          const getCurrentDate = () => {
+            const date = new Date();
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            return date.toLocaleDateString('fr-FR', options);
+          };
+    
+          const newDate = getCurrentDate();
+    
+          // Vérifier si la date a changé
+          if (newDate !== currentDate) {
+            setCurrentDate(newDate);
+          }
+        }, 1000); // Vérifie toutes les secondes
+    
+        return () => clearInterval(interval); // Nettoyage lors du démontage du composant
+      }, [currentDate]); // Effectue l'effet à chaque changement de currentDate
+
+    console.log(currentDate)
 
     useEffect(() => {
         if (status === 'unauthenticated') {
@@ -97,6 +120,7 @@ export default function Scribe() {
                                     <h1 className="text-4xl text-center font-bold my-4">Les écrits du scribe</h1>
                                     <p className="text-center">Le scribe a laissé d&apos;étranges écrits.</p>
                                     <p>Il semble que chaque page parle d'un thème.</p>
+                                    <h1>Date actuelle : {currentDate}</h1>
                                     <p className="italic">Si vous pensez avoir trouvé un thème ou un code, rendez-vous sur la page Owarida et rentrez-le en cliquant sur l'image d'Owarida.</p>
                                     <button style={{ fontFamily: 'Style Script, cursive' }} className='font-bold text-xl p-2 rounded-lg mt-4' onClick={() => setPage(1)} >Page 1 (01 / 12 / 04 - TQWBYI)</button>
                                     <button style={{ fontFamily: 'Style Script, cursive' }} className='font-bold text-xl p-2 rounded-lg mt-4' onClick={() => setPage(2)} >Page 2 (17 / 02 / 06 - TKIRFG)</button>
@@ -236,9 +260,9 @@ export default function Scribe() {
                                 <div className="flex flex-col text-2xl leading-9 font-bold" style={{ fontFamily: 'Style Script, cursive', minHeight: "calc(100vh - 80px)" }}>
                                     <div className="flex-grow relative">
                                     <ul className="my-4 mx-8 ">
-                                        <li>13 1 26 12  19 3 12  3 5 9 8 19 3 12  5 7  3 12  26 9 25 19 3</li>
-                                        <li>15 9 26 14 19 3  19 3 12  25 1 19 19 9 26 12  8 19 12  24 9 19 19 3 26 5</li>
-                                        <li>4 3 12 10 8 4 3  20 1  24 9 8 22  13 3 23 9 19 19 3</li>
+                                        <li className="flex"><p className="mr-4">13-1-26-12</p>  <p className="mr-4">19-3-12</p>  <p className="mr-4">3-5-9-8-19-3-12</p>  <p className="mr-4">5-7</p>  <p className="mr-4">3-12</p>  <p>26-9-25-19-3</p></li>
+                                        <li className="flex"><p className="mr-4">15-9-26-14-19-3</p>  <p className="mr-4">19-3-12</p>  <p className="mr-4">25-1-19-19-9-26-12</p>  <p className="mr-4">8-19-12</p>  <p className="mr-4">24-9-19-19-3-26-5</p></li>
+                                        <li className="flex"><p className="mr-4">4-3-12-10-8-4-3</p>  <p className="mr-4">20-1</p>  <p className="mr-4">24-9-8-22</p>  <p className="mr-4">13-3-23-9-19-19-3</p></li>
                                     </ul>
                                     </div>
                                     <button style={{ fontFamily: 'Style Script, cursive' }} className='font-bold text-xl p-2 rounded-lg mt-4' onClick={() => setPage(0)} >Retourner aux notes</button>
