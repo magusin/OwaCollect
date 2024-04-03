@@ -50,7 +50,7 @@ async function runMiddleware(req, res, fn) {
 export default async function handler(req, res) {
     try {
         const nextToken = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
-
+        console.log("nextToken", nextToken)
         if (!nextToken) {
             return res.status(400).json({ message: 'Utilisateur non authentifié' });
         }

@@ -429,6 +429,7 @@ export default function Collection({ cards, totalPoints, errorServer }) {
                             </span>
                         </div>
                         <div className="flex flex-wrap justify-center">
+                        
                             {filteredCards.map((card) => (
                                 <div key={card.id} onClick={() => handleCardClick(card)} className="text-black relative flex flex-col items-center justify-center m-4 cursor-pointer">
                                     <div className="relative w-[100px] h-[100px] sm:w-[150px] sm:h-[150px] md:w-[200px] md:h-[200px] lg:w-[250px] lg:h-[250px] xl:w-[300px] xl:h-[300px] 2xl:w-[350px] 2xl:h-[350px]">
@@ -441,6 +442,7 @@ export default function Collection({ cards, totalPoints, errorServer }) {
                                             sizes="100%"
                                         />
                                     </div>
+                                    
                                     <div className={`absolute inset-0 flex items-center justify-center rounded-full ${ownedCardIds.has(card.id) ? "hidden" : ""}`}>
                                         <div className="bg-white/80 backdrop-blur-sm rounded-full px-2 py-1 md:px-4 md:py-2 text-lg font-semibold shadow-xl border border-gray-300">
                                             {card.number}
