@@ -106,12 +106,17 @@ async function refreshAccessToken(token) {
         'Authorization': `Bearer ${refreshedTokens.access_token}`
       }
     });
-
+    console.log(JSON.stringify(subscriptionsResponse))
     if (subscriptionsResponse.ok) {
       const responseData = await subscriptionsResponse.json();
-      token.isSubscribed = responseData.data.length > 0 ? responseData.data[0].tier : false;
+      const isSubscribed = responseData.data.length > 0;
+      if (isSubscribed) {
+        token.isSubscribed = isSubscribed;
+      } else {
+        token.isSubscribed = false;
+      }
     } else {
-      token.isSubscribed = false;
+      throw new Error('Failed to fetch subscriptions');
     }
 
     return {
