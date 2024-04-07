@@ -70,6 +70,7 @@ export default NextAuth({
     async session({ session, token, user }) {
       // Send properties to the client
       // session.accessToken = token.accessToken
+      console.log('session: ', session)
       session.user.id = token.sub
       session.customJwt = token.customJwt;
       return session

@@ -21,6 +21,8 @@ export default function Login() {
   const [isFetching, setIsFetching] = React.useState(false);
   const { darkMode } = useDarkMode();
 
+  console.log(session)
+
   useEffect(() => {
     if (session && !isFetching) {
       setIsFetching(true);
