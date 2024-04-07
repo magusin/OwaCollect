@@ -56,8 +56,6 @@ export default function Leaderboard({ totalPoints, errorServer, leaderboard }) {
         }
     }, [searchTerm, leaderboard]);
 
-    console.log(leaderboard)
-
     useEffect(() => {
 
         localStorage.setItem('points', points);

@@ -39,7 +39,6 @@ export default function Shop({ productsData, totalPoints, errorServer }) {
     
 
     const handleConfirmPurchase = async (selectedProduct, quantity) => {
-        console.log('selectedProduct', selectedProduct);
         setLoading(true);
         setShowModal(false);
         const totalPointsCost = selectedProduct.price * quantity;

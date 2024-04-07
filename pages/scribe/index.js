@@ -41,7 +41,6 @@ export default function Scribe() {
         return () => clearInterval(interval); // Nettoyage lors du démontage du composant
       }, [currentDate]); // Effectue l'effet à chaque changement de currentDate
 
-    console.log(currentDate)
 
     useEffect(() => {
         if (status === 'unauthenticated') {
