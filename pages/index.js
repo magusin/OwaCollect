@@ -1,4 +1,3 @@
-import axios from "axios";
 import React from 'react';
 import { signIn, signOut, useSession } from "next-auth/react";
 import { useEffect } from "react";
@@ -6,7 +5,6 @@ import { useRouter } from "next/router";
 import OwaGif from "C/owaGif";
 import Header from "C/header";
 import calculatePoints from "@/utils/calculatePoints";
-import TwitchUserInfo from "C/twitchUserInfo";
 import Image from "next/legacy/image";
 import { useDarkMode } from "@/contexts/darkModeContext";
 import Footer from "C/footer";

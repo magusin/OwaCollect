@@ -46,10 +46,9 @@ export default NextAuth({
 
           if (subscriptionsResponse.ok) {
             const responseData = await subscriptionsResponse.json();
-            const isSubscribed = responseData.data.length > 0;
-            token.isSubscribed = isSubscribed;
+            token.isSubscribed = responseData.data.length > 0 ? responseData.data[0].tier : false;
           } else {
-            throw new Error('Failed to fetch subscriptions');
+            token.isSubscribed = false;
           }
         } catch (error) {
           console.error(error);
@@ -95,6 +94,22 @@ async function refreshAccessToken(token) {
     const refreshedTokens = await response.json();
     if (!response.ok) {
       throw refreshedTokens;
+    }
+
+    // Vérifier si l'utilisateur est abonné lors du rafraîchissement du jeton
+    const subscriptionsResponse = await fetch(`https://api.twitch.tv/helix/subscriptions/user?broadcaster_id=${process.env.BROADCASTER_ID}&user_id=${token.id}`, {
+      method: 'GET',
+      headers: {
+        'Client-ID': process.env.TWITCH_CLIENT_ID,
+        'Authorization': `Bearer ${refreshedTokens.access_token}`
+      }
+    });
+
+    if (subscriptionsResponse.ok) {
+      const responseData = await subscriptionsResponse.json();
+      token.isSubscribed = responseData.data.length > 0 ? responseData.data[0].tier : false;
+    } else {
+      token.isSubscribed = false;
     }
 
     return {

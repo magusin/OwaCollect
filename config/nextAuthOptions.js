@@ -46,8 +46,13 @@ const nextAuthOptions = {
 
           if (subscriptionsResponse.ok) {
             const responseData = await subscriptionsResponse.json();
+            console.log(responseData)
             const isSubscribed = responseData.data.length > 0;
+            if (isSubscribed) {
             token.isSubscribed = isSubscribed;
+            } else {
+              token.isSubscribed = false;
+            }
           } else {
             throw new Error('Failed to fetch subscriptions');
           }
