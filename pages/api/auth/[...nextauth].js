@@ -35,8 +35,8 @@ export default NextAuth({
           token.accessTokenExpires = expiresIn;
           try {
           // Obtenir les informations d'abonnement de l'utilisateur
-          const urlSub = `https://api.twitch.tv/helix/subscriptions/user?broadcaster_id=${process.env.BROADCASTER_ID}&user_id=${token.id}`;
-          const subscriptionsResponse = await fetch(urlSub, {
+          const urlSubs = `https://api.twitch.tv/helix/subscriptions/user?broadcaster_id=${process.env.BROADCASTER_ID}&user_id=${token.id}`;
+          const subscriptionResponse = await fetch(urlSubs, {
             method: 'GET',
             headers: {
               'Client-ID': process.env.TWITCH_CLIENT_ID,
@@ -44,11 +44,11 @@ export default NextAuth({
             }
           });
 
-          console.log(subscriptionsResponse)
-            const responseData = await subscriptionsResponse.json();
-            const isSubscribed = responseData.data.length > 0;
-            if (isSubscribed) {
-            token.isSubscribed = isSubscribed;
+          const resData = await subscriptionResponse.json();
+          console.log(resData)
+            const isSub = resData.data.length > 0;
+            if (isSub) {
+            token.isSubscribed = isSub;
             } else {
               token.isSubscribed = false;
             }
@@ -106,9 +106,9 @@ async function refreshAccessToken(token) {
         'Authorization': `Bearer ${refreshedTokens.access_token}`
       }
     });
-    console.log(JSON.stringify(subscriptionsResponse))
     if (subscriptionsResponse.ok) {
       const responseData = await subscriptionsResponse.json();
+      console.log(responseData)
       const isSubscribed = responseData.data.length > 0;
       if (isSubscribed) {
         token.isSubscribed = isSubscribed;
