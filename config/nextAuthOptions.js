@@ -43,8 +43,7 @@ const nextAuthOptions = {
               'Authorization': `Bearer ${account.access_token}`
             }
           });
-
-          if (subscriptionsResponse.ok) {
+        
             const responseData = await subscriptionsResponse.json();
             const isSubscribed = responseData.data.length > 0;
             if (isSubscribed) {
@@ -52,9 +51,6 @@ const nextAuthOptions = {
             } else {
               token.isSubscribed = false;
             }
-          } else {
-            throw new Error('Failed to fetch subscriptions');
-          }
         } catch (error) {
           console.error(error);
           return {

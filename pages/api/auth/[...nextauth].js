@@ -44,7 +44,7 @@ export default NextAuth({
             }
           });
 
-          if (subscriptionsResponse.ok) {
+          console.log(subscriptionsResponse)
             const responseData = await subscriptionsResponse.json();
             const isSubscribed = responseData.data.length > 0;
             if (isSubscribed) {
@@ -52,9 +52,6 @@ export default NextAuth({
             } else {
               token.isSubscribed = false;
             }
-          } else {
-            throw new Error('Failed to fetch subscriptions');
-          }
         } catch (error) {
           console.error(error);
           return {
