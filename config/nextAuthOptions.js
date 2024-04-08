@@ -1,70 +1,46 @@
-// nextAuthOptions.js
+import NextAuth from "next-auth";
 import TwitchProvider from "next-auth/providers/twitch";
+import jwt from 'jsonwebtoken';
 
-const nextAuthOptions = {
+export default NextAuth({
   secret: process.env.NEXTAUTH_SECRET,
   providers: [
     TwitchProvider({
       clientId: process.env.TWITCH_CLIENT_ID,
       clientSecret: process.env.TWITCH_CLIENT_SECRET,
       authorization: {
-        // necessary scope permissions
         params: {
-          scope: 'openid user:read:email user:read:subscriptions'
+          scope: 'openid user:read:email'
         },
       },
     }),
   ],
   callbacks: {
     async jwt({ token, account, profile, user }) {
-      // Persist the OAuth access_token and or the user id to the token right after signin     
-      if (account && user) {
-        token.id = account.providerAccountId;
-        const userPayload = {
-          id: token.id,
-          name: token.name,
-          email: token.email,
-          image: token.picture
-        };
-        // const expiresIn = Math.floor(account.expires_at / 1000)
-        const expiresIn = Date.now() + 3600000;
-        const customJwt = jwt.sign(userPayload, process.env.JWT_SECRET, { expiresIn });
-        token.customJwt = customJwt;
-        token.accessToken = account.access_token;
-        token.refreshToken = account.refresh_token;
-        token.accessTokenExpires = expiresIn;
-        try {
-          // Obtenir les informations d'abonnement de l'utilisateur
-          const urlSub = `https://api.twitch.tv/helix/subscriptions/user?broadcaster_id=${process.env.BROADCASTER_ID}&user_id=${token.id}`;
-          const subscriptionsResponse = await fetch(urlSub, {
-            method: 'GET',
-            headers: {
-              'Client-ID': process.env.TWITCH_CLIENT_ID,
-              'Authorization': `Bearer ${account.access_token}`
-            }
-          });
-        
-          if (subscriptionsResponse.ok) {
-            const responseData = await subscriptionsResponse.json();
-            const isSubscribed = responseData.data.length > 0;
-            if (isSubscribed) {
-              token.isSubscribed = isSubscribed;
-            } else {
-              token.isSubscribed = false;
-            }
-          } else {
-            throw new Error('Failed to fetch subscriptions');
-          }
-        } catch (error) {
-          console.error(error);
-          return {
-            ...token,
-            error: "SubsError",
+        // Persist the OAuth access_token and or the user id to the token right after signin     
+        if (account && user) {
+          token.id = account.providerAccountId;
+          const userPayload = {
+            id: token.id,
+            name: token.name,
+            email: token.email,
+            image: token.picture
           };
+          // const expiresIn = Math.floor(account.expires_at / 1000)
+          const expiresIn = Date.now() + 3600000;
+          const customJwt = jwt.sign(userPayload, process.env.JWT_SECRET, { expiresIn });
+          token.customJwt = customJwt;
+          token.accessToken = account.access_token;
+          token.refreshToken = account.refresh_token;
+          token.accessTokenExpires = expiresIn;
         }
-      }
-      return token
-    },
+
+        if (Date.now() < token.accessTokenExpires) {
+          return token
+        }
+        // Access token has expired, try to update it
+        return refreshAccessToken(token)
+      },
     async session({ session, token, user }) {
       // Send properties to the client
       // session.accessToken = token.accessToken
@@ -73,6 +49,41 @@ const nextAuthOptions = {
       return session
     }
   }
-};
+});
 
-export default nextAuthOptions;
+async function refreshAccessToken(token) {
+  try {
+    const url = "https://id.twitch.tv/oauth2/token";
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: new URLSearchParams({
+        client_id: process.env.TWITCH_CLIENT_ID,
+        client_secret: process.env.TWITCH_CLIENT_SECRET,
+        grant_type: 'refresh_token',
+        refresh_token: token.refreshToken,
+      }),
+    });
+
+    const refreshedTokens = await response.json();
+    if (!response.ok) {
+      throw refreshedTokens;
+    }
+
+    return {
+      ...token,
+      accessToken: refreshedTokens.access_token,
+      accessTokenExpires: Date.now() + 3600000,
+      refreshToken: refreshedTokens.refresh_token ?? token.refreshToken, // Fallback to old refresh token
+    };
+  } catch (error) {
+    console.error(error);
+
+    return {
+      ...token,
+      error: "RefreshAccessTokenError",
+    };
+  }
+}
