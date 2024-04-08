@@ -17,8 +17,10 @@ export default NextAuth({
   ],
   callbacks: {
     async jwt({ token, account, profile, user }) {
+      try {
         // Persist the OAuth access_token and or the user id to the token right after signin     
         if (account && user) {
+          console.log('profile: ', profile)
           token.id = account.providerAccountId;
           const userPayload = {
             id: token.id,
@@ -33,7 +35,6 @@ export default NextAuth({
           token.accessToken = account.access_token;
           token.refreshToken = account.refresh_token;
           token.accessTokenExpires = expiresIn;
-          try {
           // Obtenir les informations d'abonnement de l'utilisateur
           const urlSubs = `https://api.twitch.tv/helix/subscriptions/user?broadcaster_id=${process.env.BROADCASTER_ID}&user_id=${token.id}`;
           const subscriptionResponse = await fetch(urlSubs, {
@@ -45,13 +46,14 @@ export default NextAuth({
           });
 
           const resData = await subscriptionResponse.json();
-          console.log(resData)
+          console.log('resData:', resData)
             const isSub = resData.data.length > 0;
             if (isSub) {
             token.isSubscribed = isSub;
             } else {
               token.isSubscribed = false;
             }
+          }
         } catch (error) {
           console.error(error);
           return {
@@ -59,7 +61,6 @@ export default NextAuth({
             error: "SubsError",
           };
         }
-      }
 
         if (Date.now() < token.accessTokenExpires) {
           return token
