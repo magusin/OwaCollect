@@ -148,7 +148,7 @@ export default function Login() {
         <Header />
         <div className="flex flex-col h-full w-full justify-center items-center" style={{ background: 'radial-gradient(circle, #CCCCCC, #0f171b)' }}>
           <p>Maintenance en cours ...</p>
-          <p>Correction 07/04/24</p>
+          <p>Temps de maintenance comprise entre 1 à 2 jours et l'infini.</p>
           
         </div>
       </div>
