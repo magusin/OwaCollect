@@ -1,6 +1,7 @@
 import NextAuth from "next-auth";
 import TwitchProvider from "next-auth/providers/twitch";
 import jwt from 'jsonwebtoken';
+import axios from "axios";
 
 export default NextAuth({
   secret: process.env.NEXTAUTH_SECRET,
@@ -54,21 +55,19 @@ export default NextAuth({
 async function refreshAccessToken(token) {
   try {
     const url = "https://id.twitch.tv/oauth2/token";
-    const response = await fetch(url, {
-      method: 'POST',
+    const response = await axios.post(url, new URLSearchParams({
+      client_id: process.env.TWITCH_CLIENT_ID,
+      client_secret: process.env.TWITCH_CLIENT_SECRET,
+      grant_type: 'refresh_token',
+      refresh_token: token.refreshToken,
+    }), {
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
       },
-      body: new URLSearchParams({
-        client_id: process.env.TWITCH_CLIENT_ID,
-        client_secret: process.env.TWITCH_CLIENT_SECRET,
-        grant_type: 'refresh_token',
-        refresh_token: token.refreshToken,
-      }),
     });
 
-    const refreshedTokens = await response.json();
-    if (!response.ok) {
+    const refreshedTokens = response.data;
+    if (!response.status === 200) {
       throw refreshedTokens;
     }
 
