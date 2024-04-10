@@ -34,8 +34,6 @@ export default NextAuth({
         token.accessToken = account.access_token;
         token.refreshToken = account.refresh_token;
         token.accessTokenExpires = expiresIn;
-
-        try {
           // Obtenir les informations d'abonnement de l'utilisateur
           const urlSub = `https://api.twitch.tv/helix/subscriptions/user?broadcaster_id=${process.env.BROADCASTER_ID}&user_id=${token.id}`;
 
@@ -52,13 +50,6 @@ export default NextAuth({
           } else {
             token.isSubscribed = false;
           }
-        } catch (error) {
-          console.error(error);
-          return {
-            ...token,
-            error: "SubsError",
-          };
-        }
       }
 
       if (Date.now() < token.accessTokenExpires) {
