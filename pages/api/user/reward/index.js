@@ -4,6 +4,7 @@ import jwt from 'jsonwebtoken';
 import { getToken } from "next-auth/jwt";
 import verifySignature from '../../verifySignature';
 import isDateBeforeToday from '../../verifyDate';
+import axios from 'axios';
 
 // Initialiser le midleware Cors
 const allowedOrigins = [process.env.NEXTAUTH_URL]
@@ -80,9 +81,17 @@ export default async function handler(req, res) {
                     userId: decoded.id
                 }
             });
-            if (isDateBeforeToday(user.reward)) {
-                let points = 100;
-                switch (user.reward) {
+            const urlSub = `https://api.twitch.tv/helix/subscriptions/user?broadcaster_id=${process.env.BROADCASTER_ID}&user_id=${decoded.id}`;
+            const subscriptionsResponse = await axios.get(urlSub, {
+                headers: {
+                    'Client-ID': process.env.TWITCH_CLIENT_ID,
+                    'Authorization': `Bearer ${accessToken}`
+                }
+                });
+            const subs = subscriptionsResponse?.data;
+            if (subs.data.length > 0 && isDateBeforeToday(user.reward)) {
+                let points;
+                switch (subs.data[0].tier) {
                     case "2000":
                         points = 200;
                         break;
@@ -90,6 +99,7 @@ export default async function handler(req, res) {
                         points = 600;
                         break;
                     default:
+                        points = 100;
                         break;
                 }
                 // Ajouter point utilisateur et mettre à jour reward
@@ -106,7 +116,7 @@ export default async function handler(req, res) {
                 });
                 return res.status(200).json({ message : `Vous avez obtenue ${points} OC`, user : userRewarded });
             } else {
-                return res.status(400).json({ message: 'Récompense déjà réclamée' });
+                return res.status(400).json({ message: 'Vous devez être abonné pour obtenir une récompense' });
             }
         } else {
             return res.status(405).json({ message: 'Méthode non autorisée' });
