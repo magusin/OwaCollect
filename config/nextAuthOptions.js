@@ -1,5 +1,6 @@
 // nextAuthOptions.js
 import TwitchProvider from "next-auth/providers/twitch";
+import axios from "axios";
 
 const nextAuthOptions = {
   secret: process.env.NEXTAUTH_SECRET,
@@ -33,23 +34,6 @@ const nextAuthOptions = {
         token.accessToken = account.access_token;
         token.refreshToken = account.refresh_token;
         token.accessTokenExpires = expiresIn;
-      
-          // Obtenir les informations d'abonnement de l'utilisateur
-          const urlSub = `https://api.twitch.tv/helix/subscriptions/user?broadcaster_id=${process.env.BROADCASTER_ID}&user_id=${token.id}`;
-
-          const subscriptionsResponse = await axios.get(urlSub, {
-            headers: {
-              'Client-ID': process.env.TWITCH_CLIENT_ID,
-              'Authorization': `Bearer ${account.access_token}`
-            }
-          });
-
-          if (subscriptionsResponse.status === 200) {
-            const responseData = subscriptionsResponse.data;
-            token.isSubscribed = responseData.data.length > 0 ? responseData.data[0].tier : false;
-          } else {
-            token.isSubscribed = false;
-          }
       }
 
       if (Date.now() < token.accessTokenExpires) {
