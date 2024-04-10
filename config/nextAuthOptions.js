@@ -11,7 +11,7 @@ export default NextAuth({
       clientSecret: process.env.TWITCH_CLIENT_SECRET,
       authorization: {
         params: {
-          scope: 'openid user:read:email'
+          scope: 'openid user:read:email user:read:subscriptions'
         },
       },
     }),
