@@ -6,8 +6,7 @@ import { useRouter } from 'next/router';
 import Header from 'C/header';
 import Image from 'next/legacy/image';
 import calculatePoints from "@/utils/calculatePoints";
-import { getServerSession } from "next-auth";
-import nextAuthOptions from "../../config/nextAuthOptions";
+import { getSession } from "next-auth/react";
 import { useDarkMode } from "@/contexts/darkModeContext";
 import Footer from "C/footer";
 import axiosInstance from "@/utils/axiosInstance";
@@ -230,10 +229,8 @@ export default function Owarida({ totalPoints, errorServer }) {
 }
 
 export async function getServerSideProps(context) {
-    const session = await getServerSession(
-        context?.req,
-        context?.res,
-        nextAuthOptions
+    const session = await getSession(
+        context
     );
 
     if (!session) {

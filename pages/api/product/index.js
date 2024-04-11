@@ -22,14 +22,16 @@ const corsMiddleware = Cors(corsOptions);
 
 // Gestion des erreurs
 function onError(err, res) {
+    let errorMessage = 'Une erreur est survenue';
     if (err.name === 'JsonWebTokenError') {
-        return res.status(401).json({ message: 'Token invalide' });
-    }
-    if (err.name === 'TokenExpiredError') {
-        return res.status(401).json({ message: 'Token expiré' });
+        errorMessage = 'Token invalide';
+    } else if (err.name === 'TokenExpiredError') {
+        errorMessage = 'Token expiré';
+    } else if (err.response && err.response.data && err.response.data.message) {
+        errorMessage = err.response.data.message;
     }
 
-    res.status(500).json({ error: err.message })
+    res.status(err.response ? err.response.status : 500).json({ error: errorMessage });
 }
 
 // Gestion des requêtes
@@ -53,6 +55,7 @@ export default async function handler(req, res) {
             return res.status(401).json({ message: 'Utilisateur non authentifié' });
         }
         const token = req.headers.authorization?.split(' ')[1];
+        // console.log('req.headers', req.headers)
         if (!token) {
             return res.status(401).json({ message: 'Token non fourni' });
         }

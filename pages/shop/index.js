@@ -11,6 +11,7 @@ import Modal from 'C/modal';
 import Alert from 'C/alert';
 import CardsModal from 'C/cardsModal';
 import { getServerSession } from "next-auth";
+import { getSession } from "next-auth/react";
 import nextAuthOptions from "../../config/nextAuthOptions";
 import Footer from 'C/footer';
 import axiosInstance from '@/utils/axiosInstance';
@@ -208,10 +209,8 @@ export default function Shop({ productsData, totalPoints, errorServer }) {
 }
 
 export async function getServerSideProps(context) {
-    const session = await getServerSession(
-        context?.req,
-        context?.res,
-        nextAuthOptions
+    const session = await getSession(
+        context
     );
 
     if (!session) {
