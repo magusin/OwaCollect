@@ -79,7 +79,7 @@ export default async function handler(req, res) {
                 if (typeof quantity !== 'number' || typeof category !== 'string' || typeof cost !== 'number') {
                     return res.status(400).json({ message: 'Invalid input types' });
                 }
-                if (quantity < 1 || quantity > 5) {
+                if (quantity < 1 || quantity > 50) {
                     return res.status(400).json({ message: 'Quantité invalide' });
                 }
                 if (quantity * 500 != cost) {
