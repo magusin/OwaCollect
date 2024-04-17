@@ -51,7 +51,6 @@ async function runMiddleware(req, res, fn) {
 
 export default async function handler(req, res) {
     try {
-        let localPrisma;
         const nextToken = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
 
         if (!nextToken) {
@@ -135,14 +134,11 @@ export default async function handler(req, res) {
                     return acc;
                 }, {});
 
-                    localPrisma = new PrismaClient();
-                    await localPrisma.$transaction(async (localPrisma) => {
-                        for (const card of Object.values(selectedCardsMap)) {
-                            await localPrisma.$executeRaw`INSERT INTO playercards (petId, cardId, count, isNew)
-                            VALUES (${decoded.id}, ${card.id}, ${card.count}, true)
-                            ON DUPLICATE KEY UPDATE count = count + ${card.count}`;
-                        }
-                    });
+                for (const card of Object.values(selectedCardsMap)) {
+                    await prisma.$executeRaw`INSERT INTO playercards (petId, cardId, count, isNew)
+                    VALUES (${decoded.id}, ${card.id}, ${card.count}, true)
+                    ON DUPLICATE KEY UPDATE count = count + ${card.count}`;
+                }
                     // Déduire les points du joueur
                     const userData = await prisma.pets.update({
                         where: {
