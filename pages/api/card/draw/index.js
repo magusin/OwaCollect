@@ -135,7 +135,6 @@ export default async function handler(req, res) {
                     return acc;
                 }, {});
 
-                try {
                     localPrisma = new PrismaClient();
                     await localPrisma.$transaction(async (localPrisma) => {
                         for (const card of Object.values(selectedCardsMap)) {
@@ -144,23 +143,18 @@ export default async function handler(req, res) {
                             ON DUPLICATE KEY UPDATE count = count + ${card.count}`;
                         }
                     });
-                } catch (err) {
-                    onError(err, res);
-                } finally {
-                    await localPrisma?.$disconnect();
-                }
-                // Déduire les points du joueur
-                const userData = await prisma.pets.update({
-                    where: {
-                        userId: decoded.id
-                    },
-                    data: {
-                        pointsUsed: {
-                            increment: cost
+                    // Déduire les points du joueur
+                    const userData = await prisma.pets.update({
+                        where: {
+                            userId: decoded.id
+                        },
+                        data: {
+                            pointsUsed: {
+                                increment: cost
+                            }
                         }
-                    }
-                });
-
+                    });
+                    
                 res.status(200).json({ selectedCards, userData })
                 break
             default:
