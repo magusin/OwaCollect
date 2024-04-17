@@ -72,6 +72,7 @@ export default async function handler(req, res) {
         if (!decoded) {
             return res.status(401).json({ message: 'Token invalide ou expiré' });
         }
+        let prisma;
         await runMiddleware(req, res, corsMiddleware)
         switch (req.method) {
             case 'POST':
@@ -134,8 +135,6 @@ export default async function handler(req, res) {
                     return acc;
                 }, {});
 
-                let prisma;
-
                 try {
                     prisma = new PrismaClient();
                     await prisma.$transaction(async (prisma) => {
@@ -168,5 +167,5 @@ export default async function handler(req, res) {
                 res.status(405).end(`Method ${req.method} Not Allowed`)
         }
     } catch (err) { onError(err, res) }
-    finally { await prisma.$disconnect() }
+    finally { await prisma?.$disconnect() }
 }
