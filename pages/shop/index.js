@@ -183,7 +183,7 @@ export default function Shop({ productsData, totalPoints, errorServer }) {
                                                 Êtes-vous sûr de vouloir acheter <b>{selectedProduct.name}</b> pack pour <b>{selectedProduct.price} OC</b> ?
                                             </>
                                         }
-                                        maxQuantity={Math.floor(points / selectedProduct.price) > 5 ? 5 : Math.floor(points / selectedProduct.price)}
+                                        maxQuantity={Math.floor(points / selectedProduct.price) > 50 ? 50 : Math.floor(points / selectedProduct.price)}
                                         cost={selectedProduct.price}
                                         buy={true}
                                     />
