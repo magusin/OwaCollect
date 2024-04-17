@@ -134,14 +134,22 @@ export default async function handler(req, res) {
                     return acc;
                 }, {});
 
-                await prisma.$transaction(async (prisma) => {
-                    for (const card of Object.values(selectedCardsMap)) {
-                        await prisma.$executeRaw`INSERT INTO playercards (petId, cardId, count, isNew)
+                let prisma;
+
+                try {
+                    prisma = new PrismaClient();
+                    await prisma.$transaction(async (prisma) => {
+                        for (const card of Object.values(selectedCardsMap)) {
+                            await prisma.$executeRaw`INSERT INTO playercards (petId, cardId, count, isNew)
                             VALUES (${decoded.id}, ${card.id}, ${card.count}, true)
                             ON DUPLICATE KEY UPDATE count = count + ${card.count}`;
-                    }
-                });
-
+                        }
+                    });
+                } catch (err) {
+                    onError(err, res);
+                } finally {
+                    await prisma?.$disconnect();
+                }
                 // Déduire les points du joueur
                 const userData = await prisma.pets.update({
                     where: {
