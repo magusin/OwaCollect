@@ -72,7 +72,6 @@ export default async function handler(req, res) {
         if (!decoded) {
             return res.status(401).json({ message: 'Token invalide ou expiré' });
         }
-        let prisma;
         await runMiddleware(req, res, corsMiddleware)
         switch (req.method) {
             case 'POST':
@@ -136,10 +135,10 @@ export default async function handler(req, res) {
                 }, {});
 
                 try {
-                    prisma = new PrismaClient();
-                    await prisma.$transaction(async (prisma) => {
+                    const localPrisma = new PrismaClient();
+                    await localPrisma.$transaction(async (localPrisma) => {
                         for (const card of Object.values(selectedCardsMap)) {
-                            await prisma.$executeRaw`INSERT INTO playercards (petId, cardId, count, isNew)
+                            await localPrisma.$executeRaw`INSERT INTO playercards (petId, cardId, count, isNew)
                             VALUES (${decoded.id}, ${card.id}, ${card.count}, true)
                             ON DUPLICATE KEY UPDATE count = count + ${card.count}`;
                         }
@@ -147,7 +146,7 @@ export default async function handler(req, res) {
                 } catch (err) {
                     onError(err, res);
                 } finally {
-                    await prisma?.$disconnect();
+                    await localPrisma?.$disconnect();
                 }
                 // Déduire les points du joueur
                 const userData = await prisma.pets.update({
