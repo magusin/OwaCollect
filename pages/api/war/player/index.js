@@ -44,7 +44,7 @@ async function runMiddleware(req, res, fn) {
     })
 }
 
-// GET /api/card
+// GET /api/war/player
 export default async function handler(req, res) {
     try {
         const nextToken = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
@@ -63,8 +63,23 @@ export default async function handler(req, res) {
         await runMiddleware(req, res, corsMiddleware)
         switch (req.method) {
             case 'GET':
-                const cards = await prisma.map.findMany()
-                res.status(200).json(cards)
+                const existingUser = await prisma.war.findUnique({
+                    where: { petId: decoded.id },
+                });
+                if (existingUser) {
+                    return res.status(200).json(existingUser);
+                } else {
+                    const createPlayer = await prisma.war.create({
+                        data : {
+                            petId: decoded.id,
+                            name: decoded.name,
+                            imageUrl: decoded.image,
+                            position_x: Math.floor(Math.random() * 6),
+                            position_y: Math.floor(Math.random() * 6),
+                        }
+                    });
+                    res.status(200).json(createPlayer)
+                }
                 break
             default:
                 res.status(405).end(`Method ${req.method} Not Allowed`)

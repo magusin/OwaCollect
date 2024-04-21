@@ -44,7 +44,7 @@ async function runMiddleware(req, res, fn) {
     })
 }
 
-// GET /api/card
+// GET /api/war/map
 export default async function handler(req, res) {
     try {
         const nextToken = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
@@ -63,8 +63,33 @@ export default async function handler(req, res) {
         await runMiddleware(req, res, corsMiddleware)
         switch (req.method) {
             case 'GET':
-                const cards = await prisma.map.findMany()
-                res.status(200).json(cards)
+                const { limit, positionX, positionY } = req.query;
+
+                // Convertir les valeurs des paramètres en nombres
+                const limitValue = parseInt(limit);
+                const positionXValue = parseInt(positionX);
+                const positionYValue = parseInt(positionY);
+
+                // Vérifier si les paramètres sont valides
+                if (isNaN(limitValue) || isNaN(positionXValue) || isNaN(positionYValue)) {
+                    return res.status(400).json({ message: 'Les paramètres de requête sont invalides' });
+                }
+
+                // Déterminez les coordonnées de la plage de tuiles autour du joueur
+                const startX = Math.max(1, positionXValue - limitValue);
+                const endX = Math.min(6, positionXValue + limitValue);
+                const startY = Math.max(1, positionYValue - limitValue);
+                const endY = Math.min(6, positionYValue + limitValue);
+
+                // Sélectionnez les tuiles dans la plage de coordonnées
+                const tiles = await prisma.map.findMany({
+                    where: {
+                        position_x: { gte: startX, lte: endX },
+                        position_y: { gte: startY, lte: endY },
+                    },
+                });
+                console.log(tiles)
+                res.status(200).json(tiles)
                 break
             default:
                 res.status(405).end(`Method ${req.method} Not Allowed`)

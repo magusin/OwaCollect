@@ -37,20 +37,21 @@ model pets {
   quiz                        Int                 @default(0)
   pointsUsed                  Int?                @default(0)
   messagesOC                  Int                 @default(0)
-  reward                      DateTime            @default(now()) @db.Date
+  reward                      DateTime            @default(dbgenerated("'2024-04-06'")) @db.Date
   duels_duels_player1IdTopets duels[]             @relation("duels_player1IdTopets")
   duels_duels_player2IdTopets duels[]             @relation("duels_player2IdTopets")
   duels_duels_winnerIdTopets  duels[]             @relation("duels_winnerIdTopets")
   playercards                 playercards[]
   secretsdiscovered           secretsdiscovered[]
   user_achievements           user_achievements[]
+  war                         war?
 }
 
 model user_achievements {
   user_id        String       @db.VarChar(255)
   achievement_id Int
-  pets           pets         @relation(fields: [user_id], references: [userId], onUpdate: Restrict, map: "user_achievements_ibfk_1")
-  achievements   achievements @relation(fields: [achievement_id], references: [id], onUpdate: Restrict, map: "user_achievements_ibfk_2")
+  pets           pets         @relation(fields: [user_id], references: [userId], onDelete: NoAction, onUpdate: NoAction, map: "user_achievements_ibfk_1")
+  achievements   achievements @relation(fields: [achievement_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "user_achievements_ibfk_2")
 
   @@id([user_id, achievement_id])
   @@index([achievement_id], map: "achievement_id")
@@ -75,7 +76,7 @@ model card {
   rarety       String        @db.VarChar(55)
   dropRate     Int           @default(0)
   number       Int?
-  card         card?         @relation("cardTocard", fields: [evolvedId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "card_ibfk_1")
+  card         card?         @relation("cardTocard", fields: [evolvedId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "card_ibfk_1")
   other_card   card[]        @relation("cardTocard")
   passifcards  passifcards[]
   playercards  playercards[]
@@ -154,18 +155,41 @@ model passifcards {
   passif   passif @relation(fields: [passifId], references: [id], onDelete: Cascade, map: "passifcards_ibfk_2")
 
   @@id([cardId, passifId])
+  @@index([passifId], map: "passifcards_ibfk_2")
 }
 
 model secrets {
-  secretId   Int    @id @default(autoincrement())
-  secretName String @db.VarChar(255)
+  secretId          Int                 @id @default(autoincrement())
+  secretName        String              @db.VarChar(255)
+  secretsdiscovered secretsdiscovered[]
 }
 
 model secretsdiscovered {
-  userId   String @db.VarChar(255)
+  userId   String  @db.VarChar(255)
   secretId Int
-  pets     pets   @relation(fields: [userId], references: [userId], onUpdate: Restrict, map: "secretsdiscovered_ibfk_1")
+  pets     pets    @relation(fields: [userId], references: [userId], onDelete: NoAction, onUpdate: NoAction, map: "secretsdiscovered_ibfk_1")
+  secrets  secrets @relation(fields: [secretId], references: [secretId], onDelete: NoAction, onUpdate: NoAction, map: "secretsdiscovered_ibfk_2")
 
   @@id([userId, secretId])
   @@index([secretId], map: "secretId")
+}
+
+model map {
+  id         Int    @id @default(autoincrement())
+  position_x Int
+  position_y Int
+  image_url  String @db.VarChar(255)
+}
+
+model war {
+  petId      String  @id @db.VarChar(255)
+  name       String? @db.VarChar(255)
+  position_x Int?
+  position_y Int?
+  imageUrl   String? @db.VarChar(255)
+  str        Int     @default(0)
+  hit        Int     @default(0)
+  level      Int     @default(1)
+  xp         Int     @default(0)
+  pets       pets    @relation(fields: [petId], references: [userId], onDelete: Cascade, map: "war_ibfk_1")
 }
