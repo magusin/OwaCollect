@@ -4,11 +4,42 @@ import { getSession } from "next-auth/react";
 import axios from "axios";
 import calculatePoints from "../../utils/calculatePoints";
 import { signOut, useSession } from 'next-auth/react';
+import Header from 'C/header';
 
-export default function War({ errorServer, map, player }) {
+export default function War({ errorServer, map, player, totalPoints }) {
     const { data: session, status } = useSession();
+    const [windowSize, setWindowSize] = useState({ width: 0, height: 0 });
+    const [width, setWidth] = useState(0);
+    const [points, setPoints] = React.useState(totalPoints || 0);
     console.log('map', map)
     console.log('player', player)
+    
+    console.log(windowSize.width)
+
+    useEffect(() => {
+        function handleResize() {
+            setWindowSize({ width: window.innerWidth, height: window.innerHeight });
+        }
+
+        window.addEventListener('resize', handleResize);
+
+        // Au montage du composant, on récupère la taille de la fenêtre
+        handleResize();
+
+        // Nettoyage de l'écouteur d'événement au démontage du composant
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
+    // Utiliser useEffect pour mettre à jour la largeur de la tuile lorsque la taille de la fenêtre change
+    useEffect(() => {
+        if (windowSize.width < 640) {
+            setWidth(50);
+        } else if (windowSize.width < 1024) {
+            setWidth(80);
+        } else {
+            setWidth(100);
+        }
+    }, [windowSize.width]);
 
     if (errorServer) {
         return <div>{errorServer}</div>;
@@ -16,34 +47,39 @@ export default function War({ errorServer, map, player }) {
 
     if (session) {
         return (
-            <div style={{ width: '100%', height: '100vh', overflow: 'auto', position: 'relative' }}>
-                {map.map((tile) => {
-                const left = tile.position_x * 140;  // Position horizontale basée sur la position X de la tuile
-                const top = tile.position_y * 140;  // Position verticale basée sur la position Y de la tuile
-
-                return (
-                    <div key={tile.id} style={{ position: 'absolute', left: `${left}px`, top: `${top}px` }}>
-                        <Image
-                            src={tile.image_url}
-                            alt="Map"
-                            width={140}
-                            height={140}
-                        />
-                        {tile.position_x === player.position_x && tile.position_y === player.position_y && (
-                            <div key={player.petId} style={{ position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%, -50%)' }}>
+            <div className="flex flex-col h-screen" style={{ marginTop: "80px" }}>
+                <Header points={points} />
+            <div className="w-screen h-screen flex justify-center items-center">
+                <div className="relative w-screen h-screen">
+                    {map.map((tile) => {
+                        const left = tile.position_x * width - width;  
+                        const top = tile.position_y * width - width;  
+    
+                        return (
+                            <div key={tile.id} className="absolute" style={{ left: `${left}px`, top: `${top}px` }}>
                                 <Image
-                                    src={player.imageUrl}
-                                    alt={player.name}
-                                    width={500}
-                                    height={500}
-                                    zIndex={100}
-                                    style={{ borderRadius: '50%' }}
+                                    src={tile.image_url}
+                                    alt="Map"
+                                    height={width}
+                                    width={width} 
                                 />
+                                {tile.position_x === player.position_x && tile.position_y === player.position_y && (
+                                    <div key={player.petId} className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                                        <Image
+                                            src={player.imageUrl}
+                                            alt={player.name}
+                                            className="rounded-full" 
+                                            height={100}
+                                            width={100} 
+                                            
+                                        />
+                                    </div>
+                                )}
                             </div>
-                        )}
-                    </div>
-                );
-            })}
+                        );
+                    })}
+                </div>
+            </div>
             </div>
         );
     }
@@ -116,7 +152,7 @@ export async function getServerSideProps(context) {
 
         const response = await axios.get(`${process.env.NEXTAUTH_URL}/api/war/map`, {
             params: {
-                limit: 2,
+                limit: 5,
                 positionX: player.position_x,
                 positionY: player.position_y
             },

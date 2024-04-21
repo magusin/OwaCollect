@@ -77,9 +77,9 @@ export default async function handler(req, res) {
 
                 // Déterminez les coordonnées de la plage de tuiles autour du joueur
                 const startX = Math.max(1, positionXValue - limitValue);
-                const endX = Math.min(6, positionXValue + limitValue);
+                const endX = Math.min(10, positionXValue + limitValue);
                 const startY = Math.max(1, positionYValue - limitValue);
-                const endY = Math.min(6, positionYValue + limitValue);
+                const endY = Math.min(10, positionYValue + limitValue);
 
                 // Sélectionnez les tuiles dans la plage de coordonnées
                 const tiles = await prisma.map.findMany({
