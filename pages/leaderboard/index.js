@@ -99,8 +99,8 @@ export default function Leaderboard({ totalPoints, errorServer, leaderboard }) {
     const HeadView = () => {
         return (
             <Head>
-                <title>Owarida - Pantheon</title>
-                <meta name="description" content="Pantheon de la OwaCollect" />
+                <title>Owarida - Leaderboard</title>
+                <meta name="description" content="Leaderboard de la OwaCollect" />
                 <meta name="keywords" content="Owarida, Stream, Twitch, streameur, chaine" />
                 <link rel="icon" href="/favicon.ico" />
             </Head>
