@@ -11,7 +11,6 @@ export default function War({ errorServer, map, player, totalPoints }) {
     const [windowSize, setWindowSize] = useState({ width: 0, height: 0 });
     const [width, setWidth] = useState(0);
     const [points, setPoints] = React.useState(totalPoints || 0);
-    console.log('map', map)
     console.log('player', player)
     
     console.log(windowSize.width)
@@ -33,11 +32,17 @@ export default function War({ errorServer, map, player, totalPoints }) {
     // Utiliser useEffect pour mettre à jour la largeur de la tuile lorsque la taille de la fenêtre change
     useEffect(() => {
         if (windowSize.width < 640) {
+            setWidth(30);
+        } else if (windowSize.width < 768 && windowSize.width >= 640) {
             setWidth(50);
-        } else if (windowSize.width < 1024) {
+        } else if (windowSize.width < 1024 && windowSize.width >= 768) {
+            setWidth(60);
+        } else if (windowSize.width >= 1024 && windowSize.width < 1280) {
             setWidth(80);
-        } else {
+        } else if (windowSize.width >= 1280 && windowSize.width < 1536) {
             setWidth(100);
+        } else {
+            setWidth(120);
         }
     }, [windowSize.width]);
 
@@ -49,37 +54,34 @@ export default function War({ errorServer, map, player, totalPoints }) {
         return (
             <div className="flex flex-col h-screen" style={{ marginTop: "80px" }}>
                 <Header points={points} />
-            <div className="w-screen h-screen flex justify-center items-center">
-                <div className="relative w-screen h-screen">
-                    {map.map((tile) => {
-                        const left = tile.position_x * width - width;  
-                        const top = tile.position_y * width - width;  
-    
-                        return (
-                            <div key={tile.id} className="absolute" style={{ left: `${left}px`, top: `${top}px` }}>
+                <div className="flex justify-center items-center h-screen">
+                    <div className="relative h-screen w-screen">
+                        {map.map((tile, index) => (
+                            <div key={index} className="absolute" style={{ left: `${tile.position_x * width}px`, top: `${tile.position_y * width}px` }}>
                                 <Image
                                     src={tile.image_url}
                                     alt="Map"
                                     height={width}
                                     width={width} 
+                                    objectFit="cover"
                                 />
                                 {tile.position_x === player.position_x && tile.position_y === player.position_y && (
-                                    <div key={player.petId} className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                                        <Image
-                                            src={player.imageUrl}
-                                            alt={player.name}
-                                            className="rounded-full" 
-                                            height={100}
-                                            width={100} 
-                                            
-                                        />
-                                    </div>
+                                     <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                                        <div className="" style={{ height: width*90/100, width: width*90/100 }}>
+                                    <Image
+                                        src={player.imageUrl}
+                                        alt={player.name}
+                                        className="rounded-full"
+                                        layout="fill"
+                                        
+                                    />
+                                </div> 
+                            </div>
                                 )}
                             </div>
-                        );
-                    })}
+                        ))}
+                    </div>
                 </div>
-            </div>
             </div>
         );
     }
