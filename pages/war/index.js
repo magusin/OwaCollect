@@ -11,9 +11,27 @@ export default function War({ errorServer, map, player, totalPoints }) {
     const [windowSize, setWindowSize] = useState({ width: 0, height: 0 });
     const [width, setWidth] = useState(0);
     const [points, setPoints] = React.useState(totalPoints || 0);
+    const [availableDirections, setAvailableDirections] = useState({ up: true, down: true, left: true, right: true });
     console.log('player', player)
-    
-    console.log(windowSize.width)
+    // État pour contrôler l'ouverture du menu
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+    // Gestionnaire d'événements pour le clic sur une tuile
+    const handleClickTile = (position_x, position_y) => {
+        // Logique pour déterminer les directions disponibles pour le déplacement du joueur
+        const directions = {
+            up: position_y > 1,
+            down: position_y < 11,
+            left: position_x < 1,
+            right: position_x < 11
+        };
+        setAvailableDirections(directions);
+    };
+
+    // Fonction pour basculer l'état du menu
+    const toggleMenu = () => {
+        setIsMenuOpen(!isMenuOpen);
+    };
 
     useEffect(() => {
         function handleResize() {
@@ -57,31 +75,80 @@ export default function War({ errorServer, map, player, totalPoints }) {
                 <div className="flex justify-center items-center h-screen">
                     <div className="relative h-screen w-screen">
                         {map.map((tile, index) => (
-                            <div key={index} className="absolute" style={{ left: `${tile.position_x * width}px`, top: `${tile.position_y * width}px` }}>
+                            <div key={index} className="absolute cursor-pointer" style={{ left: `${tile.position_x * width - width}px`, top: `${tile.position_y * width - width}px` }}>
                                 <Image
                                     src={tile.image_url}
                                     alt="Map"
                                     height={width}
-                                    width={width} 
+                                    width={width}
                                     objectFit="cover"
+                                    onClick={() => handleClickTile(tile.position_x, tile.position_y)}
                                 />
                                 {tile.position_x === player.position_x && tile.position_y === player.position_y && (
-                                     <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                                        <div className="" style={{ height: width*90/100, width: width*90/100 }}>
-                                    <Image
-                                        src={player.imageUrl}
-                                        alt={player.name}
-                                        className="rounded-full"
-                                        layout="fill"
-                                        
-                                    />
-                                </div> 
-                            </div>
+                                    <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                                        <div className="" style={{ height: width * 90 / 100, width: width * 90 / 100 }}>
+                                            <Image
+                                                src={player.imageUrl}
+                                                alt={player.name}
+                                                className="rounded-full"
+                                                layout="fill"
+
+                                            />
+                                        </div>
+                                    </div>
                                 )}
                             </div>
                         ))}
                     </div>
+
+                    {Object.entries(availableDirections).map(([direction, available]) => (
+                        available && (
+                            <div key={direction} className="absolute">
+                                <button className="p-2 rounded bg-blue-500 text-white" style={{ top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}>
+                                    {direction.toUpperCase()}
+                                </button>
+                            </div>
+                        )
+                    ))}
+
                 </div>
+
+                <nav class="menu">
+                    <input type="checkbox" href="#" class="menu-open" name="menu-open" id="menu-open" />
+                    <label class="menu-open-button" for="menu-open">
+                        <span class="hamburger hamburger-1"></span>
+                        <span class="hamburger hamburger-2"></span>
+                        <span class="hamburger hamburger-3"></span>
+                    </label>
+
+                    <a href="#" class="menu-item"> <i class="fa fa-bar-chart"></i> </a>
+                    <a href="#" class="menu-item"> <i class="fa fa-plus"></i> </a>
+                    <a href="#" class="menu-item"> <i class="fa fa-heart"></i> </a>
+                    <a href="#" class="menu-item"> <i class="fa fa-envelope"></i> </a>
+                    <a href="#" class="menu-item"> <i class="fa fa-cog"></i> </a>
+                    <a href="#" class="menu-item"> <i class="fa fa-ellipsis-h"></i> </a>
+
+                </nav>
+
+                <svg xmlns="http://www.w3.org/2000/svg" version="1.1">
+                    <defs>
+                        <filter id="shadowed-goo">
+
+                            <feGaussianBlur in="SourceGraphic" result="blur" stdDeviation="10" />
+                            <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -7" result="goo" />
+                            <feGaussianBlur in="goo" stdDeviation="3" result="shadow" />
+                            <feColorMatrix in="shadow" mode="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 -0.2" result="shadow" />
+                            <feOffset in="shadow" dx="1" dy="1" result="shadow" />
+                            <feComposite in2="shadow" in="goo" result="goo" />
+                            <feComposite in2="goo" in="SourceGraphic" result="mix" />
+                        </filter>
+                        <filter id="goo">
+                            <feGaussianBlur in="SourceGraphic" result="blur" stdDeviation="10" />
+                            <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -7" result="goo" />
+                            <feComposite in2="goo" in="SourceGraphic" result="mix" />
+                        </filter>
+                    </defs>
+                </svg>
             </div>
         );
     }
