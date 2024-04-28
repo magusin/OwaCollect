@@ -2,6 +2,7 @@ import Cors from 'cors'
 import { PrismaClient } from '@prisma/client'
 import jwt from 'jsonwebtoken';
 import { getToken } from "next-auth/jwt";
+import { all } from 'axios';
 
 // Initialiser le midleware Cors
 const allowedOrigins = [process.env.NEXTAUTH_URL]
@@ -88,8 +89,15 @@ export default async function handler(req, res) {
                         position_y: { gte: startY, lte: endY },
                     },
                 });
-                console.log(tiles)
-                res.status(200).json(tiles)
+
+                // Créer une liste de toutes les coordonnées possibles
+                const allCoordinates = [];
+                for (let x = positionXValue - 5; x <= positionXValue + 5; x++) {
+                    for (let y = positionYValue - 5; y <= positionYValue + 5; y++) {
+                        allCoordinates.push({ position_x: x, position_y: y });
+                    }
+                }
+                res.status(200).json({ tiles, allCoordinates });
                 break
             default:
                 res.status(405).end(`Method ${req.method} Not Allowed`)

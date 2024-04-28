@@ -6,13 +6,14 @@ import calculatePoints from "../../utils/calculatePoints";
 import { signOut, useSession } from 'next-auth/react';
 import Header from 'C/header';
 
-export default function War({ errorServer, map, player, totalPoints }) {
+export default function War({ errorServer, war, player, totalPoints }) {
     const { data: session, status } = useSession();
     const [windowSize, setWindowSize] = useState({ width: 0, height: 0 });
     const [width, setWidth] = useState(0);
     const [points, setPoints] = React.useState(totalPoints || 0);
     const [availableDirections, setAvailableDirections] = useState({ up: true, down: true, left: true, right: true });
-    console.log('player', player)
+    const positionXValue = player.position_x;
+    const positionYValue = player.position_y;
     // État pour contrôler l'ouverture du menu
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -68,134 +69,149 @@ export default function War({ errorServer, map, player, totalPoints }) {
         return <div>{errorServer}</div>;
     }
 
+    // Filtrer les tuiles récupérées par le backend pour ne garder que celles qui sont reçues
+    const receivedTilesMap = new Map(war.tiles.map(tile => [`${tile.position_x},${tile.position_y}`, tile]));
+
+    // Créer une liste de tuiles en incluant les tuiles vides
+    const tilesWithEmpty = war.allCoordinates.map(({ position_x, position_y }) => {
+        const key = `${position_x},${position_y}`;
+        const matchingTile = war.tiles.find(tile => tile.position_x === position_x && tile.position_y === position_y);
+        return matchingTile || { position_x, position_y, image_url: "", alt: "" };
+    });
+
+    // Trier les tuiles en fonction de leur position X et Y croissantes
+    const sortedTiles = tilesWithEmpty.sort((a, b) => {
+        if (a.position_x !== b.position_x) {
+            return a.position_x - b.position_x;
+        }
+        return a.position_y - b.position_y;
+    });
     if (session) {
+        // return (
+        //     <div className="flex flex-col h-screen" style={{ marginTop: "80px" }}>
+        //         <Header points={points} />
+        //         <div className="flex justify-center items-center h-screen">
+        //             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        //                 {map.map((tile, index) => (
+        //                     <div key={index} className="absolute cursor-pointer" style={{ left: `${tile.position_x * width - width}px`, top: `${tile.position_y * width - width}px` }}>
+        //                         <Image
+        //                             src={tile.image_url}
+        //                             alt="Map"
+        //                             height={width}
+        //                             width={width}
+        //                             objectFit="cover"
+        //                             onClick={() => handleClickTile(tile.position_x, tile.position_y)}
+        //                         />
+        //                         {tile.position_x === player.position_x && tile.position_y === player.position_y && (
+        //                             <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
+        //                                 <div className="" style={{ height: width * 90 / 100, width: width * 90 / 100 }}>
+        //                                     <Image
+        //                                         src={player.imageUrl}
+        //                                         alt={player.name}
+        //                                         className="rounded-full"
+        //                                         layout="fill"
+
+        //                                     />
+        //                                 </div>
+        //                             </div>
+        //                         )}
+        //                     </div>
+        //                 ))}
+        //             </div>
+
+        //             {Object.entries(availableDirections).map(([direction, available]) => (
+        //                 available && (
+        //                     <div key={direction} className="absolute">
+        //                         <button className="p-2 rounded bg-blue-500 text-white" style={{ top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}>
+        //                             {direction.toUpperCase()}
+        //                         </button>
+        //                     </div>
+        //                 )
+        //             ))}
+
+        //         </div>
+
+        //         <nav class="menu">
+        //             <input type="checkbox" href="#" class="menu-open" name="menu-open" id="menu-open" />
+        //             <label class="menu-open-button" for="menu-open">
+        //                 <span class="hamburger hamburger-1"></span>
+        //                 <span class="hamburger hamburger-2"></span>
+        //                 <span class="hamburger hamburger-3"></span>
+        //             </label>
+
+        //             <a href="#" class="menu-item"> <i class="fa fa-bar-chart"></i> </a>
+        //             <a href="#" class="menu-item"> <i class="fa fa-plus"></i> </a>
+        //             <a href="#" class="menu-item"> <i class="fa fa-heart"></i> </a>
+        //             <a href="#" class="menu-item"> <i class="fa fa-envelope"></i> </a>
+        //             <a href="#" class="menu-item"> <i class="fa fa-cog"></i> </a>
+        //             <a href="#" class="menu-item"> <i class="fa fa-ellipsis-h"></i> </a>
+
+        //         </nav>
+
+        //         <svg xmlns="http://www.w3.org/2000/svg" version="1.1">
+        //             <defs>
+        //                 <filter id="shadowed-goo">
+
+        //                     <feGaussianBlur in="SourceGraphic" result="blur" stdDeviation="10" />
+        //                     <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -7" result="goo" />
+        //                     <feGaussianBlur in="goo" stdDeviation="3" result="shadow" />
+        //                     <feColorMatrix in="shadow" mode="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 -0.2" result="shadow" />
+        //                     <feOffset in="shadow" dx="1" dy="1" result="shadow" />
+        //                     <feComposite in2="shadow" in="goo" result="goo" />
+        //                     <feComposite in2="goo" in="SourceGraphic" result="mix" />
+        //                 </filter>
+        //                 <filter id="goo">
+        //                     <feGaussianBlur in="SourceGraphic" result="blur" stdDeviation="10" />
+        //                     <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -7" result="goo" />
+        //                     <feComposite in2="goo" in="SourceGraphic" result="mix" />
+        //                 </filter>
+        //             </defs>
+        //         </svg>
+        //     </div>
+        // );
         return (
             <div className="flex flex-col h-screen" style={{ marginTop: "80px" }}>
                 <Header points={points} />
-                <div className="flex justify-center items-center h-screen">
-                    <div className="relative h-screen w-screen">
-                        {map.map((tile, index) => (
-                            <div key={index} className="absolute cursor-pointer" style={{ left: `${tile.position_x * width - width}px`, top: `${tile.position_y * width - width}px` }}>
+                <div className="grid grid-cols-11 md:grid-cols-11 lg:grid-cols-11">
+                    {/* Afficher les tuiles autour du joueur dans l'ordre croissant de distance relative au joueur */}
+                    {sortedTiles.map((tile, index) => (
+                        <div key={index} className="relative">
+                            {/* Image de la tuile ou une div vide si la tuile est vide */}
+                            {tile.image_url ? (
                                 <Image
                                     src={tile.image_url}
-                                    alt="Map"
-                                    height={width}
-                                    width={width}
-                                    objectFit="cover"
-                                    onClick={() => handleClickTile(tile.position_x, tile.position_y)}
+                                    alt={tile.alt}
+                                    width={150} // Définir une taille par défaut pour les images
+                                    height={150}
+                                    layout="responsive" // Assurer un layout responsive pour les images
                                 />
-                                {tile.position_x === player.position_x && tile.position_y === player.position_y && (
-                                    <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                                        <div className="" style={{ height: width * 90 / 100, width: width * 90 / 100 }}>
-                                            <Image
-                                                src={player.imageUrl}
-                                                alt={player.name}
-                                                className="rounded-full"
-                                                layout="fill"
-
-                                            />
-                                        </div>
+                            ) : (
+                                <div style={{ width: '100%', paddingBottom: '100%' }} />
+                            )}
+                            {/* Image du joueur */}
+                            {tile.position_x === positionXValue && tile.position_y === positionYValue && (
+                                <div className="absolute inset-0 flex items-center justify-center">
+                                    <div style={{ width: '50px', height: '50px' }}>
+                                        <Image
+                                            src={player.imageUrl}
+                                            alt={player.name}
+                                            className="rounded-full"
+                                            layout="fill"
+                                        />
                                     </div>
-                                )}
-                            </div>
-                        ))}
-                    </div>
-
-                    {Object.entries(availableDirections).map(([direction, available]) => (
-                        available && (
-                            <div key={direction} className="absolute">
-                                <button className="p-2 rounded bg-blue-500 text-white" style={{ top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}>
-                                    {direction.toUpperCase()}
-                                </button>
-                            </div>
-                        )
+                                </div>
+                            )}
+                        </div>
                     ))}
-
                 </div>
+            
 
-                <nav class="menu">
-                    <input type="checkbox" href="#" class="menu-open" name="menu-open" id="menu-open" />
-                    <label class="menu-open-button" for="menu-open">
-                        <span class="hamburger hamburger-1"></span>
-                        <span class="hamburger hamburger-2"></span>
-                        <span class="hamburger hamburger-3"></span>
-                    </label>
-
-                    <a href="#" class="menu-item"> <i class="fa fa-bar-chart"></i> </a>
-                    <a href="#" class="menu-item"> <i class="fa fa-plus"></i> </a>
-                    <a href="#" class="menu-item"> <i class="fa fa-heart"></i> </a>
-                    <a href="#" class="menu-item"> <i class="fa fa-envelope"></i> </a>
-                    <a href="#" class="menu-item"> <i class="fa fa-cog"></i> </a>
-                    <a href="#" class="menu-item"> <i class="fa fa-ellipsis-h"></i> </a>
-
-                </nav>
-
-                <svg xmlns="http://www.w3.org/2000/svg" version="1.1">
-                    <defs>
-                        <filter id="shadowed-goo">
-
-                            <feGaussianBlur in="SourceGraphic" result="blur" stdDeviation="10" />
-                            <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -7" result="goo" />
-                            <feGaussianBlur in="goo" stdDeviation="3" result="shadow" />
-                            <feColorMatrix in="shadow" mode="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 -0.2" result="shadow" />
-                            <feOffset in="shadow" dx="1" dy="1" result="shadow" />
-                            <feComposite in2="shadow" in="goo" result="goo" />
-                            <feComposite in2="goo" in="SourceGraphic" result="mix" />
-                        </filter>
-                        <filter id="goo">
-                            <feGaussianBlur in="SourceGraphic" result="blur" stdDeviation="10" />
-                            <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -7" result="goo" />
-                            <feComposite in2="goo" in="SourceGraphic" result="mix" />
-                        </filter>
-                    </defs>
-                </svg>
             </div>
         );
     }
-
-    //     const playerPosition = { x: 10, y: 10 }; // Position du joueur sur la carte
-    //     const mapWidth = 10944; // Largeur totale de la carte
-    //     const mapHeight = 10944; // Hauteur totale de la carte
-    //     const tileSize = 40; // Taille d'une case sur la carte
-    //     const containerRef = useRef(null);
-    //     const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
-
-    //     useEffect(() => {
-    //         const handleResize = () => {
-    //             if (containerRef.current) {
-    //                 const { width, height } = containerRef.current.getBoundingClientRect();
-    //                 setContainerSize({ width, height });
-    //             }
-    //         };
-
-    //         handleResize();
-    //         window.addEventListener('resize', handleResize);
-
-    //         return () => {
-    //             window.removeEventListener('resize', handleResize);
-    //         };
-    //     }, []);
-
-    //     const viewWidth = containerSize.width;
-    //     const viewHeight = containerSize.height;
-
-    //     // Calcul des coordonnées de l'image pour centrer la vue autour du joueur
-    //     const imageX = Math.max(0, Math.min(playerPosition.x * tileSize - viewWidth / 2, mapWidth - viewWidth));
-    //     const imageY = Math.max(0, Math.min(playerPosition.y * tileSize - viewHeight / 2, mapHeight - viewHeight));
-
-    //     return (
-    //         <div ref={containerRef} style={{ width: '100vh', height: '50vh', overflow: 'hidden', position: 'relative', border: '1px solid black' }}>
-    //             <div style={{ position: 'absolute', left: -imageX, top: -imageY }}>
-    //                 <Image
-    //                     src="/images/testMap-min.jpg"
-    //                     alt="Map"
-    //                     width={mapWidth * tileSize}
-    //                     height={mapHeight * tileSize}
-    //                 />
-    //             </div>
-    //         </div>
-    //     );
 }
+
+
 
 export async function getServerSideProps(context) {
     const session = await getSession(
@@ -231,8 +247,7 @@ export async function getServerSideProps(context) {
                 cookie: context.req.headers.cookie
             }
         })
-        const map = await response.data;
-        console.log(map)
+        const war = await response.data;
         const timestamp = new Date().getTime().toString();
         const signature = await axios.post(`${process.env.NEXTAUTH_URL}/api/generateSignature`, {
             timestamp: timestamp
@@ -255,7 +270,7 @@ export async function getServerSideProps(context) {
         const user = await responseUser.data;
         const totalPoints = calculatePoints(user);
         return {
-            props: { map, totalPoints, player },
+            props: { war, totalPoints, player },
         };
     } catch (error) {
         if (error.response?.status === 401) {
