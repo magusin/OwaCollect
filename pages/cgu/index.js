@@ -94,7 +94,7 @@ export default function CGU() {
                     <p className="text-center py-8">En vigueur au 11/01/2024</p>
                     <section>
                         <p>Les présentes conditions générales d'utilisation (dites <b>« CGU »</b>) ont pour objet l'encadrement juridique
-                            des modalités de mise à disposition du site et des services et de définir les
+                            des modalités de mise à disposition du site et des services et de déFinir les
                             conditions d’accès et d’utilisation des services par « l'Utilisateur ».</p>
                         <p>Les présentes CGU sont accessibles sur le site à la rubrique <b>«CGU»</b>.</p>
                         <p>Toute inscription ou utilisation du site implique l'acceptation sans aucune réserve ni restriction des
@@ -124,7 +124,7 @@ export default function CGU() {
                         <p>L’Utilisateur non membre n'a pas accès aux services réservés. Pour cela, il doit posséder un compte Twitch. En acceptant de s’inscrire sur Twitch l'utilisateur accepte leur CGU.</p>
                         <p>Toute désinscription ou suppression du compte Twitch de l'utilisateur entrainera une impossibilité d'accéder aux services d'owarida.fr.</p>
                         <p>Tout événement dû à un cas de force majeure ayant pour conséquence un dysfonctionnement du site
-                            ou serveur et sous réserve de toute interruption ou modification en cas de maintenance, n'engage
+                            ou serveur et sous réserve de toute interruption ou mOdification en cas de maintenance, n'engage
                             pas la responsabilité de owarida.fr. Dans ces cas, l’Utilisateur accepte ainsi ne pas tenir rigueur à
                             l’éditeur de toute interruption ou suspension de service, même sans préavis.</p>
                         <p>L'Utilisateur a la possibilité de contacter le site par messagerie électronique à l’adresse email de
@@ -134,11 +134,11 @@ export default function CGU() {
                     <section>
                         <p>Le site assure à l'Utilisateur une collecte et un traitement d'informations personnelles dans le respect
                             de la vie privée conformément à la loi n°78-17 du 6 janvier 1978 relative à l'informatique, aux fichiers
-                            et aux libertés. Le site est déclaré à la CNIL sous le numéro 0000.</p>
+                            et aux libertés.</p>
                         <p>En vertu de la loi Informatique et Libertés, en date du 6 janvier 1978, l'Utilisateur dispose d'un droit
                             d'accès, de rectification, de suppression et d'opposition de ses données personnelles. L'Utilisateur
                             exerce ce droit :</p>
-                        <p>· par mail à l'adresse email contact@owarida.fr</p>
+                        <p>· par mail à l'adresse email hugo.jacques71@gmail.com</p>
                     </section>
                     <h2 className="font-bold my-4">ARTICLE 4 : Propriété intellectuelle</h2>
                     <section>
@@ -178,7 +178,7 @@ export default function CGU() {
                             ne contiennent pas d’information personnelle et ne peuvent pas être utilisés pour identifier quelqu’un.
                             Un cookie contient un identifiant unique, généré aléatoirement et donc anonyme. Certains cookies
                             expirent à la fin de la visite de l’Utilisateur, d’autres restent.</p>
-                        <p>L’information contenue dans les cookies est utilisée pour améliorer le site owarida.fr.</p>
+                        <p>L’information contenue dans les cooKies est utilisée pour améliorer le site owarida.fr.</p>
                         <p>En naviguant sur le site, L’Utilisateur les accepte.</p>
                         <p>L’Utilisateur doit toutefois donner son consentement quant à l’utilisation de certains cookies.</p>
                         <p>A défaut d’acceptation, l’Utilisateur est informé que certaines fonctionnalités ou pages risquent de lui
