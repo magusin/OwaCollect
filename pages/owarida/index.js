@@ -41,7 +41,7 @@ export default function Owarida({ totalPoints, errorServer }) {
                 const totalPoints = currentPoints + 500;
                 localStorage.setItem('points', totalPoints);
                 setPoints(totalPoints);
-            } else if (response.data.success && response.data.secret9) {
+            } else if (response.data.success && response.data.secret9 || response.data.success && response.data.secret10) {
                 setMessage(response.data.message);
                 const currentPoints = parseInt(points); // Convertit points en nombre entier
                 const totalPoints = currentPoints + 1000;
