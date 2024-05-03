@@ -1,7 +1,6 @@
-import { useSprings, animated } from 'react-spring';
-import { useDrag } from 'react-use-gesture';
 import { useEffect, useState, useRef } from 'react';
 import styles from './index.module.css'; // Assurez-vous de créer ce fichier CSS
+import Head from 'next/head';
 
 const VideoCarousel = () => {
     const videoSet1 = [
@@ -62,8 +61,20 @@ const VideoCarousel = () => {
     const scale = videoWidth / radius
     const buttonMargin = radius - radius / numberOfVideos
   
+    function HeadView() {
+      return (
+          <Head>
+              <title>Owarida Collect | FOK</title>
+              <meta name="description" content="Les vidéos du scribe." />
+              <meta name="keywords" content="Owarida, owarida collect, fok, owarida carte" />
+              <link rel="icon" href="/favicon.ico" />
+          </Head>
+      )
+  }
+
     return (
       <>
+      <HeadView />
         <div className={styles.carouselContainer}>
           {/* <div className={styles.buttonsBar}>
             <button className={styles.button} onClick={() => {setCurrentVideos(videoSet1); setRotateValue(0); }}  >Set 1</button>
