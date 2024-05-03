@@ -123,7 +123,8 @@ export default function Scribe() {
                                     <button style={{ fontFamily: 'Style Script, cursive' }} className='font-bold text-xl p-2 rounded-lg mt-4 mb-4' onClick={() => setPage(4)} >Page 4 (05 / 01 / 14 - BBIZFR)</button>
 
                                     <button style={{ fontFamily: 'Style Script, cursive' }} className='font-bold text-xl p-2 rounded-lg mt-4' onClick={() => setPage(6)} >Page 6 (10x10x6 - AZERTY)</button>
-                                    <button style={{ fontFamily: 'Style Script, cursive' }} className='font-bold text-xl p-2 rounded-lg mt-4' onClick={() => setPage(7)} >Page 7 (MOTLETTRE - CGUCGU)</button>
+                                    <button style={{ fontFamily: 'Style Script, cursive' }} className='font-bold text-xl p-2 rounded-lg mt-4' onClick={() => setPage(7)} >Page 7 (MOTLET - CGUCGU)</button>
+                                    <button style={{ fontFamily: 'Style Script, cursive' }} className='font-bold text-xl p-2 rounded-lg mt-4' onClick={() => setPage(8)} >Page 8 (???)</button>
                                 </div>
                             )}
                             {page === 1 && (
