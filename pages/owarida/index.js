@@ -35,13 +35,13 @@ export default function Owarida({ totalPoints, errorServer }) {
                 setMessage('Code correct !');
                 localStorage.setItem('secretShopLink', response.data.secretShopLink);
                 router.push(`/secretShop/${response.data.secretShopLink}`)
-            } else if (response.data.success && response.data.secret1 || response.data.success && response.data.secret2 || response.data.success && response.data.secret3 || response.data.success && response.data.secret4 || response.data.success && response.data.secret5 || response.data.success && response.data.secret6 || response.data.success && response.data.secret7 || response.data.success && response.data.secret8) {
+            } else if (response.data.success && response.data.secret1 || response.data.success && response.data.secret2 || response.data.success && response.data.secret3 || response.data.success && response.data.secret4 || response.data.success && response.data.secret5 || response.data.success && response.data.secret6 || response.data.success && response.data.secret7 || response.data.success && response.data.secret8 || response.data.success && response.data.secret12) {
                 setMessage(response.data.message);
                 const currentPoints = parseInt(points); // Convertit points en nombre entier
                 const totalPoints = currentPoints + 500;
                 localStorage.setItem('points', totalPoints);
                 setPoints(totalPoints);
-            } else if (response.data.success && response.data.secret9 || response.data.success && response.data.secret10) {
+            } else if (response.data.success && response.data.secret9 || response.data.success && response.data.secret10 || response.data.success && response.data.secret11) {
                 setMessage(response.data.message);
                 const currentPoints = parseInt(points); // Convertit points en nombre entier
                 const totalPoints = currentPoints + 1000;
