@@ -105,13 +105,13 @@ export default function Contact() {
                     <section>
                     <div className="flex justify-center items-center">
                     <svg width="32px" height="32px" viewBox="0 0 1024 1024" className="icon" version="1.1" xmlns="http://www.w3.org/2000/svg" fill="#000000"><g id="SVGRepo_bgCarrier" strokeWidth="0"></g><g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round"></g><g id="SVGRepo_iconCarrier"><path d="M512 599.6L107.9 311.1v19.7L512 619.3l404.1-288.6V311L512 599.6z" fill="#E73B37"></path><path d="M63.9 187v650h896.2V187H63.9z m852.2 598.5L672.2 611.3l-13.8 9.8L899.1 793H125.5l240.6-171.8-13.8-9.8-244.4 174.5V231h808.2v554.5z" fill="#39393A"></path><path d="M512.9 536.7m-10 0a10 10 0 1 0 20 0 10 10 0 1 0-20 0Z" fill="#E73B37"></path></g></svg>
-                    <span className="pl-4">contact@owarida.fr</span>
+                    <span className="pl-4">hugo.jacques71@gmail.com</span>
                     </div>                        
-                    <p className="text-center">ou</p>
+                    {/* <p className="text-center">ou</p>
                     <div className="flex justify-center items-center">
                     <svg xmlns="http://www.w3.org/2000/svg" aria-label="Gmail" role="img" viewBox="0 0 512 512" width="32px" height="32px" fill="#000000"><g id="SVGRepo_bgCarrier" strokeWidth="0"></g><g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round"></g><g id="SVGRepo_iconCarrier"><rect width="512" height="512" rx="15%" fill="#ffffff"></rect><path fill="#f2f2f2" d="M120 392V151.075h272V392"></path><path fillOpacity=".05" d="M256 285L120 392l-4-212"></path><path fill="#d54c3f" d="M120 392H97c-12 0-22-10-22-23V143h45z"></path><path fillOpacity=".08" d="M317 392h77V159H82"></path><path fill="#f2f2f2" d="M97 121h318L256 234"></path><path fill="#b63524" d="M392 392h23c12 0 22-10 22-23V143h-45z"></path><path fill="none" stroke="#de5145" strokeLinecap="round" strokeWidth="44" d="M97 143l159 115 159-115"></path></g></svg>
                     <span className="pl-4">hugo.jacques71@gmail.com</span>
-                    </div>
+                    </div> */}
                     </section>
                 </div>
                 <Footer />

@@ -115,7 +115,7 @@ export default function Scribe() {
                                     <h1 className="text-4xl text-center font-bold my-4">Les écrits du scribe</h1>
                                     <p className="text-center">Le scribe a laissé d&apos;étranges écrits.</p>
                                     <p>Il semble que chaque page parle d'un thème.</p>
-                                    <h1>Date actuelle : {currentDate}</h1>
+                                    {/* <h1>Date actuelle : {currentDate}</h1> */}
                                     <p className="italic">Si vous pensez avoir trouvé un thème ou un code, rendez-vous sur la page Owarida et rentrez-le en cliquant sur l'image d'Owarida.</p>
                                     <button style={{ fontFamily: 'Style Script, cursive' }} className='font-bold text-xl p-2 rounded-lg mt-4' onClick={() => setPage(1)} >Page 1 (01 / 12 / 04 - TQWBYI)</button>
                                     <button style={{ fontFamily: 'Style Script, cursive' }} className='font-bold text-xl p-2 rounded-lg mt-4' onClick={() => setPage(2)} >Page 2 (17 / 02 / 06 - TKIRFG)</button>
@@ -123,6 +123,8 @@ export default function Scribe() {
                                     <button style={{ fontFamily: 'Style Script, cursive' }} className='font-bold text-xl p-2 rounded-lg mt-4 mb-4' onClick={() => setPage(4)} >Page 4 (05 / 01 / 14 - BBIZFR)</button>
 
                                     <button style={{ fontFamily: 'Style Script, cursive' }} className='font-bold text-xl p-2 rounded-lg mt-4' onClick={() => setPage(6)} >Page 6 (10x10x6 - AZERTY)</button>
+                                    <button style={{ fontFamily: 'Style Script, cursive' }} className='font-bold text-xl p-2 rounded-lg mt-4' onClick={() => setPage(7)} >Page 7 (MOTLET - CGUCGU)</button>
+                                    <button style={{ fontFamily: 'Style Script, cursive' }} className='font-bold text-xl p-2 rounded-lg mt-4' onClick={() => setPage(8)} >Page 8 (???)</button>
                                 </div>
                             )}
                             {page === 1 && (
@@ -258,6 +260,63 @@ export default function Scribe() {
                                         <li className="flex"><p className="mr-4">13-1-26-12</p>  <p className="mr-4">19-3-12</p>  <p className="mr-4">3-5-9-8-19-3-12</p>  <p className="mr-4">5-7</p>  <p className="mr-4">3-12</p>  <p>26-9-25-19-3</p></li>
                                         <li className="flex"><p className="mr-4">15-9-26-14-19-3</p>  <p className="mr-4">19-3-12</p>  <p className="mr-4">25-1-19-19-9-26-12</p>  <p className="mr-4">8-19-12</p>  <p className="mr-4">24-9-19-19-3-26-5</p></li>
                                         <li className="flex"><p className="mr-4">4-3-12-10-8-4-3</p>  <p className="mr-4">20-1</p>  <p className="mr-4">24-9-8-22</p>  <p className="mr-4">13-3-23-9-19-19-3</p></li>
+                                    </ul>
+                                    </div>
+                                    <button style={{ fontFamily: 'Style Script, cursive' }} className='font-bold text-xl p-2 rounded-lg mt-4' onClick={() => setPage(0)} >Retourner aux notes</button>
+                                    <div className="flex justify-center my-4">
+                                        <button onClick={() => setPage(page - 1)} className="absolute left-0 top-1/2 transform -translate-y-1/2 text-black-600 hover:text-black-800 focus:outline-none">
+                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                                            </svg>
+                                        </button>
+                                        <button onClick={() => setPage(page + 1)} className="absolute right-0 top-1/2 transform -translate-y-1/2 text-black-600 hover:text-black-800 focus:outline-none">
+                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+                            {page === 7 && (
+                                <div className="flex flex-col text-2xl leading-9 font-bold" style={{ fontFamily: 'Style Script, cursive', minHeight: "calc(100vh - 80px)" }}>
+                                    <div className="flex-grow relative">
+                                    <ul className="my-4 mx-8 ">
+                                        <li>A6 : M3 L1</li>
+                                        <li>A5 : M1 L2</li>
+                                        <li>A6 : M3 L8</li>
+                                        <li>A2 : M2 L2</li>
+                                        <li>A4 : M9 L3</li>
+                                        <li>A5 : M4 L2</li>
+                                    </ul>
+                                    </div>
+                                    <button style={{ fontFamily: 'Style Script, cursive' }} className='font-bold text-xl p-2 rounded-lg mt-4' onClick={() => setPage(0)} >Retourner aux notes</button>
+                                    <div className="flex justify-center my-4">
+                                        <button onClick={() => setPage(page - 1)} className="absolute left-0 top-1/2 transform -translate-y-1/2 text-black-600 hover:text-black-800 focus:outline-none">
+                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                                            </svg>
+                                        </button>
+                                        <button onClick={() => setPage(page + 1)} className="absolute right-0 top-1/2 transform -translate-y-1/2 text-black-600 hover:text-black-800 focus:outline-none">
+                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+                            {page === 8 && (
+                                <div className="flex flex-col text-2xl leading-9 font-bold" style={{ fontFamily: 'Style Script, cursive', minHeight: "calc(100vh - 80px)" }}>
+                                    <div className="flex-grow relative">
+                                    <ul className="my-4 mx-8 ">
+                                        <li>Tout le monde sait que vieillir n'aide pas à rester jeune.</li>
+                                        <li>Rares sont ceux qui ont visité les studios originaux d'Apollo 11.</li>
+                                        <li>A ma connaissance, rentrer les codes découverts dans l'URL fonctionne.</li>
+                                        <li>C'est une femme qui double Bart.</li>
+                                        <li>Alimenter un feu avec son corps est déconseillé.</li>
+                                        <li>Saviez-vous que Mewtwo est enfermé dans la zone 51 ?</li>
+                                        <li>Si une technologie est suffisamment avancée elle pourrait être indiscernable de la magie.</li>
+                                        <li>Imaginez qu'il y est un code disséminé dans plusieurs pages pour accéder au marchand secret ...</li>
+                                        <li>N'oubliez pas de retirer l'écran devant le ciel avant d'aller dormir nous pourrions enfin voir la vraie lune.</li>
                                     </ul>
                                     </div>
                                     <button style={{ fontFamily: 'Style Script, cursive' }} className='font-bold text-xl p-2 rounded-lg mt-4' onClick={() => setPage(0)} >Retourner aux notes</button>
