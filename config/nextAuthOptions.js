@@ -43,7 +43,6 @@ export default NextAuth({
         return refreshAccessToken(token)
       },
     async session({ session, token, user }) {
-      console.log('session', session)
       // Send properties to the client
       // session.accessToken = token.accessToken
       session.user.id = token.sub

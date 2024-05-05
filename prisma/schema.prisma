@@ -44,7 +44,7 @@ model pets {
   playercards                 playercards[]
   secretsdiscovered           secretsdiscovered[]
   user_achievements           user_achievements[]
-  war                         war?
+  war                         warPlayers?
 }
 
 model user_achievements {
@@ -175,21 +175,25 @@ model secretsdiscovered {
 }
 
 model map {
-  id         Int    @id @default(autoincrement())
+  id         Int          @id @default(autoincrement())
   position_x Int
   position_y Int
-  image_url  String @db.VarChar(255)
+  image_url  String       @db.VarChar(255)
+  warPlayers warPlayers[]
 }
 
-model war {
-  petId      String  @id @db.VarChar(255)
-  name       String? @db.VarChar(255)
-  position_x Int?
-  position_y Int?
-  imageUrl   String? @db.VarChar(255)
-  str        Int     @default(0)
-  hit        Int     @default(0)
-  level      Int     @default(1)
-  xp         Int     @default(0)
-  pets       pets    @relation(fields: [petId], references: [userId], onDelete: Cascade, map: "war_ibfk_1")
+model warPlayers {
+  petId    String  @id @db.VarChar(255)
+  name     String? @db.VarChar(255)
+  imageUrl String? @db.VarChar(255)
+  mapId    Int?
+  str      Int     @default(0)
+  hit      Int     @default(0)
+  level    Int     @default(1)
+  xp       Int     @default(0)
+  hp       Int     @default(50)
+  pets     pets    @relation(fields: [petId], references: [userId], onDelete: Cascade, map: "war_ibfk_1")
+  map      map?    @relation(fields: [mapId], references: [id], onDelete: Cascade, map: "warPlayers_ibfk_2")
+
+  @@index([mapId], map: "warPlayers_ibfk_2")
 }

@@ -9,61 +9,83 @@ import Header from 'C/header';
 export default function War({ errorServer, war, player, totalPoints }) {
     const { data: session, status } = useSession();
     const [windowSize, setWindowSize] = useState({ width: 0, height: 0 });
-    const [width, setWidth] = useState(0);
+    // const [width, setWidth] = useState(0);
     const [points, setPoints] = React.useState(totalPoints || 0);
     const [availableDirections, setAvailableDirections] = useState({ up: true, down: true, left: true, right: true });
-    const positionXValue = player.position_x;
-    const positionYValue = player.position_y;
+    const positionPlayer = player.mapId;
     // État pour contrôler l'ouverture du menu
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [selectedTilePlayers, setSelectedTilePlayers] = useState([]);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    // Stocker les coordonnées de la tuile sélectionnée
+    const [selectedTileX, setSelectedTileX] = useState(null);
+    const [selectedTileY, setSelectedTileY] = useState(null);
 
     // Gestionnaire d'événements pour le clic sur une tuile
-    const handleClickTile = (position_x, position_y) => {
-        // Logique pour déterminer les directions disponibles pour le déplacement du joueur
-        const directions = {
-            up: position_y > 1,
-            down: position_y < 11,
-            left: position_x < 1,
-            right: position_x < 11
-        };
-        setAvailableDirections(directions);
+    const handleClickTile = (tile) => {
+        // Filtrer les joueurs présents sur la tuile cliquée
+        const playersOnTile = tile.warPlayers || [];
+        setSelectedTilePlayers(playersOnTile);
+
+        // Stocker les coordonnées de la tuile sélectionnée
+        setSelectedTileX(tile.position_x);
+        setSelectedTileY(tile.position_y);
+
+        setIsModalOpen(true);
     };
+
+    // Fonction pour fermer la fenêtre modale
+    const closeModal = () => {
+        setIsModalOpen(false);
+    };
+
+    // Gestionnaire d'événements pour le clic sur une tuile
+    // const handleClickTile = (position_x, position_y) => {
+    //     // Logique pour déterminer les directions disponibles pour le déplacement du joueur
+    //     const directions = {
+    //         up: position_y > 1,
+    //         down: position_y < 11,
+    //         left: position_x < 1,
+    //         right: position_x < 11
+    //     };
+    //     setAvailableDirections(directions);
+    // };
 
     // Fonction pour basculer l'état du menu
     const toggleMenu = () => {
         setIsMenuOpen(!isMenuOpen);
     };
 
-    useEffect(() => {
-        function handleResize() {
-            setWindowSize({ width: window.innerWidth, height: window.innerHeight });
-        }
+    // useEffect(() => {
+    //     function handleResize() {
+    //         setWindowSize({ width: window.innerWidth, height: window.innerHeight });
+    //     }
 
-        window.addEventListener('resize', handleResize);
+    //     window.addEventListener('resize', handleResize);
 
-        // Au montage du composant, on récupère la taille de la fenêtre
-        handleResize();
+    //     // Au montage du composant, on récupère la taille de la fenêtre
+    //     handleResize();
 
-        // Nettoyage de l'écouteur d'événement au démontage du composant
-        return () => window.removeEventListener('resize', handleResize);
-    }, []);
+    //     // Nettoyage de l'écouteur d'événement au démontage du composant
+    //     return () => window.removeEventListener('resize', handleResize);
+    // }, []);
 
     // Utiliser useEffect pour mettre à jour la largeur de la tuile lorsque la taille de la fenêtre change
-    useEffect(() => {
-        if (windowSize.width < 640) {
-            setWidth(30);
-        } else if (windowSize.width < 768 && windowSize.width >= 640) {
-            setWidth(50);
-        } else if (windowSize.width < 1024 && windowSize.width >= 768) {
-            setWidth(60);
-        } else if (windowSize.width >= 1024 && windowSize.width < 1280) {
-            setWidth(80);
-        } else if (windowSize.width >= 1280 && windowSize.width < 1536) {
-            setWidth(100);
-        } else {
-            setWidth(120);
-        }
-    }, [windowSize.width]);
+    // useEffect(() => {
+    //     if (windowSize.width < 640) {
+    //         setWidth(30);
+    //     } else if (windowSize.width < 768 && windowSize.width >= 640) {
+    //         setWidth(50);
+    //     } else if (windowSize.width < 1024 && windowSize.width >= 768) {
+    //         setWidth(60);
+    //     } else if (windowSize.width >= 1024 && windowSize.width < 1280) {
+    //         setWidth(80);
+    //     } else if (windowSize.width >= 1280 && windowSize.width < 1536) {
+    //         setWidth(100);
+    //     } else {
+    //         setWidth(120);
+    //     }
+    // }, [windowSize.width]);
 
     if (errorServer) {
         return <div>{errorServer}</div>;
@@ -172,10 +194,10 @@ export default function War({ errorServer, war, player, totalPoints }) {
         return (
             <div className="flex flex-col h-screen" style={{ marginTop: "80px" }}>
                 <Header points={points} />
-                <div className="grid grid-cols-11 md:grid-cols-11 lg:grid-cols-11">
+                <div className="grid grid-cols-11">
                     {/* Afficher les tuiles autour du joueur dans l'ordre croissant de distance relative au joueur */}
                     {sortedTiles.map((tile, index) => (
-                        <div key={index} className="relative">
+                        <div key={index} className="relative cursor-pointer" onClick={() => handleClickTile(tile)}>
                             {/* Image de la tuile ou une div vide si la tuile est vide */}
                             {tile.image_url ? (
                                 <Image
@@ -189,9 +211,9 @@ export default function War({ errorServer, war, player, totalPoints }) {
                                 <div style={{ width: '100%', paddingBottom: '100%' }} />
                             )}
                             {/* Image du joueur */}
-                            {tile.position_x === positionXValue && tile.position_y === positionYValue && (
+                            {tile.id === positionPlayer ? (
                                 <div className="absolute inset-0 flex items-center justify-center">
-                                    <div style={{ width: '50px', height: '50px' }}>
+                                    <div style={{ width: 'auto', height: 'auto', maxWidth: '80%', maxHeight: '80%' }}>
                                         <Image
                                             src={player.imageUrl}
                                             alt={player.name}
@@ -200,12 +222,38 @@ export default function War({ errorServer, war, player, totalPoints }) {
                                         />
                                     </div>
                                 </div>
+                            ) : (
+                                tile.warPlayers && tile.warPlayers.length > 0 && (
+                                    <div className="absolute inset-0 flex items-center justify-center">
+                                        <div style={{ width: 'auto', height: 'auto', maxWidth: '80%', maxHeight: '80%' }}>
+                                            <Image
+                                                src={tile.warPlayers[0].imageUrl}
+                                                alt={tile.warPlayers[0].name}
+                                                className="rounded-full"
+                                                layout="fill"
+                                            />
+                                        </div>
+                                    </div>
+                                )
                             )}
                         </div>
                     ))}
                 </div>
-            
 
+                {isModalOpen && (
+                    <div className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center bg-black bg-opacity-50 text-black">
+                        <div className="bg-white p-4 rounded-lg relative">
+                            <h2 className="text-lg font-bold mb-2">Joueurs en {selectedTileX}, {selectedTileY} :</h2>
+                            <ul>
+                                {selectedTilePlayers.map((player, index) => (
+                                    <li key={index}>{player.name}</li>
+                                ))}
+                            </ul>
+                            {/* Bouton pour fermer la fenêtre modale */}
+                            <button onClick={closeModal} className="absolute top-0 right-0 -mt-2 -mr-2 px-3 py-1 bg-red-500 text-white rounded-full">X</button>
+                        </div>
+                    </div>
+                )}
             </div>
         );
     }
@@ -234,12 +282,10 @@ export async function getServerSideProps(context) {
         });
         const player = await responseWar.data;
 
-
         const response = await axios.get(`${process.env.NEXTAUTH_URL}/api/war/map`, {
             params: {
                 limit: 5,
-                positionX: player.position_x,
-                positionY: player.position_y
+                mapId: player.mapId,
             },
             headers: {
                 'Content-Type': 'application/json',

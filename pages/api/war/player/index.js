@@ -63,19 +63,18 @@ export default async function handler(req, res) {
         await runMiddleware(req, res, corsMiddleware)
         switch (req.method) {
             case 'GET':
-                const existingUser = await prisma.war.findUnique({
+                const existingUser = await prisma.warPlayers.findUnique({
                     where: { petId: decoded.id },
                 });
                 if (existingUser) {
                     return res.status(200).json(existingUser);
                 } else {
-                    const createPlayer = await prisma.war.create({
+                    const createPlayer = await prisma.warPlayers.create({
                         data : {
                             petId: decoded.id,
                             name: decoded.name,
                             imageUrl: decoded.image,
-                            position_x: Math.floor(Math.random() * 6),
-                            position_y: Math.floor(Math.random() * 6),
+                            mapId: Math.floor(Math.random() * 121) + 1,
                         }
                     });
                     res.status(200).json(createPlayer)

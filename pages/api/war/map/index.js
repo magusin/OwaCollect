@@ -64,30 +64,44 @@ export default async function handler(req, res) {
         await runMiddleware(req, res, corsMiddleware)
         switch (req.method) {
             case 'GET':
-                const { limit, positionX, positionY } = req.query;
+                const { limit, mapId } = req.query;
 
                 // Convertir les valeurs des paramètres en nombres
                 const limitValue = parseInt(limit);
-                const positionXValue = parseInt(positionX);
-                const positionYValue = parseInt(positionY);
+                const mapIdValue  = parseInt(mapId);
 
                 // Vérifier si les paramètres sont valides
-                if (isNaN(limitValue) || isNaN(positionXValue) || isNaN(positionYValue)) {
+                if (isNaN(limitValue) || isNaN(mapIdValue)) {
                     return res.status(400).json({ message: 'Les paramètres de requête sont invalides' });
                 }
-
+                
+                const mapPlayer = await prisma.map.findFirst({
+                    where: { id: mapIdValue },
+                });
+                
+                
+                if (!mapPlayer) {
+                    return res.status(404).json({ message: 'Carte introuvable' });
+                }
+                
+                const positionXValue = mapPlayer.position_x;
+                const positionYValue = mapPlayer.position_y;
+                
                 // Déterminez les coordonnées de la plage de tuiles autour du joueur
                 const startX = Math.max(1, positionXValue - limitValue);
                 const endX = Math.min(11, positionXValue + limitValue);
                 const startY = Math.max(1, positionYValue - limitValue);
                 const endY = Math.min(11, positionYValue + limitValue);
-
+                
                 // Sélectionnez les tuiles dans la plage de coordonnées
                 const tiles = await prisma.map.findMany({
                     where: {
                         position_x: { gte: startX, lte: endX },
                         position_y: { gte: startY, lte: endY },
                     },
+                    include: {
+                        warPlayers: true // Inclure les joueurs associés à chaque tuile
+                    }
                 });
 
                 // Créer une liste de toutes les coordonnées possibles
@@ -97,6 +111,17 @@ export default async function handler(req, res) {
                         allCoordinates.push({ position_x: x, position_y: y });
                     }
                 }
+
+                // const players = await prisma.warPlayers.findMany({
+                //     where: {
+                //         AND: [
+                //             { position_x: { gte: startX, lte: endX } },
+                //             { position_y: { gte: startY, lte: endY } },
+                //             { NOT: { petId: decoded.id } } // Exclure le joueur actuel
+                //         ]
+                //     },
+                    
+                // });
                 res.status(200).json({ tiles, allCoordinates });
                 break
             default:
