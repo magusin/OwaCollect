@@ -15,8 +15,9 @@ export default function War({ errorServer, war, player, totalPoints }) {
     const positionPlayer = player.mapId;
     // État pour contrôler l'ouverture du menu
     const [isMenuOpen, setIsMenuOpen] = useState(false);
-    const [selectedTilePlayers, setSelectedTilePlayers] = useState([]);
+    const [selectedTilePlayers, setSelectedTilePlayers] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isModalPlayerOpen, setIsModalPlayerOpen] = useState(false);
     // Stocker les coordonnées de la tuile sélectionnée
     const [selectedTileX, setSelectedTileX] = useState(null);
     const [selectedTileY, setSelectedTileY] = useState(null);
@@ -25,6 +26,7 @@ export default function War({ errorServer, war, player, totalPoints }) {
 
     // Fonction pour gérer le clic sur un joueur de la liste
     const handleClickPlayer = (player) => {
+        setSelectedTilePlayers(null)
         // Mettre à jour l'état avec les informations du joueur sélectionné
         setSelectedPlayer(player);
         // Ouvrir la modal
@@ -33,6 +35,7 @@ export default function War({ errorServer, war, player, totalPoints }) {
 
     // Gestionnaire d'événements pour le clic sur une tuile
     const handleClickTile = (tile) => {
+        setIsModalOpen(false);
         // Filtrer les joueurs présents sur la tuile cliquée
         const playersOnTile = tile.warPlayers || [];
         setSelectedTilePlayers(playersOnTile);
@@ -48,6 +51,7 @@ export default function War({ errorServer, war, player, totalPoints }) {
     const closeModal = () => {
         setIsModalOpen(false);
         setSelectedPlayer(null);
+        setSelectedTilePlayers(null);
     };
 
     // Gestionnaire d'événements pour le clic sur une tuile
@@ -162,46 +166,7 @@ export default function War({ errorServer, war, player, totalPoints }) {
         //                 )
         //             ))}
 
-        //         </div>
 
-        //         <nav class="menu">
-        //             <input type="checkbox" href="#" class="menu-open" name="menu-open" id="menu-open" />
-        //             <label class="menu-open-button" for="menu-open">
-        //                 <span class="hamburger hamburger-1"></span>
-        //                 <span class="hamburger hamburger-2"></span>
-        //                 <span class="hamburger hamburger-3"></span>
-        //             </label>
-
-        //             <a href="#" class="menu-item"> <i class="fa fa-bar-chart"></i> </a>
-        //             <a href="#" class="menu-item"> <i class="fa fa-plus"></i> </a>
-        //             <a href="#" class="menu-item"> <i class="fa fa-heart"></i> </a>
-        //             <a href="#" class="menu-item"> <i class="fa fa-envelope"></i> </a>
-        //             <a href="#" class="menu-item"> <i class="fa fa-cog"></i> </a>
-        //             <a href="#" class="menu-item"> <i class="fa fa-ellipsis-h"></i> </a>
-
-        //         </nav>
-
-        //         <svg xmlns="http://www.w3.org/2000/svg" version="1.1">
-        //             <defs>
-        //                 <filter id="shadowed-goo">
-
-        //                     <feGaussianBlur in="SourceGraphic" result="blur" stdDeviation="10" />
-        //                     <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -7" result="goo" />
-        //                     <feGaussianBlur in="goo" stdDeviation="3" result="shadow" />
-        //                     <feColorMatrix in="shadow" mode="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 -0.2" result="shadow" />
-        //                     <feOffset in="shadow" dx="1" dy="1" result="shadow" />
-        //                     <feComposite in2="shadow" in="goo" result="goo" />
-        //                     <feComposite in2="goo" in="SourceGraphic" result="mix" />
-        //                 </filter>
-        //                 <filter id="goo">
-        //                     <feGaussianBlur in="SourceGraphic" result="blur" stdDeviation="10" />
-        //                     <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -7" result="goo" />
-        //                     <feComposite in2="goo" in="SourceGraphic" result="mix" />
-        //                 </filter>
-        //             </defs>
-        //         </svg>
-        //     </div>
-        // );
         return (
             <div className="flex flex-col h-screen" style={{ marginTop: "80px" }}>
                 <Header points={points} />
@@ -251,10 +216,11 @@ export default function War({ errorServer, war, player, totalPoints }) {
                     ))}
                 </div>
 
-                {isModalOpen && (
-                    <div className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center bg-black bg-opacity-50 text-black overflow-auto">
-                        <div className="bg-white p-4 rounded-lg relative w-3/6 h-3/6">
-                            <h2 className="text-lg font-bold mb-2">Joueurs en {selectedTileX}, {selectedTileY} :</h2>
+                {isModalOpen && selectedTilePlayers && (
+                    <div className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center bg-black bg-opacity-50 text-black z-10">
+                        <div className="bg-white p-4 rounded-lg relative w-3/4 h-3/4 max-h-3/4 overflow-auto">
+                            <h2 className="text-lg font-bold mb-4 text-center">{selectedTileX}, {selectedTileY}</h2>
+                            <h3 className="text-lg mb-2 text-center">{selectedTilePlayers.length > 0 ? "Joueur" : "Aucun joueur"}</h3>
                             <ul>
                                 {selectedTilePlayers.map((playerTile, index) => (
 
@@ -268,20 +234,22 @@ export default function War({ errorServer, war, player, totalPoints }) {
                                             alt={playerTile.name}
                                             className="w-8 h-8 rounded-full mr-2"
 
-                                        /> 
+                                        />
                                         {/* Nom du joueur */}
                                         {playerTile.name}
                                     </li>
                                 ))}
                             </ul>
                             {/* Bouton pour fermer la fenêtre modale */}
-                            <button onClick={closeModal} className="absolute top-0 right-0 -mt-2 -mr-2 px-3 py-1 bg-red-500 text-white rounded-full">X</button>
+                            <div className="flex justify-center absolute bottom-4 left-1/2 transform -translate-x-1/2">
+                                <button onClick={closeModal} className="bg-red-500 text-white py-2 px-4 rounded">Fermer</button>
+                            </div>
                         </div>
                     </div>
                 )}
                 {isModalOpen && selectedPlayer && (
-                    <div className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center bg-black bg-opacity-50 text-black overflow-auto">
-                        <div className="bg-white p-4 rounded-lg relative w-3/6 h-3/6">
+                    <div className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center bg-black bg-opacity-50 text-black z-10">
+                        <div className="bg-white p-4 rounded-lg relative w-3/4 h-3/4 max-h-3/4 overflow-auto">
                             {/* Image du joueur */}
                             <img
                                 src={selectedPlayer.imageUrl}
@@ -291,12 +259,51 @@ export default function War({ errorServer, war, player, totalPoints }) {
                             {/* Nom du joueur */}
                             <h2 className="text-lg font-bold text-center mb-2">{selectedPlayer.name}</h2>
                             {/* Stats du joueur */}
-                            <p className="font-bold text-center">Level : {selectedPlayer.level}</p>
-                            {/* Bouton pour fermer la fenêtre modale */}
-                            <button onClick={closeModal} className="absolute top-0 right-0 -mt-2 -mr-2 px-3 py-1 bg-red-500 text-white rounded-full">X</button>
+                            <p className="font-bold text-center mb-4">Level : {selectedPlayer.level}</p>
+                            <div className="flex justify-center absolute bottom-4 left-1/2 transform -translate-x-1/2">
+                                <button className="bg-green-500 text-white py-2 px-4 rounded mr-4" onClick={closeModal}>Attaquer</button>
+                                {/* Bouton pour fermer la fenêtre modale */}
+                                <button onClick={closeModal} className="bg-red-500 text-white py-2 px-4 rounded">Fermer</button>
+                            </div>
                         </div>
                     </div>
                 )}
+                <nav class="menu flex justify-center">
+                    <input type="checkbox" href="#" className="menu-open" name="menu-open" id="menu-open" />
+                    <label className="menu-open-button" for="menu-open">
+                        <span className="hamburger hamburger-1"></span>
+                        <span className="hamburger hamburger-2"></span>
+                        <span className="hamburger hamburger-3"></span>
+                    </label>
+
+                    <button className="menu-item flex items-center justify-center"> <img src="images/inventory.webp" className="rounded-full h-5/6" alt="Icon 1" /> </button>
+                    <button className="menu-item flex items-center justify-center"> <img src="images/inventory.webp" className="rounded-full h-5/6" alt="Icon 2" /> </button>
+                    <button className="menu-item flex items-center justify-center"> <img src="images/inventory.webp" className="rounded-full h-5/6" alt="Icon 3" /> </button>
+                    <button className="menu-item flex items-center justify-center"> <img src="images/player.webp" className="rounded-full h-5/6" alt="Icon 4" /> </button>
+                    <button className="menu-item flex items-center justify-center"> <img src="images/spell.webp" className="rounded-full h-5/6" alt="Icon 5" /> </button>
+                    <button className="menu-item flex items-center justify-center"> </button>
+
+                </nav>
+
+                <svg xmlns="http://www.w3.org/2000/svg" version="1.1">
+                    <defs>
+                        <filter id="shadowed-goo">
+
+                            <feGaussianBlur in="SourceGraphic" result="blur" stdDeviation="10" />
+                            <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -7" result="goo" />
+                            <feGaussianBlur in="goo" stdDeviation="3" result="shadow" />
+                            <feColorMatrix in="shadow" mode="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 -0.2" result="shadow" />
+                            <feOffset in="shadow" dx="1" dy="1" result="shadow" />
+                            <feComposite in2="shadow" in="goo" result="goo" />
+                            <feComposite in2="goo" in="SourceGraphic" result="mix" />
+                        </filter>
+                        <filter id="goo">
+                            <feGaussianBlur in="SourceGraphic" result="blur" stdDeviation="10" />
+                            <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -7" result="goo" />
+                            <feComposite in2="goo" in="SourceGraphic" result="mix" />
+                        </filter>
+                    </defs>
+                </svg>
             </div>
         );
     }

@@ -140,13 +140,13 @@ h1 {
 }
 
 .menu {
-  position: absolute;
+  position: fixed;
   left: 50%;
   margin-left: -190px;
   padding-top: 20px;
   padding-left: 190px;
-  width: 380px;
-  height: 250px;
+  
+  
   box-sizing: border-box;
   font-size: 20px;
   text-align: left;
@@ -200,14 +200,14 @@ h1 {
 .menu-open:checked ~ .menu-item {
   transition-timing-function: cubic-bezier(0.935, 0, 0.34, 1.33);
 }
-.menu-open:checked ~ .menu-item:nth-child(3) {
+/* .menu-open:checked ~ .menu-item:nth-child(3) {
   transition-duration: 180ms;
   transform: translate3d(0.08361px, -104.99997px, 0);
 }
 .menu-open:checked ~ .menu-item:nth-child(4) {
   transition-duration: 280ms;
   transform: translate3d(90.9466px, -52.47586px, 0);
-}
+} */
 .menu-open:checked ~ .menu-item:nth-child(5) {
   transition-duration: 380ms;
   transform: translate3d(90.9466px, 52.47586px, 0);
@@ -220,10 +220,10 @@ h1 {
   transition-duration: 580ms;
   transform: translate3d(-90.86291px, 52.62064px, 0);
 }
-.menu-open:checked ~ .menu-item:nth-child(8) {
+/* .menu-open:checked ~ .menu-item:nth-child(8) {
   transition-duration: 680ms;
   transform: translate3d(-91.03006px, -52.33095px, 0);
-}
+} */
 .menu-open:checked ~ .menu-item:nth-child(9) {
   transition-duration: 780ms;
   transform: translate3d(-0.25084px, -104.9997px, 0);
@@ -233,8 +233,7 @@ h1 {
   .menu {
     left: 50%;
     margin-left: -150px;
-    width: 300px;
-    height: 200px;
+    
     padding-left: 150px;
   }
 
@@ -257,8 +256,7 @@ h1 {
   .menu {
     left: 50%;
     margin-left: -170px;
-    width: 340px;
-    height: 220px;
+    
     padding-left: 170px;
   }
 }
@@ -268,8 +266,8 @@ h1 {
   .menu {
     left: 50%;
     margin-left: -190px;
-    width: 380px;
-    height: 250px;
+   
     padding-left: 190px;
   }
 }
+ 
