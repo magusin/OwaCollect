@@ -20,6 +20,16 @@ export default function War({ errorServer, war, player, totalPoints }) {
     // Stocker les coordonnées de la tuile sélectionnée
     const [selectedTileX, setSelectedTileX] = useState(null);
     const [selectedTileY, setSelectedTileY] = useState(null);
+    // Déclaration de l'état pour stocker les informations du joueur sélectionné
+    const [selectedPlayer, setSelectedPlayer] = useState(null);
+
+    // Fonction pour gérer le clic sur un joueur de la liste
+    const handleClickPlayer = (player) => {
+        // Mettre à jour l'état avec les informations du joueur sélectionné
+        setSelectedPlayer(player);
+        // Ouvrir la modal
+        setIsModalOpen(true);
+    };
 
     // Gestionnaire d'événements pour le clic sur une tuile
     const handleClickTile = (tile) => {
@@ -37,6 +47,7 @@ export default function War({ errorServer, war, player, totalPoints }) {
     // Fonction pour fermer la fenêtre modale
     const closeModal = () => {
         setIsModalOpen(false);
+        setSelectedPlayer(null);
     };
 
     // Gestionnaire d'événements pour le clic sur une tuile
@@ -241,14 +252,46 @@ export default function War({ errorServer, war, player, totalPoints }) {
                 </div>
 
                 {isModalOpen && (
-                    <div className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center bg-black bg-opacity-50 text-black">
-                        <div className="bg-white p-4 rounded-lg relative">
+                    <div className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center bg-black bg-opacity-50 text-black overflow-auto">
+                        <div className="bg-white p-4 rounded-lg relative w-3/6 h-3/6">
                             <h2 className="text-lg font-bold mb-2">Joueurs en {selectedTileX}, {selectedTileY} :</h2>
                             <ul>
-                                {selectedTilePlayers.map((player, index) => (
-                                    <li key={index}>{player.name}</li>
+                                {selectedTilePlayers.map((playerTile, index) => (
+
+                                    <li key={index}
+                                        className={`flex items-center ${playerTile.petId != player.petId ? "cursor-pointer" : ''}`}
+                                        onClick={playerTile.petId !== player.petId ? () => handleClickPlayer(playerTile) : null}
+                                    >
+                                        {/* Image du joueur */}
+                                        <img
+                                            src={playerTile.imageUrl}
+                                            alt={playerTile.name}
+                                            className="w-8 h-8 rounded-full mr-2"
+
+                                        /> 
+                                        {/* Nom du joueur */}
+                                        {playerTile.name}
+                                    </li>
                                 ))}
                             </ul>
+                            {/* Bouton pour fermer la fenêtre modale */}
+                            <button onClick={closeModal} className="absolute top-0 right-0 -mt-2 -mr-2 px-3 py-1 bg-red-500 text-white rounded-full">X</button>
+                        </div>
+                    </div>
+                )}
+                {isModalOpen && selectedPlayer && (
+                    <div className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center bg-black bg-opacity-50 text-black overflow-auto">
+                        <div className="bg-white p-4 rounded-lg relative w-3/6 h-3/6">
+                            {/* Image du joueur */}
+                            <img
+                                src={selectedPlayer.imageUrl}
+                                alt={selectedPlayer.name}
+                                className="lg:w-32 lg:h-32 md:w-24 md:h-24 h-16 w-16 rounded-full mx-auto mb-2"
+                            />
+                            {/* Nom du joueur */}
+                            <h2 className="text-lg font-bold text-center mb-2">{selectedPlayer.name}</h2>
+                            {/* Stats du joueur */}
+                            <p className="font-bold text-center">Level : {selectedPlayer.level}</p>
                             {/* Bouton pour fermer la fenêtre modale */}
                             <button onClick={closeModal} className="absolute top-0 right-0 -mt-2 -mr-2 px-3 py-1 bg-red-500 text-white rounded-full">X</button>
                         </div>

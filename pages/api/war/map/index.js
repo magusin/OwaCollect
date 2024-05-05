@@ -100,7 +100,15 @@ export default async function handler(req, res) {
                         position_y: { gte: startY, lte: endY },
                     },
                     include: {
-                        warPlayers: true // Inclure les joueurs associés à chaque tuile
+                        warPlayers: {
+                            select: {
+                                petId: true,
+                                name: true,
+                                imageUrl: true,
+                                mapId: true,
+                                level: true
+                            }
+                        }
                     }
                 });
 
