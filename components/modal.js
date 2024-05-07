@@ -48,14 +48,14 @@ export default function Modal ({ sell, buy, setShowModal, handleConfirm, title, 
                     {maxQuantity ? (
                         <button
                         onClick={() => handleConfirm(quantity)}
-                        className="bg-green-500 text-white py-2 px-4 rounded mr-4"
+                        className="bg-blue-500 text-white py-2 px-4 rounded mr-4"
                         >
                         Confirmer
                         </button>
                     ) : (
                         <button
                         onClick={handleConfirm}
-                        className="bg-green-500 text-white py-2 px-4 rounded mr-4"
+                        className="bg-blue-500 text-white py-2 px-4 rounded mr-4"
                         >
                         Confirmer
                         </button>
