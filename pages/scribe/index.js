@@ -103,7 +103,7 @@ export default function Scribe() {
                 <div className="flex flex-col min-h-screen">
                     <Header points={points}/>
                     <div style={{
-                        backgroundImage: `url('/images/paper-scribe.png')`,
+                        backgroundImage: `url('/images/paper-scribe.webp')`,
                         backgroundSize: 'cover',
                         backgroundRepeat: 'no-repeat',
                         width: '100%',

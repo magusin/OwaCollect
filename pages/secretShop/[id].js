@@ -191,7 +191,7 @@ export default function SecretShop({ cards, totalPoints, errorServer }) {
                     <Header points={points} />
                     <div className="flex-grow mt-4 flex flex-col items-center" style={{ marginTop: "80px" }}>
                         <Image
-                            src="/images/salesman.png"
+                            src="/images/salesman.webp"
                             alt="salesman"
                             priority={true}
                             width={600}
