@@ -14,6 +14,10 @@
     --background-start-rgb: 38, 40, 42;
     --background-end-rgb: 0, 0, 0;
   }
+
+  .gray {
+    background-color: #374151
+  }
 } 
 
 .dark-mode {

@@ -258,7 +258,7 @@ export default function Scribe() {
                                     <div className="flex-grow relative">
                                     <ul className="my-4 mx-8 ">
                                         <li className="flex"><p className="mr-4">13-1-26-12</p>  <p className="mr-4">19-3-12</p>  <p className="mr-4">3-5-9-8-19-3-12</p>  <p className="mr-4">5-7</p>  <p className="mr-4">3-12</p>  <p>26-9-25-19-3</p></li>
-                                        <li className="flex"><p className="mr-4">15-9-26-14-19-3</p>  <p className="mr-4">19-3-12</p>  <p className="mr-4">25-1-19-19-9-26-12</p>  <p className="mr-4">8-19-12</p>  <p className="mr-4">24-9-19-19-3-26-5</p></li>
+                                        <li className="flex"><p className="mr-4">15-9-26-14-19-3</p>  <p className="mr-4">19-3-12</p>  <p className="mr-4">25-1-19-19-9-26-12</p>  <p className="mr-4">8-19-12</p>  <p className="mr-4">24-9-19-3-26-5</p></li>
                                         <li className="flex"><p className="mr-4">4-3-12-10-8-4-3</p>  <p className="mr-4">20-1</p>  <p className="mr-4">24-9-8-22</p>  <p className="mr-4">13-3-23-9-19-19-3</p></li>
                                     </ul>
                                     </div>
