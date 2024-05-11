@@ -85,10 +85,6 @@ h1 {
   font-size: 3em;
 }
 
-.menu {
-  filter: url("#goo");
-}
-
 .menu-item, .menu-open-button {
   background: #e91e63;
   border-radius: 100%;
@@ -207,11 +203,11 @@ h1 {
 /* .menu-open:checked ~ .menu-item:nth-child(3) {
   transition-duration: 180ms;
   transform: translate3d(0.08361px, -104.99997px, 0);
-}
+}*/
 .menu-open:checked ~ .menu-item:nth-child(4) {
   transition-duration: 280ms;
-  transform: translate3d(90.9466px, -52.47586px, 0);
-} */
+  transform: translate3d(165.9466px, -12.47586px, 0);
+} 
 .menu-open:checked ~ .menu-item:nth-child(5) {
   transition-duration: 380ms;
   transform: translate3d(90.9466px, 52.47586px, 0);

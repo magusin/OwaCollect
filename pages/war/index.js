@@ -6,23 +6,31 @@ import calculatePoints from "../../utils/calculatePoints";
 import { signOut, useSession } from 'next-auth/react';
 import Header from 'C/header';
 
-export default function War({ errorServer, war, player, totalPoints }) {
+export default function War({ errorServer, war, initialPlayer, totalPoints }) {
     const { data: session, status } = useSession();
     const [windowSize, setWindowSize] = useState({ width: 0, height: 0 });
+    // data game
+    const [player, setPlayer] = useState(initialPlayer);
+    const [coordinates, setCoordinates] = useState(war.allCoordinates);
+    const [tiles, setTiles] = useState(war.tiles);
     // const [width, setWidth] = useState(0);
     const [points, setPoints] = React.useState(totalPoints || 0);
     const [availableDirections, setAvailableDirections] = useState({ up: true, down: true, left: true, right: true });
-    const positionPlayer = player.mapId;
+    const positionPlayer = player.map.id;
+    const positionPlayerX = player.map.position_x;
+    const positionPlayerY = player.map.position_y;
     // État pour contrôler l'ouverture du menu
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [selectedTilePlayers, setSelectedTilePlayers] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [isModalPlayerOpen, setIsModalPlayerOpen] = useState(false);
+    const [isMenuMoveOpen, setIsMenuMoveOpen] = useState(false);
     // Stocker les coordonnées de la tuile sélectionnée
     const [selectedTileX, setSelectedTileX] = useState(null);
     const [selectedTileY, setSelectedTileY] = useState(null);
     // Déclaration de l'état pour stocker les informations du joueur sélectionné
     const [selectedPlayer, setSelectedPlayer] = useState(null);
+    // loading state
+    const [loading, setLoading] = useState(false);
 
     // Fonction pour gérer le clic sur un joueur de la liste
     const handleClickPlayer = (player) => {
@@ -54,22 +62,56 @@ export default function War({ errorServer, war, player, totalPoints }) {
         setSelectedTilePlayers(null);
     };
 
+    // Fonction pour fermer le menu de déplacement
+    const closeMoveMenu = () => {
+        setIsMenuMoveOpen(false);
+    };
+
     // Gestionnaire d'événements pour le clic sur une tuile
-    // const handleClickTile = (position_x, position_y) => {
-    //     // Logique pour déterminer les directions disponibles pour le déplacement du joueur
-    //     const directions = {
-    //         up: position_y > 1,
-    //         down: position_y < 11,
-    //         left: position_x < 1,
-    //         right: position_x < 11
-    //     };
-    //     setAvailableDirections(directions);
-    // };
+    const handleClickMove = () => {
+        // Logique pour déterminer les directions disponibles pour le déplacement du joueur
+        const directions = {
+            up: positionPlayerY > 1,
+            down: positionPlayerY < 11,
+            left: positionPlayerX > 1,
+            right: positionPlayerX < 11
+        };
+        setAvailableDirections(directions);
+        setIsMenuMoveOpen(true);
+    };
 
     // Fonction pour basculer l'état du menu
     const toggleMenu = () => {
         setIsMenuOpen(!isMenuOpen);
     };
+
+    const movePlayer = async (direction) => {
+        setLoading(true);
+        try {
+            const response = await axios.get(`/api/war/map/move`, {
+                params: {
+                    direction,
+                },
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${session.customJwt}`,
+                }
+            });
+            const updatedPlayer = await response.data;
+            console.log(updatedPlayer.updatedUser);
+            setPlayer(updatedPlayer.updatedUser);
+            setTiles(updatedPlayer.tiles);
+            setCoordinates(updatedPlayer.allCoordinates);
+            setIsMenuMoveOpen(false);
+            setIsMenuOpen(true); 
+            // setIsModalOpen(false);
+
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setLoading(false);
+        }
+    }
 
     // useEffect(() => {
     //     function handleResize() {
@@ -106,67 +148,37 @@ export default function War({ errorServer, war, player, totalPoints }) {
         return <div>{errorServer}</div>;
     }
 
+    if (status === "loading" || loading) {
+        return (
+            <>
+            <div className="flex flex-col h-screen" style={{ marginTop: "80px" }}>
+                <Header points={points} />
+                <div className="flex-grow flex justify-center items-center">
+                    <span className="text-center"><svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24"><path fill="#1f2937" d="M12,4a8,8,0,0,1,7.89,6.7A1.53,1.53,0,0,0,21.38,12h0a1.5,1.5,0,0,0,1.48-1.75,11,11,0,0,0-21.72,0A1.5,1.5,0,0,0,2.62,12h0a1.53,1.53,0,0,0,1.49-1.3A8,8,0,0,1,12,4Z"><animateTransform attributeName="transform" dur="0.75s" repeatCount="indefinite" type="rotate" values="0 12 12;360 12 12" /></path></svg></span>
+                </div>
+            </div>
+            </>
+        )
+    }
+
     // Filtrer les tuiles récupérées par le backend pour ne garder que celles qui sont reçues
     const receivedTilesMap = new Map(war.tiles.map(tile => [`${tile.position_x},${tile.position_y}`, tile]));
 
     // Créer une liste de tuiles en incluant les tuiles vides
-    const tilesWithEmpty = war.allCoordinates.map(({ position_x, position_y }) => {
+    const tilesWithEmpty = coordinates.map(({ position_x, position_y }) => {
         const key = `${position_x},${position_y}`;
-        const matchingTile = war.tiles.find(tile => tile.position_x === position_x && tile.position_y === position_y);
+        const matchingTile = tiles.find(tile => tile.position_x === position_x && tile.position_y === position_y);
         return matchingTile || { position_x, position_y, image_url: "", alt: "" };
     });
 
     // Trier les tuiles en fonction de leur position X et Y croissantes
     const sortedTiles = tilesWithEmpty.sort((a, b) => {
-        if (a.position_x !== b.position_x) {
-            return a.position_x - b.position_x;
+        if (a.position_y !== b.position_y) {
+            return a.position_y - b.position_y;
         }
-        return a.position_y - b.position_y;
+        return a.position_x - b.position_x;
     });
     if (session) {
-        // return (
-        //     <div className="flex flex-col h-screen" style={{ marginTop: "80px" }}>
-        //         <Header points={points} />
-        //         <div className="flex justify-center items-center h-screen">
-        //             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        //                 {map.map((tile, index) => (
-        //                     <div key={index} className="absolute cursor-pointer" style={{ left: `${tile.position_x * width - width}px`, top: `${tile.position_y * width - width}px` }}>
-        //                         <Image
-        //                             src={tile.image_url}
-        //                             alt="Map"
-        //                             height={width}
-        //                             width={width}
-        //                             objectFit="cover"
-        //                             onClick={() => handleClickTile(tile.position_x, tile.position_y)}
-        //                         />
-        //                         {tile.position_x === player.position_x && tile.position_y === player.position_y && (
-        //                             <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
-        //                                 <div className="" style={{ height: width * 90 / 100, width: width * 90 / 100 }}>
-        //                                     <Image
-        //                                         src={player.imageUrl}
-        //                                         alt={player.name}
-        //                                         className="rounded-full"
-        //                                         layout="fill"
-
-        //                                     />
-        //                                 </div>
-        //                             </div>
-        //                         )}
-        //                     </div>
-        //                 ))}
-        //             </div>
-
-        //             {Object.entries(availableDirections).map(([direction, available]) => (
-        //                 available && (
-        //                     <div key={direction} className="absolute">
-        //                         <button className="p-2 rounded bg-blue-500 text-white" style={{ top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}>
-        //                             {direction.toUpperCase()}
-        //                         </button>
-        //                     </div>
-        //                 )
-        //             ))}
-
-
         return (
             <div className="flex flex-col h-screen" style={{ marginTop: "80px" }}>
                 <Header points={points} />
@@ -219,7 +231,7 @@ export default function War({ errorServer, war, player, totalPoints }) {
                 {isModalOpen && selectedTilePlayers && (
                     <div className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center bg-black bg-opacity-50 text-black z-10">
                         <div className="bg-white p-4 rounded-lg relative w-3/4 h-3/4 max-h-3/4 overflow-auto">
-                            <h2 className="text-lg font-bold mb-4 text-center">{selectedTileX}, {selectedTileY}</h2>
+                            <h2 className="text-lg font-bold mb-4 text-center">X {selectedTileX}, Y {selectedTileY}</h2>
                             <h3 className="text-lg mb-2 text-center">{selectedTilePlayers.length > 0 ? "Joueur" : "Aucun joueur"}</h3>
                             <ul>
                                 {selectedTilePlayers.map((playerTile, index) => (
@@ -268,16 +280,37 @@ export default function War({ errorServer, war, player, totalPoints }) {
                         </div>
                     </div>
                 )}
-                <nav class="menu flex justify-center">
-                    <input type="checkbox" href="#" className="menu-open" name="menu-open" id="menu-open" />
-                    <label className="menu-open-button" for="menu-open">
+                {isMenuMoveOpen && (
+                    <div className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center bg-black bg-opacity-50 text-black z-10">
+                        <div className="bg-white p-4 rounded-lg relative w-3/4 h-3/4 max-h-3/4 overflow-auto">
+                            <h2 className="text-lg font-bold mb-4 text-center">Déplacer le joueur</h2>
+                            <div className="flex justify-center">
+                                {Object.entries(availableDirections).map(([direction, available]) => (
+                                    available && (
+                                        <button key={direction} className="p-2 rounded bg-blue-500 text-white mr-4" onClick={() => movePlayer(direction)}>
+                                            {direction.toUpperCase()}
+                                        </button>
+                                    )
+                                ))}
+                            </div>
+                            {/* Bouton pour fermer le menu */}
+                            <div className="flex justify-center absolute bottom-4 left-1/2 transform -translate-x-1/2">
+                                <button onClick={closeMoveMenu} className="bg-red-500 text-white py-2 px-4 rounded">Fermer</button>
+                            </div>
+                        </div>
+                    </div>
+                
+                )}
+                <nav className="menu flex justify-center">
+                    <input type="checkbox" href="#" className="menu-open" name="menu-open" id="menu-open" checked={isMenuOpen} onClick={toggleMenu} />
+                    <label className="menu-open-button" htmlFor="menu-open" >
                         <span className="hamburger hamburger-1"></span>
                         <span className="hamburger hamburger-2"></span>
                         <span className="hamburger hamburger-3"></span>
                     </label>
 
                     <button className="menu-item flex items-center justify-center"> <img src="images/inventory.webp" className="rounded-full h-5/6" alt="Icon 1" /> </button>
-                    <button className="menu-item flex items-center justify-center"> <img src="images/inventory.webp" className="rounded-full h-5/6" alt="Icon 2" /> </button>
+                    <button className="menu-item flex items-center justify-center"> <img src="images/run.webp" className="rounded-full h-5/6" alt="Icon 2" onClick={() => handleClickMove()}/> </button>
                     <button className="menu-item flex items-center justify-center"> <img src="images/inventory.webp" className="rounded-full h-5/6" alt="Icon 3" /> </button>
                     <button className="menu-item flex items-center justify-center"> <img src="images/player.webp" className="rounded-full h-5/6" alt="Icon 4" /> </button>
                     <button className="menu-item flex items-center justify-center"> <img src="images/spell.webp" className="rounded-full h-5/6" alt="Icon 5" /> </button>
@@ -330,12 +363,12 @@ export async function getServerSideProps(context) {
                 cookie: context.req.headers.cookie
             }
         });
-        const player = await responseWar.data;
+        const initialPlayer = await responseWar.data;
 
         const response = await axios.get(`${process.env.NEXTAUTH_URL}/api/war/map`, {
             params: {
                 limit: 5,
-                mapId: player.mapId,
+                mapId: initialPlayer.mapId,
             },
             headers: {
                 'Content-Type': 'application/json',
@@ -366,7 +399,7 @@ export async function getServerSideProps(context) {
         const user = await responseUser.data;
         const totalPoints = calculatePoints(user);
         return {
-            props: { war, totalPoints, player },
+            props: { war, totalPoints, initialPlayer },
         };
     } catch (error) {
         if (error.response?.status === 401) {

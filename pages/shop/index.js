@@ -10,7 +10,6 @@ import calculatePoints from '@/utils/calculatePoints';
 import Modal from 'C/modal';
 import Alert from 'C/alert';
 import CardsModal from 'C/cardsModal';
-import { getServerSession } from "next-auth";
 import { getSession } from "next-auth/react";
 import nextAuthOptions from "../../config/nextAuthOptions";
 import Footer from 'C/footer';

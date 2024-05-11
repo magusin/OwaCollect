@@ -65,7 +65,8 @@ export default async function handler(req, res) {
             case 'GET':
                 const existingUser = await prisma.warPlayers.findUnique({
                     where: { petId: decoded.id },
-                });
+                    include: { map: true }
+                });         
                 if (existingUser) {
                     return res.status(200).json(existingUser);
                 } else {
@@ -75,7 +76,8 @@ export default async function handler(req, res) {
                             name: decoded.name,
                             imageUrl: decoded.image,
                             mapId: Math.floor(Math.random() * 121) + 1,
-                        }
+                        },
+                        include: { map: true }
                     });
                     res.status(200).json(createPlayer)
                 }
