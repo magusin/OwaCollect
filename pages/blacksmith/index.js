@@ -209,7 +209,7 @@ export default function Blacksmith({ cards, totalPoints, errorServer }) {
                                             </div>
                                             <button
                                                 onClick={() => handleForgeCard(card.card)}
-                                                className="bg-green-500 text-white py-2 px-4 rounded mt-4">
+                                                className="bg-blue-500 text-white py-2 px-4 rounded mt-4">
                                                 Sacrifier
                                             </button>
                                             {showModal && (

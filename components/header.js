@@ -94,7 +94,7 @@ export default function Header({ points }) {
     <>
       {session ? (
         // if session
-        <header className={`fixed top-0 left-0 right-0 z-10 transition duration-300 ease-in-out font-bold ${isScrolled ? 'backdrop-blur' : ''} ${darkMode ? 'text-black' : 'text-white'} p-4 w-full`} style={{ backgroundColor: isScrolled ? '#00990080' : '#009900' }}>
+        <header className={`fixed top-0 left-0 right-0 z-10 transition duration-300 ease-in-out font-bold ${isScrolled ? 'backdrop-blur' : ''} text-white p-4 w-full`} style={{ backgroundColor: isScrolled ? '#2B2D4280' : '#2B2D42' }}>
           <div className=" flex justify-between items-center">
             <Link href='/' className="flex items-center">
               <span className={`${darkMode ? 'border-black' : 'border-white'} mr-4 border-r-2 pr-2`}>{session.user.name}</span>

@@ -23,6 +23,7 @@ export default function Owarida({ totalPoints, errorServer }) {
     const [code, setCode] = React.useState('');
     const [message, setMessage] = React.useState('');
     const { darkMode } = useDarkMode();
+    const parentDomain = process.env.NEXT_PUBLIC_PARENT;
 
     const handleSubmit = async () => {
         setLoading(true);
@@ -163,7 +164,7 @@ export default function Owarida({ totalPoints, errorServer }) {
                 <div className="flex-grow flex flex-col items-center">
                     <div onClick={handleImageClick}>
                         <Image
-                            src="/images/owarida.png"
+                            src="/images/owarida.webp"
                             alt="OWARIDA ON STREAM"
                             priority={true}
                             width={600}
@@ -175,7 +176,7 @@ export default function Owarida({ totalPoints, errorServer }) {
                         <div className="flex-grow" style={{ width: '70%' }}>
                             <div className="relative" style={{ paddingTop: '58.33%' }}> {/* 700/1200 = 0.5833 */}
                                 <iframe
-                                    src={`https://player.twitch.tv/?channel=owarida&${darkMode ? 'darkpopout&' : ''}parent=owarida.fr`}
+                                    src={`https://player.twitch.tv/?channel=owarida&${darkMode ? 'darkpopout&' : ''}parent=${parentDomain}`}
                                     allowFullScreen={true}
                                     seamless={true}
                                     style={{
@@ -194,7 +195,7 @@ export default function Owarida({ totalPoints, errorServer }) {
                         <div className="flex-grow" style={{ width: '30%' }}>
                             <div className="relative" style={{ paddingTop: '142.85%' }}> {/* 500/350 = 1,4285 */}
                                 <iframe
-                                    src={`https://www.twitch.tv/embed/owarida/chat?${darkMode ? 'darkpopout&' : ''}parent=owarida.fr`}
+                                    src={`https://www.twitch.tv/embed/owarida/chat?${darkMode ? 'darkpopout&' : ''}parent=${parentDomain}`}
                                     style={{
                                         position: 'absolute',
                                         top: 0,
