@@ -16,12 +16,12 @@ const DynamicPlaylist = dynamic(() => import('C/playlist'), {
 
 const playlists = [
   {
-      title: "Playlist 1",
+      title: "Marathon Souls",
       videos: [
           { id: 1, title: "Ep.1❄️MARATHON SOULS ALL BOSSES❄️Les 4 jeux à la ZWEIHANDER", thumbnail: "https://static-cdn.jtvnw.net/cf_vods/dgeft87wbj63p/0c40672f3199c1366590_owarida_11654714028_5539955234//thumb/thumb2107182379-320x180.jpg", videoId: "2107182379", collection: "qCqr4xD3wRdumg", url: "https://www.twitch.tv/videos/2107182379?collection=qCqr4xD3wRdumg" },
           { id: 2, title: "Ep.2❄️MARATHON SOULS ALL BOSSES❄️Les 4 jeux à la ZWEIHANDER", thumbnail: "https://static-cdn.jtvnw.net/cf_vods/d1m7jfoe9zdc1j/0d311347ceed1689cfa4_owarida_76406526343_4564151795//thumb/thumb2107182876-320x180.jpg", videoId: "2107182876", collection: "qCqr4xD3wRdumg", url: "https://www.twitch.tv/videos/2107182876?collection=qCqr4xD3wRdumg" },
           { id: 3, title: "Ep.3❄️MARATHON SOULS ALL BOSSES❄️Les 4 jeux à la ZWEIHANDER", thumbnail: "https://static-cdn.jtvnw.net/cf_vods/dgeft87wbj63p/fd0813b66a9e67529f28_owarida_13316461860_4665390885//thumb/thumb2107183284-320x180.jpg", videoId: "2107183284", collection: "qCqr4xD3wRdumg", url: "https://www.twitch.tv/videos/2107183284?collection=qCqr4xD3wRdumg" },
-          { id: 4, title: "Video 4", thumbnail: "https://static-cdn.jtvnw.net/cf_vods/dgeft87wbj63p/0c40672f3199c1366590_owarida_11654714028_5539955234//thumb/thumb2107182379-320x180.jpg", videoId: "2107182379", collection: "qCqr4xD3wRdumg", url: "https://www.twitch.tv/videos/2107182379?collection=qCqr4xD3wRdumg" }
+          { id: 4, title: "Ep.4❄️MARATHON SOULS ALL BOSSES❄️Les 4 jeux à la ZWEIHANDER", thumbnail: "https://static-cdn.jtvnw.net/cf_vods/dgeft87wbj63p/227aaf440961c5ace33b_owarida_16482795038_4272637631//thumb/thumb2107183740-320x180.jpg", videoId: "2107183740", collection: "qCqr4xD3wRdumg", url: "https://www.twitch.tv/videos/2107183740?collection=qCqr4xD3wRdumg" }
       ]
   },
   {
@@ -70,9 +70,12 @@ export default function Challenges() {
   //   </>
   // );
   return (
+    <>
+    <HeadView />
     <div className="container mx-auto px-4 py-8">
         <h1 className="text-xl font-bold text-center mb-4">Video Playlists</h1>
         <PlaylistsContainer playlists={playlists} />
     </div>
+    </>
 );
 }
