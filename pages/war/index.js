@@ -271,7 +271,16 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                             {/* Nom du joueur */}
                             <h2 className="text-lg font-bold text-center mb-2">{selectedPlayer.name}</h2>
                             {/* Stats du joueur */}
+                            {selectedPlayer.petId != player.petId ? (
+                                <p className="font-bold text-center mb-4">Level : {selectedPlayer.level}</p>
+
+                                ) : (
+                                    <>
                             <p className="font-bold text-center mb-4">Level : {selectedPlayer.level}</p>
+                            <p className="font-bold text-center mb-4">HP : {selectedPlayer.hp}</p>
+                            
+                                    </>
+                                )}
                             <div className="flex justify-center absolute bottom-4 left-1/2 transform -translate-x-1/2">
                                 <button className="bg-green-500 text-white py-2 px-4 rounded mr-4" onClick={closeModal}>Attaquer</button>
                                 {/* Bouton pour fermer la fenêtre modale */}
@@ -312,7 +321,7 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                     <button className="menu-item flex items-center justify-center"> <img src="images/inventory.webp" className="rounded-full h-5/6" alt="Icon 1" /> </button>
                     <button className="menu-item flex items-center justify-center"> <img src="images/run.webp" className="rounded-full h-5/6" alt="Icon 2" onClick={() => handleClickMove()}/> </button>
                     <button className="menu-item flex items-center justify-center"> <img src="images/inventory.webp" className="rounded-full h-5/6" alt="Icon 3" /> </button>
-                    <button className="menu-item flex items-center justify-center"> <img src="images/player.webp" className="rounded-full h-5/6" alt="Icon 4" /> </button>
+                    <button className="menu-item flex items-center justify-center"> <img src="images/player.webp" className="rounded-full h-5/6" alt="Icon 4" onClick={() => handleClickPlayer(player)} /> </button>
                     <button className="menu-item flex items-center justify-center"> <img src="images/spell.webp" className="rounded-full h-5/6" alt="Icon 5" /> </button>
                     <button className="menu-item flex items-center justify-center"> </button>
 
