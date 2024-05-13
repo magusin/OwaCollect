@@ -24,6 +24,7 @@ const Playlist = ({ playlist, index }) => {
             value={searchTerm}
             onChange={e => setSearchTerm(e.target.value)}
             className="mb-4 p-2 border border-gray-300 rounded"
+            style={{color: "#222"}}
           />
           <Swiper
               spaceBetween={20}
@@ -39,7 +40,7 @@ const Playlist = ({ playlist, index }) => {
                           <div className="aspect-w-16 aspect-h-9">
                               <img src={video.thumbnail} alt={video.title} className="object-cover" />
                           </div>
-                          <p className="text-center mt-2">{video.title}</p>
+                          <p className="text-center mt-2" style={{color: "#FF4A1C"}}>{video.title}</p>
                       </a>
                   </SwiperSlide>
               ))}
