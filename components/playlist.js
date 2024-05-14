@@ -40,7 +40,7 @@ const Playlist = ({ playlist, index }) => {
                           <div className="aspect-w-16 aspect-h-9">
                               <img src={video.thumbnail} alt={video.title} className="object-cover" />
                           </div>
-                          <p className="text-center mt-2" style={{color: "#FF4A1C"}}>{video.title}</p>
+                          <p className="text-center mt-2" style={{color: "#FEF6C9", wordWrap: "break-word"}}>{video.title}</p>
                       </a>
                   </SwiperSlide>
               ))}

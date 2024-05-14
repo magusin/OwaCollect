@@ -75,9 +75,9 @@ export default function Challenges() {
     <>
       <HeadView />
       {/* Div englobante avec style complet */}
-      <div className="min-h-screen w-full" style={{ backgroundColor: "#2B2D42", color: "#FEF6C9" }}>
+      <div className="min-h-screen w-full" style={{ backgroundColor: "#2B2D42", color: "#FF4A1C" }}>
         <div className="container mx-auto px-4 py-8">
-          <h1 className="text-xl font-bold text-center mb-4">Video Playlists</h1>
+          <h1 className="text-2xl font-bold text-center mb-4 uppercase">Video Playlists</h1>
           <PlaylistsContainer playlists={playlists} />
         </div>
       </div>
