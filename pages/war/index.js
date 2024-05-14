@@ -98,7 +98,6 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                 }
             });
             const updatedPlayer = await response.data;
-            console.log(updatedPlayer.updatedUser);
             setPlayer(updatedPlayer.updatedUser);
             setTiles(updatedPlayer.tiles);
             setCoordinates(updatedPlayer.allCoordinates);
