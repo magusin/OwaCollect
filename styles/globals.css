@@ -143,5 +143,5 @@ body {
 } */
 
 .swiper-button-prev {
-  z-index: 100;
+  z-index: 90;
 }
