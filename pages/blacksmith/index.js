@@ -232,7 +232,7 @@ export default function Blacksmith({ cards, totalPoints, errorServer }) {
                         </div>
                     </div>
                     {selectedCard && (
-                        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 px-4 py-6 overflow-y-auto h-full w-full">
+                        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-10 px-4 py-6 overflow-y-auto h-full w-full">
                             <div className="flex flex-wrap flex-row p-4 h-full w-full items-center justify-center md:flex-col">
                                 {/* Image card */}
                                 <div className="relative h-full" style={{ width: '100%', maxWidth: '100vh' }}>

@@ -248,7 +248,7 @@ export default function SecretShop({ cards, totalPoints, errorServer }) {
                         ))}
                     </div>
                     {selectedCard && (
-                        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 px-4 py-6 overflow-y-auto h-full w-full">
+                        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-20 px-4 py-6 overflow-y-auto h-full w-full">
                         <div className="flex flex-wrap flex-row p-4 h-full w-full items-center justify-center md:flex-col">
                             {/* Image card */}
                             <div className="relative h-full" style={{ width: '100%', maxWidth: '100vh' }}>
@@ -290,7 +290,7 @@ export default function SecretShop({ cards, totalPoints, errorServer }) {
                     <Header points={points} />
                     <div className="flex-grow items-start justify-center" >
                         <div className="relative w-full h-screen">
-                        <button className='absolute z-50 right-5 top-1/2 -translate-y-1/2 bg-white bg-opacity-20 hover:bg-opacity-50 md:text-xl text-white font-bold py-2 px-4 rounded-full'
+                        <button className='absolute z-20 right-5 top-1/2 -translate-y-1/2 bg-white bg-opacity-20 hover:bg-opacity-50 md:text-xl text-white font-bold py-2 px-4 rounded-full'
                     onClick={() => router.push('/scribe')}>Scribe</button>
                             <Image
                                 src="/images/closed.png"
