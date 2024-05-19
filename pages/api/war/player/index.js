@@ -63,28 +63,59 @@ export default async function handler(req, res) {
         await runMiddleware(req, res, corsMiddleware)
         switch (req.method) {
             case 'GET':
-                const existingUser = await prisma.warPlayers.findUnique({
-                    where: { petId: decoded.id },
-                    include: { map: true }
-                });         
-                if (existingUser) {
-                    return res.status(200).json(existingUser);
-                } else {
-                    const createPlayer = await prisma.warPlayers.create({
-                        data : {
-                            petId: decoded.id,
-                            name: decoded.name,
-                            imageUrl: decoded.image,
-                            mapId: Math.floor(Math.random() * 121) + 1,
-                        },
-                        include: { map: true }
-                    });
-                    res.status(200).json(createPlayer)
+        try {
+            const existingUser = await prisma.warPlayers.findUnique({
+                where: { petId: decoded.id },
+                include: {
+                    map: true,
+                    warPlayerSkills: {
+                        include: { warSkills: true }
+                    }
                 }
-                break
-            default:
-                res.status(405).end(`Method ${req.method} Not Allowed`)
+            });
+
+            if (existingUser) {
+                return res.status(200).json(existingUser);
+            } else {
+                // Créer le joueur
+                const createPlayer = await prisma.warPlayers.create({
+                    data: {
+                        petId: decoded.id,
+                        name: decoded.name,
+                        imageUrl: decoded.image,
+                        mapId: Math.floor(Math.random() * 121) + 1
+                    }
+                });
+
+                // Ajouter une compétence initiale pour le joueur
+                await prisma.warPlayerSkills.create({
+                    data: {
+                        petId: createPlayer.petId,
+                        skillId: 1, // Supposons que l'ID de la compétence initiale est 1
+                        createdAt: new Date() // Date de création de l'association
+                    }
+                });
+
+                // Récupérer le joueur avec ses compétences mises à jour
+                const newPlayer = await prisma.warPlayers.findUnique({
+                    where: { petId: decoded.id },
+                    include: {
+                        map: true,
+                        warPlayerSkills: {
+                            include: { warSkills: true }
+                        }
+                    }
+                });
+
+                return res.status(200).json(newPlayer);
+            }
+        } catch (error) {
+            console.error(error);
+            return res.status(500).json({ error: "Internal Server Error" });
         }
+    default:
+        res.status(405).end(`Method ${req.method} Not Allowed`);
+}
     } catch (err) { onError(err, res) }
     finally { await prisma.$disconnect() }
 }

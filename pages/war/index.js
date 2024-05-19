@@ -43,6 +43,8 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
         setIsModalOpen(true);
     };
 
+    console.log("player", player)
+
     // Gestionnaire d'événements pour le clic sur une tuile
     const handleClickTile = (tile) => {
         setIsModalOpen(false);

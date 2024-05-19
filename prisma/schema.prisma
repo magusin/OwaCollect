@@ -183,17 +183,48 @@ model map {
 }
 
 model warPlayers {
-  petId    String  @id @db.VarChar(255)
-  name     String? @db.VarChar(255)
-  imageUrl String? @db.VarChar(255)
-  mapId    Int?
-  str      Int     @default(0)
-  hit      Int     @default(0)
-  level    Int     @default(1)
-  xp       Int     @default(0)
-  hp       Int     @default(50)
-  pets     pets    @relation(fields: [petId], references: [userId], onDelete: Cascade, map: "war_ibfk_1")
-  map      map?    @relation(fields: [mapId], references: [id], onDelete: Cascade, map: "warPlayers_ibfk_2")
+  petId           String            @id @db.VarChar(255)
+  name            String?           @db.VarChar(255)
+  imageUrl        String?           @db.VarChar(255)
+  mapId           Int?
+  str             Int               @default(0)
+  hit             Int               @default(0)
+  level           Int               @default(1)
+  xp              Int               @default(0)
+  hp              Int               @default(50)
+  hpMax           Int               @default(50)
+  dex             Int               @default(0)
+  intel           Int               @default(0)
+  def             Int               @default(1)
+  defM            Int               @default(1)
+  warPlayerSkills warPlayerSkills[]
+  pets            pets              @relation(fields: [petId], references: [userId], onDelete: Cascade, map: "war_ibfk_1")
+  map             map?              @relation(fields: [mapId], references: [id], onDelete: Cascade, map: "warPlayers_ibfk_2")
 
   @@index([mapId], map: "warPlayers_ibfk_2")
+}
+
+model warPlayerSkills {
+  petId      String     @db.VarChar(255)
+  skillId    Int
+  createdAt  DateTime   @db.Date
+  warPlayers warPlayers @relation(fields: [petId], references: [petId], onDelete: NoAction, onUpdate: NoAction, map: "warPlayerSkills_ibfk_1")
+  warSkills  warSkills  @relation(fields: [skillId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "warPlayerSkills_ibfk_2")
+
+  @@id([petId, skillId])
+  @@index([skillId], map: "skillId")
+}
+
+model warSkills {
+  id              Int               @id @default(autoincrement())
+  name            String            @db.VarChar(255)
+  hit             Int
+  description     String            @db.VarChar(255)
+  dmgMin          Int
+  dmgMax          Int
+  type            String            @db.VarChar(55)
+  cost            Int
+  dist            Int
+  divider         Int
+  warPlayerSkills warPlayerSkills[]
 }

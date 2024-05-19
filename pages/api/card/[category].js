@@ -61,7 +61,8 @@ export default async function handler(req, res) {
         if (!decoded) {
             return res.status(401).json({ message: 'Token invalide ou expiré' });
         }
-        if (typeof req.query.category !== 'string') {
+
+        if (typeof req.query.category !== 'string' || !req.query.category) {
             return res.status(400).json({ message: 'Catégorie invalide' });
         }
         await runMiddleware(req, res, corsMiddleware)
