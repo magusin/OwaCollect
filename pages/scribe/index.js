@@ -314,9 +314,9 @@ export default function Scribe() {
                                         <li>C'est une femme qui double Bart.</li>
                                         <li>Alimenter un feu avec son corps est déconseillé.</li>
                                         <li>Saviez-vous que Mewtwo est enfermé dans la zone 51 ?</li>
-                                        <li>Si une technologie est suffisamment avancée elle pourrait être indiscernable de la magie.</li>
-                                        <li>Imaginez qu'il y est un code disséminé dans plusieurs pages pour accéder au marchand secret ...</li>
-                                        <li>N'oubliez pas de retirer l'écran devant le ciel avant d'aller dormir nous pourrions enfin voir la vraie lune.</li>
+                                        <li>Si une technologie est suffisamment avancée, elle pourrait être indiscernable de la magie.</li>
+                                        <li>Imaginez qu'il y ait un code disséminé dans plusieurs pages pour accéder au marchand secret...</li>
+                                        <li>N'oubliez pas de retirer l'écran devant le ciel avant d'aller dormir, nous pourrions enfin voir la vraie lune.</li>
                                     </ul>
                                     </div>
                                     <button style={{ fontFamily: 'Style Script, cursive' }} className='font-bold text-xl p-2 rounded-lg mt-4' onClick={() => setPage(0)} >Retourner aux notes</button>
