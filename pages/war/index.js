@@ -7,6 +7,8 @@ import { signOut, useSession } from 'next-auth/react';
 import Header from 'C/header';
 import Head from 'next/head';
 import Script from 'next/script'
+import calculateDmg from "../../utils/calculateDmg";
+
 
 export default function War({ errorServer, war, initialPlayer, totalPoints }) {
     const { data: session, status } = useSession();
@@ -21,11 +23,13 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
     const positionPlayer = player.map.id;
     const positionPlayerX = player.map.position_x;
     const positionPlayerY = player.map.position_y;
+    const playerSkill = player.warPlayerSkills;
     // État pour contrôler l'ouverture du menu
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [selectedTilePlayers, setSelectedTilePlayers] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isMenuMoveOpen, setIsMenuMoveOpen] = useState(false);
+    const [isModalSpell, setIsModalSpell] = useState(false);
     // Stocker les coordonnées de la tuile sélectionnée
     const [selectedTileX, setSelectedTileX] = useState(null);
     const [selectedTileY, setSelectedTileY] = useState(null);
@@ -33,7 +37,11 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
     const [selectedPlayer, setSelectedPlayer] = useState(null);
     // loading state
     const [loading, setLoading] = useState(false);
-
+    // state for active and passive skills
+    const [activeOpen, setActiveOpen] = useState(false);
+    const [passiveOpen, setPassiveOpen] = useState(false);
+    // Tooltip state
+    const [hoveredSkill, setHoveredSkill] = useState(null);
     // Fonction pour gérer le clic sur un joueur de la liste
     const handleClickPlayer = (player) => {
         // setSelectedTilePlayers(null)
@@ -43,7 +51,20 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
         setIsModalOpen(true);
     };
 
-    console.log("player", player)
+    const handleClickSpell = () => {
+        setIsModalSpell(true);
+    }
+
+
+    const handleMouseEnter = (skill) => {
+        setHoveredSkill(skill);
+    };
+
+    const handleMouseLeave = () => {
+        setHoveredSkill(null);
+    };
+
+    console.log("playerSkill", playerSkill)
 
     // Gestionnaire d'événements pour le clic sur une tuile
     const handleClickTile = (tile) => {
@@ -75,6 +96,11 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
     const closeMoveMenu = () => {
         setIsMenuMoveOpen(false);
     };
+
+    // Fonction pour fermer la fenêtre modale de compétences
+    const closeModalSpell = () => {
+        setIsModalSpell(false);
+    }
 
     // Gestionnaire d'événements pour le clic sur une tuile
     const handleClickMove = () => {
@@ -120,37 +146,6 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
             setLoading(false);
         }
     }
-
-    // useEffect(() => {
-    //     function handleResize() {
-    //         setWindowSize({ width: window.innerWidth, height: window.innerHeight });
-    //     }
-
-    //     window.addEventListener('resize', handleResize);
-
-    //     // Au montage du composant, on récupère la taille de la fenêtre
-    //     handleResize();
-
-    //     // Nettoyage de l'écouteur d'événement au démontage du composant
-    //     return () => window.removeEventListener('resize', handleResize);
-    // }, []);
-
-    // Utiliser useEffect pour mettre à jour la largeur de la tuile lorsque la taille de la fenêtre change
-    // useEffect(() => {
-    //     if (windowSize.width < 640) {
-    //         setWidth(30);
-    //     } else if (windowSize.width < 768 && windowSize.width >= 640) {
-    //         setWidth(50);
-    //     } else if (windowSize.width < 1024 && windowSize.width >= 768) {
-    //         setWidth(60);
-    //     } else if (windowSize.width >= 1024 && windowSize.width < 1280) {
-    //         setWidth(80);
-    //     } else if (windowSize.width >= 1280 && windowSize.width < 1536) {
-    //         setWidth(100);
-    //     } else {
-    //         setWidth(120);
-    //     }
-    // }, [windowSize.width]);
 
     function HeadView() {
         return (
@@ -360,6 +355,82 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                             </div>
                         </div>
                     )}
+            {isModalSpell && (
+                <div className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center bg-black bg-opacity-50 text-black z-10">
+                    <div className="bg-white p-4 rounded-lg relative w-3/4 h-3/4 max-h-3/4 overflow-auto flex flex-col justify-between">
+                        <h2 className="text-2xl font-bold mb-8 text-center">Compétences</h2>
+                        <div className="flex flex-col items-center space-y-4 mb-8 w-full">
+                            {/* Liste des sorts actifs */}
+                            <div className="w-full">
+                                <button
+                                    className="w-full bg-blue-500 text-white py-2 px-4 rounded text-xl mb-2"
+                                    onClick={() => setActiveOpen(!activeOpen)}
+                                >
+                                    {activeOpen ? 'Cacher' : 'Afficher'} les sorts actifs
+                                </button>
+                                {activeOpen && (
+                                    <ul className="list-disc list-inside w-full">
+                                        {playerSkill
+                                            .filter(skill => skill.warSkills.type === 'actif')
+                                            .map((skill, index) => (
+                                                <li 
+                                                    key={index} 
+                                                    className="mt-2 group relative cursor-pointer"
+                                                    onMouseEnter={() => handleMouseEnter(skill)}
+                                                    onMouseLeave={handleMouseLeave}
+                                                >
+                                                    <span className="font-bold">{skill.warSkills.name}</span>: ({skill.warSkills.cost} PA) <span className="text-red-800">{calculateDmg(player, skill.warSkills.stat, skill.warSkills.dmgMin, skill.warSkills.divider)} - {calculateDmg(player, skill.warSkills.stat, skill.warSkills.dmgMax, skill.warSkills.divider)}</span>
+                                                    {hoveredSkill === skill && (
+                                                        <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 p-2 bg-gray-700 text-white text-xs rounded w-max max-w-xs md:max-w-md lg:max-w-lg">
+                                                            {skill.warSkills.description}
+                                                        </div>
+                                                    )}
+                                                </li>
+                                            ))}
+                                    </ul>
+                                )}
+                            </div>
+
+                            {/* Liste des sorts passifs */}
+                            <div className="w-full">
+                                <button
+                                    className="w-full bg-green-500 text-white py-2 px-4 rounded text-xl mb-2"
+                                    onClick={() => setPassiveOpen(!passiveOpen)}
+                                >
+                                    {passiveOpen ? 'Cacher' : 'Afficher'} les sorts passifs
+                                </button>
+                                {passiveOpen && (
+                                    <ul className="list-disc list-inside w-full">
+                                        {playerSkill
+                                            .filter(skill => skill.warSkills.type === 'passif')
+                                            .map((skill, index) => (
+                                                <li 
+                                                    key={index} 
+                                                    className="mt-2 group relative cursor-pointer"
+                                                    onMouseEnter={() => handleMouseEnter(skill)}
+                                                    onMouseLeave={handleMouseLeave}
+                                                >
+                                                    <span className="font-bold">{skill.warSkills.name}</span>: ({skill.warSkills.cost} PA) <span className="text-red-800">{calculateDmg(player, skill.warSkills.stat, skill.warSkills.dmgMin, skill.warSkills.divider)} - {calculateDmg(player, skill.warSkills.stat, skill.warSkills.dmgMax, skill.warSkills.divider)}</span>
+                                                    {hoveredSkill === skill && (
+                                                        <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 p-2 bg-gray-700 text-white text-xs rounded w-max max-w-xs md:max-w-md lg:max-w-lg">
+                                                            {skill.warSkills.description}
+                                                        </div>
+                                                    )}
+                                                </li>
+                                            ))}
+                                    </ul>
+                                )}
+                            </div>
+                        </div>
+                        {/* Bouton pour fermer le menu */}
+                        <div className="relative w-full mt-4">
+                            <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2">
+                                <button onClick={closeModalSpell} className="bg-red-500 text-white py-2 px-4 rounded text-xl">Fermer</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
                     <nav className="menu flex justify-center">
                         <input type="checkbox" href="#" className="menu-open" name="menu-open" onChange={toggleMenu} id="menu-open" checked={isMenuOpen} />
                         <label className="menu-open-button" htmlFor="menu-open" >
@@ -372,7 +443,7 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                         <button className="menu-item flex items-center justify-center"> <img src="images/run.webp" className="rounded-full h-5/6" alt="Icon 2" onClick={() => handleClickMove()} /> </button>
                         <button className="menu-item flex items-center justify-center"> <img src="images/inventory.webp" className="rounded-full h-5/6" alt="Icon 3" /> </button>
                         <button className="menu-item flex items-center justify-center"> <img src="images/player.webp" className="rounded-full h-5/6" alt="Icon 4" onClick={() => handleClickPlayer(player)} /> </button>
-                        <button className="menu-item flex items-center justify-center"> <img src="images/spell.webp" className="rounded-full h-5/6" alt="Icon 5" /> </button>
+                        <button className="menu-item flex items-center justify-center"> <img src="images/spell.webp" className="rounded-full h-5/6" alt="Icon 5" onClick={() => handleClickSpell()} /> </button>
                         <button className="menu-item flex items-center justify-center"> </button>
 
                     </nav>

@@ -91,8 +91,8 @@ export default async function handler(req, res) {
                 await prisma.warPlayerSkills.create({
                     data: {
                         petId: createPlayer.petId,
-                        skillId: 1, // Supposons que l'ID de la compétence initiale est 1
-                        createdAt: new Date() // Date de création de l'association
+                        skillId: 1,
+                        createdAt: new Date() // Date de création
                     }
                 });
 

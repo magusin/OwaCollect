@@ -197,6 +197,8 @@ model warPlayers {
   intel           Int               @default(0)
   def             Int               @default(1)
   defM            Int               @default(1)
+  acu             Int               @default(0)
+  isDied          DateTime?         @db.Date
   warPlayerSkills warPlayerSkills[]
   pets            pets              @relation(fields: [petId], references: [userId], onDelete: Cascade, map: "war_ibfk_1")
   map             map?              @relation(fields: [mapId], references: [id], onDelete: Cascade, map: "warPlayers_ibfk_2")
@@ -208,11 +210,11 @@ model warPlayerSkills {
   petId      String     @db.VarChar(255)
   skillId    Int
   createdAt  DateTime   @db.Date
-  warPlayers warPlayers @relation(fields: [petId], references: [petId], onDelete: NoAction, onUpdate: NoAction, map: "warPlayerSkills_ibfk_1")
-  warSkills  warSkills  @relation(fields: [skillId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "warPlayerSkills_ibfk_2")
+  warPlayers warPlayers @relation(fields: [petId], references: [petId], onDelete: Cascade, map: "warPlayerSkills_ibfk_1")
+  warSkills  warSkills  @relation(fields: [skillId], references: [id], onDelete: Cascade, map: "warPlayerSkills_ibfk_2")
 
   @@id([petId, skillId])
-  @@index([skillId], map: "skillId")
+  @@index([skillId], map: "warPlayerSkills_ibfk_2")
 }
 
 model warSkills {
@@ -226,5 +228,7 @@ model warSkills {
   cost            Int
   dist            Int
   divider         Int
+  stat            String            @db.VarChar(55)
+  img             String            @db.VarChar(255)
   warPlayerSkills warPlayerSkills[]
 }
