@@ -44,7 +44,7 @@ export default function Login() {
               router.push('/');
             }, 2000);
           } else {
-            setError('Erreur lors de la récupération des données utilisateur. ' + error.response?.data?.message || error.message);
+            setError('Erreur lors de la récupération des données utilisateur. ' + error.message);
           }
         } finally {
           setLoading(false);
