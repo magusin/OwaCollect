@@ -369,25 +369,39 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                                     {activeOpen ? 'Cacher' : 'Afficher'} les sorts actifs
                                 </button>
                                 {activeOpen && (
-                                    <ul className="list-disc list-inside w-full">
-                                        {playerSkill
-                                            .filter(skill => skill.warSkills.type === 'actif')
-                                            .map((skill, index) => (
-                                                <li 
-                                                    key={index} 
-                                                    className="mt-2 group relative cursor-pointer"
-                                                    onMouseEnter={() => handleMouseEnter(skill)}
-                                                    onMouseLeave={handleMouseLeave}
-                                                >
-                                                    <span className="font-bold">{skill.warSkills.name}</span>: ({skill.warSkills.cost} PA) <span className="text-red-800">{calculateDmg(player, skill.warSkills.stat, skill.warSkills.dmgMin, skill.warSkills.divider)} - {calculateDmg(player, skill.warSkills.stat, skill.warSkills.dmgMax, skill.warSkills.divider)}</span>
-                                                    {hoveredSkill === skill && (
-                                                        <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 p-2 bg-gray-700 text-white text-xs rounded w-max max-w-xs md:max-w-md lg:max-w-lg">
-                                                            {skill.warSkills.description}
-                                                        </div>
-                                                    )}
-                                                </li>
-                                            ))}
-                                    </ul>
+                                    <ul className="flex flex-col md:flex-row md:flex-wrap">
+                                    {playerSkill
+                                        .filter(skill => skill.warSkills.type === 'actif')
+                                        .map((skill, index) => (
+                                            <li
+                                                key={index}
+                                                className="mt-2 group relative cursor-pointer md:w-1/2 lg:w-1/3 xl:w-1/4 p-2"
+                                                onMouseEnter={() => handleMouseEnter(skill)}
+                                                onMouseLeave={handleMouseLeave}
+                                            >
+                                                <div className="flex items-center">
+                                                    <div className="relative w-6 h-6 mr-2">
+                                                        <Image 
+                                                            src={skill.warSkills.img} 
+                                                            alt={`${skill.warSkills.name} icon`} 
+                                                            layout="fill"
+                                                            objectFit="contain"
+                                                        />
+                                                    </div>
+                                                    <span className="font-bold">{skill.warSkills.name}</span>: ({skill.warSkills.cost} PA) 
+                                                    <span className="text-red-800 ml-1">
+                                                        {calculateDmg(player, skill.warSkills.stat, skill.warSkills.dmgMin, skill.warSkills.divider)} - 
+                                                        {calculateDmg(player, skill.warSkills.stat, skill.warSkills.dmgMax, skill.warSkills.divider)}
+                                                    </span>
+                                                </div>
+                                                {hoveredSkill === skill && (
+                                                    <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 p-2 bg-gray-700 text-white text-xs rounded w-max max-w-xs md:max-w-md lg:max-w-lg">
+                                                        {skill.warSkills.description}
+                                                    </div>
+                                                )}
+                                            </li>
+                                        ))}
+                                </ul>
                                 )}
                             </div>
 
@@ -498,7 +512,6 @@ export async function getServerSideProps(context) {
 
         const response = await axios.get(`${process.env.NEXTAUTH_URL}/api/war/map`, {
             params: {
-                limit: 5,
                 mapId: initialPlayer.mapId,
             },
             headers: {

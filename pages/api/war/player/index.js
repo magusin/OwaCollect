@@ -6,7 +6,7 @@ import { getToken } from "next-auth/jwt";
 // Initialiser le midleware Cors
 const allowedOrigins = [process.env.NEXTAUTH_URL]
 const corsOptions = {
-    methods: ['POST', 'HEAD'],
+    methods: ['GET', 'HEAD'],
     origin: (origin, callback) => {
         if (!origin || allowedOrigins.indexOf(origin) !== -1) {
             callback(null, true);
