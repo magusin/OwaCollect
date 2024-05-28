@@ -97,18 +97,24 @@ export default function Alley() {
     return (
         <>
             <HeadView />
-        <div className="flex flex-col h-screen">
-            <Header points={points}/>
-            <div className="relative flex-grow flex justify-center">
-                <button className='absolute z-10 right-5 top-1/2 -translate-y-1/2 bg-white bg-opacity-20 hover:bg-opacity-50 md:text-xl text-white font-bold py-2 px-4 rounded-full'
-                    onClick={handleRandomNavigation}>Marchand</button>
-                {/* Pour centrer à gauche */}
-                <button className='absolute z-10 left-5 top-1/2 -translate-y-1/2 bg-white bg-opacity-20 hover:bg-opacity-50 md:text-xl text-white font-bold py-2 px-4 rounded-full'
-                    onClick={() => router.push('/blacksmith')}>Forgeron</button>
-                <Image src="/images/alley.webp" alt="Alley 9-3/4" fill priority={true} />
+            <div className="flex flex-col h-screen">
+                <Header points={points} />
+                <div className="relative flex-grow flex justify-center">
+                    <button className='absolute z-50 right-5 top-1/2 -translate-y-1/2 bg-white bg-opacity-20 hover:bg-opacity-50 md:text-xl text-white font-bold py-2 px-4 rounded-full'
+                        onClick={handleRandomNavigation}>Marchand</button>
+                    {/* Pour centrer à gauche */}
+                    <button className='absolute z-50 left-5 top-1/2 -translate-y-1/2 bg-white bg-opacity-20 hover:bg-opacity-50 md:text-xl text-white font-bold py-2 px-4 rounded-full'
+                        onClick={() => router.push('/blacksmith')}>Forgeron</button>
+                    <Image src="/images/alley.webp"
+                        alt="Alley 9-3/4"
+                        layout="responsive"
+                        objectFit="contain"
+                        width={1920}
+                        height={1080}
+                        priority />
+                </div>
+                <Footer />
             </div>
-            <Footer />
-        </div>
         </>
     );
 }

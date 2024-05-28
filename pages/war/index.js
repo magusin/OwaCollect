@@ -512,6 +512,7 @@ export async function getServerSideProps(context) {
 
         const response = await axios.get(`${process.env.NEXTAUTH_URL}/api/war/map`, {
             params: {
+                limit: 5,
                 mapId: initialPlayer.mapId,
             },
             headers: {
@@ -521,6 +522,7 @@ export async function getServerSideProps(context) {
             }
         })
         const war = await response.data;
+        console.log("war", war)
         const timestamp = new Date().getTime().toString();
         const signature = await axios.post(`${process.env.NEXTAUTH_URL}/api/generateSignature`, {
             timestamp: timestamp

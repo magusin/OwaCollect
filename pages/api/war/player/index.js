@@ -73,6 +73,7 @@ export default async function handler(req, res) {
                     }
                 }
             });
+          
 
             if (existingUser) {
                 return res.status(200).json(existingUser);

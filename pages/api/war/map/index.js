@@ -66,9 +66,9 @@ export default async function handler(req, res) {
                 const { limit, mapId } = req.query;
 
                 // // Vérifier si les paramètres de requête sont présents
-                // if (!limit || !mapId) {
-                //     return res.status(400).json({ message: 'Les paramètres de requête sont manquants' });
-                // }
+                if (!limit || !mapId) {
+                    return res.status(400).json({ message: 'Les paramètres de requête sont manquants' });
+                }
 
                 // Convertir les valeurs des paramètres en nombres
                 const limitValue = parseInt(limit);
