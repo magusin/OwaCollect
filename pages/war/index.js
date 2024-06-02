@@ -8,6 +8,7 @@ import Header from 'C/header';
 import Head from 'next/head';
 import Script from 'next/script'
 import calculateDmg from "../../utils/calculateDmg";
+import calculateDef from "../../utils/calculateDef";
 
 
 export default function War({ errorServer, war, initialPlayer, totalPoints }) {
@@ -18,18 +19,19 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
     const [coordinates, setCoordinates] = useState(war.allCoordinates);
     const [tiles, setTiles] = useState(war.tiles);
     // const [width, setWidth] = useState(0);
-    const [points, setPoints] = React.useState(totalPoints || 0);
+    const [points, setPoints] = useState(totalPoints || 0);
     const [availableDirections, setAvailableDirections] = useState({ up: true, down: true, left: true, right: true });
     const positionPlayer = player.map.id;
     const positionPlayerX = player.map.position_x;
     const positionPlayerY = player.map.position_y;
     const playerSkill = player.warPlayerSkills;
-    // État pour contrôler l'ouverture du menu
+    // État pour contrôler l'ouverture des menus
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [selectedTilePlayers, setSelectedTilePlayers] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isMenuMoveOpen, setIsMenuMoveOpen] = useState(false);
     const [isModalSpell, setIsModalSpell] = useState(false);
+    const [isModalFight, setIsModalFight] = useState(false);
     // Stocker les coordonnées de la tuile sélectionnée
     const [selectedTileX, setSelectedTileX] = useState(null);
     const [selectedTileY, setSelectedTileY] = useState(null);
@@ -42,6 +44,8 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
     const [passiveOpen, setPassiveOpen] = useState(false);
     // Tooltip state
     const [hoveredSkill, setHoveredSkill] = useState(null);
+    // Déclaration de l'état du spell sélectionné pour l'attaque
+    const [selectedFightSpell, setSelectedFightSpell] = useState(null);
     // Fonction pour gérer le clic sur un joueur de la liste
     const handleClickPlayer = (player) => {
         // setSelectedTilePlayers(null)
@@ -51,10 +55,17 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
         setIsModalOpen(true);
     };
 
+    const handleSelectFightSpell = (spell) => {
+        setIsModalFight(false);
+    }
+
+    const handleClickFight = () => {
+        setIsModalFight(true);
+    }
+
     const handleClickSpell = () => {
         setIsModalSpell(true);
     }
-
 
     const handleMouseEnter = (skill) => {
         setHoveredSkill(skill);
@@ -63,8 +74,6 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
     const handleMouseLeave = () => {
         setHoveredSkill(null);
     };
-
-    console.log("playerSkill", playerSkill)
 
     // Gestionnaire d'événements pour le clic sur une tuile
     const handleClickTile = (tile) => {
@@ -100,6 +109,12 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
     // Fonction pour fermer la fenêtre modale de compétences
     const closeModalSpell = () => {
         setIsModalSpell(false);
+    }
+
+    // Fonction pour fermer la fenêtre modale de combat
+    const closeModalFight = () => {
+        setIsModalFight(false);
+        setSelectedFightSpell(null);
     }
 
     // Gestionnaire d'événements pour le clic sur une tuile
@@ -140,6 +155,30 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
             setIsMenuOpen(true);
             // setIsModalOpen(false);
 
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    const attackPlayer = async (opponentId, spellId) => {
+        setLoading(true);
+        try {
+            const response = await axios.post(`/api/war/player/fight`, {
+                opponentId,
+            }, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${session.customJwt}`,
+                }
+            });
+            const updatedPlayer = await response.data;
+            console.log("responseData", updatedPlayer)
+            // setPlayer(updatedPlayer.updatedUser);
+            // setTiles(updatedPlayer.tiles);
+            // setCoordinates(updatedPlayer.allCoordinates);
+            // setIsModalOpen(false);
         } catch (error) {
             console.error(error);
         } finally {
@@ -276,7 +315,7 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                             </div>
                         </div>
                     )}
-                    {isModalOpen && selectedPlayer && (
+                    {isModalOpen && selectedPlayer && isModalFight === false && (
                         <div className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center bg-black bg-opacity-50 text-black z-10">
                             <div className="bg-white p-4 rounded-lg relative w-3/4 h-3/4 max-h-3/4 overflow-auto">
                                 {/* Image du joueur */}
@@ -286,22 +325,121 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                                     className="lg:w-32 lg:h-32 md:w-24 md:h-24 h-16 w-16 rounded-full mx-auto mb-2"
                                 />
                                 {/* Nom du joueur */}
-                                <h2 className="text-lg font-bold text-center mb-2">{selectedPlayer.name}</h2>
+                                <h2 className="text-xl font-bold text-center mb-2">{selectedPlayer.name}</h2>
                                 {/* Stats du joueur */}
                                 {selectedPlayer.petId != player.petId ? (
                                     <p className="font-bold text-center mb-4">Level : {selectedPlayer.level}</p>
 
                                 ) : (
                                     <>
-                                        <p className="font-bold text-center mb-4">Level : {selectedPlayer.level}</p>
-                                        <p className="font-bold text-center mb-4">HP : {selectedPlayer.hp}</p>
+                                        
+                                        <div className="mt-4">
+                                        <div className="flex flex-col sm:flex-row justify-center">
+                                                <div className="flex-1 text-center mb-2 sm:mb-0 sm:mr-4">
+                                                    <p className="font-bold">Vie</p>
+                                                    <p>{selectedPlayer.hp}/{selectedPlayer.hpMax}</p>
+                                                <div
+                                                    className="bg-red-600 h-2.5 rounded-full"
+                                                    style={{ width: `${(selectedPlayer.hp / selectedPlayer.maxHp) * 100}%` }}>
+                                                </div>
+                                                </div>
+                                                <div className="flex-1 text-center">
+                                                    <p className="font-bold">Level</p>
+                                                    <p>{selectedPlayer.level}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="mt-4">
+                                            <p className="font-bold text-center mb-2">Défense Globale</p>
+                                            <div className="flex flex-col sm:flex-row justify-center">
+                                                <div className="flex-1 text-center mb-2 sm:mb-0 sm:mr-4">
+                                                    <p className="font-bold">Défense Physique</p>
+                                                    <p>{selectedPlayer.defP}</p>
+                                                </div>
+                                                <div className="flex-1 text-center">
+                                                    <p className="font-bold">Défense Magique</p>
+                                                    <p>{selectedPlayer.defM}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="mt-4 mb-8">
+                                            <p className="font-bold text-center mb-2">Défense Générale</p>
+                                            <div className="flex flex-col sm:flex-row justify-center mb-2">
+                                                <div className="flex-1 text-center mb-2 sm:mb-0 sm:mr-4 relative group">
+                                                    <p className="font-bold">Défense Standard</p>
+                                                    <p>{selectedPlayer.defPStand + selectedPlayer.defP}</p>
+                                                    <div className="absolute left-1/2 transform -translate-x-1/2 -top-8 hidden group-hover:block bg-gray-700 text-white text-xs rounded py-1 px-2">
+                                                        {selectedPlayer.defPStand} + {selectedPlayer.defP} = {calculateDef(selectedPlayer, 'Pstandard')}% de réduction
+                                                    </div>
+                                                </div>
+                                                <div className="flex-1 text-center relative group">
+                                                    <p className="font-bold">Résistance Standard</p>
+                                                    <p>{selectedPlayer.defMStand + selectedPlayer.defM}</p>
+                                                    <div className="absolute left-1/2 transform -translate-x-1/2 -top-8 hidden group-hover:block bg-gray-700 text-white text-xs rounded py-1 px-2">
+                                                        {selectedPlayer.defMStand} + {selectedPlayer.defM} = {calculateDef(selectedPlayer, 'Mstandard')}% de réduction
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div className="flex flex-col sm:flex-row justify-center mb-2">
+                                                <div className="flex-1 text-center mb-2 sm:mb-0 sm:mr-4 relative group">
+                                                    <p className="font-bold">Défense Perçante</p>
+                                                    <p>{selectedPlayer.defPierce + selectedPlayer.defP}</p>
+                                                    <div className="absolute left-1/2 transform -translate-x-1/2 -top-8 hidden group-hover:block bg-gray-700 text-white text-xs rounded py-1 px-2">
+                                                        {selectedPlayer.defPierce} + {selectedPlayer.defP} = {calculateDef(selectedPlayer, 'Pierce')}% de réduction
+                                                    </div>
+                                                </div>
+                                                <div className="flex-1 text-center relative group">
+                                                    <p className="font-bold">Résistance Feu</p>
+                                                    <p>{selectedPlayer.defFire + selectedPlayer.defM}</p>
+                                                    <div className="absolute left-1/2 transform -translate-x-1/2 -top-8 hidden group-hover:block bg-gray-700 text-white text-xs rounded py-1 px-2">
+                                                        {selectedPlayer.defFire} + {selectedPlayer.defM} = {calculateDef(selectedPlayer, 'Fire')}% de réduction
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div className="flex flex-col sm:flex-row justify-center mb-2">
+                                                <div className="flex-1 text-center mb-2 sm:mb-0 sm:mr-4 relative group">
+                                                    <p className="font-bold">Défense Tranchante</p>
+                                                    <p>{selectedPlayer.defSlash + selectedPlayer.defP}</p>
+                                                    <div className="absolute left-1/2 transform -translate-x-1/2 -top-8 hidden group-hover:block bg-gray-700 text-white text-xs rounded py-1 px-2">
+                                                        {selectedPlayer.defSlash} + {selectedPlayer.defP} = {calculateDef(selectedPlayer, 'Slash')}% de réduction
+                                                    </div>
+                                                </div>
+                                                <div className="flex-1 text-center relative group">
+                                                    <p className="font-bold">Résistance Foudre</p>
+                                                    <p>{selectedPlayer.defLightning + selectedPlayer.defM}</p>
+                                                    <div className="absolute left-1/2 transform -translate-x-1/2 -top-8 hidden group-hover:block bg-gray-700 text-white text-xs rounded py-1 px-2">
+                                                        {selectedPlayer.defLightning} + {selectedPlayer.defM} = {calculateDef(selectedPlayer, 'Lightning')}% de réduction
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div className="flex flex-col sm:flex-row justify-center mb-2">
+                                                <div className="flex-1 text-center mb-2 sm:mb-0 sm:mr-4 relative group">
+                                                    <p className="font-bold">Défense Percutante</p>
+                                                    <p>{selectedPlayer.defStrike + selectedPlayer.defP}</p>
+                                                    <div className="absolute left-1/2 transform -translate-x-1/2 -top-8 hidden group-hover:block bg-gray-700 text-white text-xs rounded py-1 px-2">
+                                                        {selectedPlayer.defHoly} + {selectedPlayer.defP} = {calculateDef(selectedPlayer, 'Strike')}% de réduction
+                                                    </div>
+                                                </div>
+                                                <div className="flex-1 text-center relative group">
+                                                    <p className="font-bold">Résistance Sacrée</p>
+                                                    <p>{selectedPlayer.defHoly + selectedPlayer.defM}</p>
+                                                    <div className="absolute left-1/2 transform -translate-x-1/2 -top-8 hidden group-hover:block bg-gray-700 text-white text-xs rounded py-1 px-2">
+                                                        {selectedPlayer.defHoly} + {selectedPlayer.defM} = {calculateDef(selectedPlayer, 'Holy')}% de réduction
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
 
                                     </>
                                 )}
-                                <div className="flex justify-center absolute bottom-4 left-1/2 transform -translate-x-1/2">
-                                    <button className="bg-green-500 text-white py-2 px-4 rounded mr-4" onClick={null}>Attaquer</button>
-                                    {/* Bouton pour fermer la fenêtre modale */}
-                                    <button onClick={closeModalPlayer} className="bg-red-500 text-white py-2 px-4 rounded">Retour</button>
+                                {/* Bouton pour fermer le menu */}
+                                <div className="relative w-full mt-4">
+                                    <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2">
+                                        {selectedPlayer.petId != player.petId && (
+                                            <button className="bg-green-500 text-white py-2 px-4 rounded mr-4" onClick={handleClickFight}>Attaquer</button>
+                                        )}
+                                        <button onClick={closeModalPlayer} className="bg-red-500 text-white py-2 px-4 rounded">Fermer</button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -355,96 +493,147 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                             </div>
                         </div>
                     )}
-            {isModalSpell && (
-                <div className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center bg-black bg-opacity-50 text-black z-10">
-                    <div className="bg-white p-4 rounded-lg relative w-3/4 h-3/4 max-h-3/4 overflow-auto flex flex-col justify-between">
-                        <h2 className="text-2xl font-bold mb-8 text-center">Compétences</h2>
-                        <div className="flex flex-col items-center space-y-4 mb-8 w-full">
-                            {/* Liste des sorts actifs */}
-                            <div className="w-full">
-                                <button
-                                    className="w-full bg-blue-500 text-white py-2 px-4 rounded text-xl mb-2"
-                                    onClick={() => setActiveOpen(!activeOpen)}
-                                >
-                                    {activeOpen ? 'Cacher' : 'Afficher'} les sorts actifs
-                                </button>
-                                {activeOpen && (
-                                    <ul className="flex flex-col md:flex-row md:flex-wrap">
-                                    {playerSkill
-                                        .filter(skill => skill.warSkills.type === 'actif')
-                                        .map((skill, index) => (
-                                            <li
-                                                key={index}
-                                                className="mt-2 group relative cursor-pointer md:w-1/2 lg:w-1/3 xl:w-1/4 p-2"
-                                                onMouseEnter={() => handleMouseEnter(skill)}
-                                                onMouseLeave={handleMouseLeave}
-                                            >
-                                                <div className="flex items-center">
-                                                    <div className="relative w-6 h-6 mr-2">
-                                                        <Image 
-                                                            src={skill.warSkills.img} 
-                                                            alt={`${skill.warSkills.name} icon`} 
-                                                            layout="fill"
-                                                            objectFit="contain"
-                                                        />
-                                                    </div>
-                                                    <span className="font-bold">{skill.warSkills.name}</span>: ({skill.warSkills.cost} PA) 
-                                                    <span className="text-red-800 ml-1">
-                                                        {calculateDmg(player, skill.warSkills.stat, skill.warSkills.dmgMin, skill.warSkills.divider)} - 
-                                                        {calculateDmg(player, skill.warSkills.stat, skill.warSkills.dmgMax, skill.warSkills.divider)}
-                                                    </span>
+                    {isModalFight && (
+                        <div className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center bg-black bg-opacity-50 text-black z-10">
+                            <div className="bg-white p-4 rounded-lg relative w-3/4 h-3/4 max-h-3/4 overflow-auto">
+                                <h2 className="text-lg font-bold text-center mb-4">Sélectionner un Sort/Compétence pour attaquer {selectedPlayer.name}</h2>
+                                <ul className="flex flex-col">
+                                    {playerSkill.filter(skill => skill.warSkills.type === 'actif').map((skill, index) => (
+                                        <li key={index}
+                                            className={`flex items-center cursor-pointer p-2 border-b ${selectedFightSpell === skill ? 'bg-gray-200' : ''}`}
+                                            onClick={() => setSelectedFightSpell(skill)}
+                                        >
+                                            <div className="flex items-center">
+                                                <div className="relative w-20 h-20 mr-2">
+                                                    <Image
+                                                        src={skill.warSkills.img}
+                                                        alt={`${skill.warSkills.name} icon`}
+                                                        layout="fill"
+                                                        objectFit="contain"
+                                                    />
                                                 </div>
-                                                {hoveredSkill === skill && (
-                                                    <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 p-2 bg-gray-700 text-white text-xs rounded w-max max-w-xs md:max-w-md lg:max-w-lg">
-                                                        {skill.warSkills.description}
-                                                    </div>
-                                                )}
-                                            </li>
-                                        ))}
+                                                <span className="font-bold">{skill.warSkills.name} ({skill.warSkills.cost} PA)</span>
+                                                <span className={`${skill.warSkills.stat === 'str' ? 'text-orange-500' : 'text-green-500'} ml-2 md:ml-4`}>
+                                                    {calculateDmg(player, skill.warSkills.stat, skill.warSkills.dmgMin, skill.warSkills.divider)} - {calculateDmg(player, skill.warSkills.stat, skill.warSkills.dmgMax, skill.warSkills.divider)} dmg
+                                                </span>
+                                                <span className="ml-2 text-red-500 md:ml-4">
+                                                    Crit {calculateDmg(player, skill.warSkills.stat, skill.warSkills.crit, skill.warSkills.divider)} dmg
+                                                </span>
+                                                <span className="ml-2 md:ml-4">
+                                                    Portée {skill.warSkills.dist}
+                                                </span>
+                                            </div>
+                                            {hoveredSkill === skill && (
+                                                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 p-2 bg-gray-700 text-white text-xs rounded w-max max-w-xs md:max-w-md lg:max-w-lg">
+                                                    {skill.warSkills.description}
+                                                </div>
+                                            )}
+                                        </li>
+                                    ))}
                                 </ul>
-                                )}
+                                {/* Bouton pour fermer la fenêtre modale */}
+                                <div className="flex justify-center absolute bottom-4 left-1/2 transform -translate-x-1/2">
+                                    <button disabled={selectedFightSpell === null} onClick={() => handleSelectFightSpell(spell)} className={`bg-green-500 text-white py-2 px-4 rounded mr-4 ${selectedFightSpell === null ? 'bg-stone-500' : ''}`}>Confirmer</button>
+                                    <button onClick={closeModalFight} className="bg-red-500 text-white py-2 px-4 rounded">Retour</button>
+                                </div>
                             </div>
+                        </div>
+                    )}
+                    {isModalSpell && (
+                        <div className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center bg-black bg-opacity-50 text-black z-10">
+                            <div className="bg-white p-4 rounded-lg relative w-3/4 h-3/4 max-h-3/4 overflow-auto flex flex-col justify-between">
+                                <h2 className="text-2xl font-bold mb-8 text-center">Compétences</h2>
+                                <div className="flex flex-col items-center space-y-4 mb-8 w-full">
+                                    {/* Liste des sorts actifs */}
+                                    <div className="w-full">
+                                        <button
+                                            className="w-full bg-blue-500 text-white py-2 px-4 rounded text-xl mb-2"
+                                            onClick={() => setActiveOpen(!activeOpen)}
+                                        >
+                                            {activeOpen ? 'Cacher' : 'Afficher'} les sorts actifs
+                                        </button>
+                                        {activeOpen && (
+                                            <ul className="flex flex-col">
+                                                {playerSkill
+                                                    .filter(skill => skill.warSkills.type === 'actif')
+                                                    .map((skill, index) => (
+                                                        <li
+                                                            key={index}
+                                                            className="mt-2 group relative cursor-pointer p-2"
+                                                            onMouseEnter={() => handleMouseEnter(skill)}
+                                                            onMouseLeave={handleMouseLeave}
+                                                        >
+                                                            <div className="flex items-center">
+                                                                <div className="relative w-20 h-20 mr-2">
+                                                                    <Image
+                                                                        src={skill.warSkills.img}
+                                                                        alt={`${skill.warSkills.name} icon`}
+                                                                        layout="fill"
+                                                                        objectFit="contain"
+                                                                    />
+                                                                </div>
+                                                                <span className="font-bold">{skill.warSkills.name} ({skill.warSkills.cost} PA)</span>
+                                                                <span className={`${skill.warSkills.stat === 'str' ? 'text-orange-500' : 'text-green-500'} ml-2 md:ml-4`}>
+                                                                    {calculateDmg(player, skill.warSkills.stat, skill.warSkills.dmgMin, skill.warSkills.divider)} - {calculateDmg(player, skill.warSkills.stat, skill.warSkills.dmgMax, skill.warSkills.divider)} dmg
+                                                                </span>
+                                                                <span className="ml-2 text-red-500 md:ml-4">
+                                                                    Crit {calculateDmg(player, skill.warSkills.stat, skill.warSkills.crit, skill.warSkills.divider)} dmg
+                                                                </span>
+                                                                <span className="ml-2 md:ml-4">
+                                                                    Portée {skill.warSkills.dist}
+                                                                </span>
+                                                            </div>
+                                                            {hoveredSkill === skill && (
+                                                                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 p-2 bg-gray-700 text-white text-xs rounded w-max max-w-xs md:max-w-md lg:max-w-lg">
+                                                                    {skill.warSkills.description}
+                                                                </div>
+                                                            )}
+                                                        </li>
+                                                    ))}
+                                            </ul>
+                                        )}
+                                    </div>
 
-                            {/* Liste des sorts passifs */}
-                            <div className="w-full">
-                                <button
-                                    className="w-full bg-green-500 text-white py-2 px-4 rounded text-xl mb-2"
-                                    onClick={() => setPassiveOpen(!passiveOpen)}
-                                >
-                                    {passiveOpen ? 'Cacher' : 'Afficher'} les sorts passifs
-                                </button>
-                                {passiveOpen && (
-                                    <ul className="list-disc list-inside w-full">
-                                        {playerSkill
-                                            .filter(skill => skill.warSkills.type === 'passif')
-                                            .map((skill, index) => (
-                                                <li 
-                                                    key={index} 
-                                                    className="mt-2 group relative cursor-pointer"
-                                                    onMouseEnter={() => handleMouseEnter(skill)}
-                                                    onMouseLeave={handleMouseLeave}
-                                                >
-                                                    <span className="font-bold">{skill.warSkills.name}</span>: ({skill.warSkills.cost} PA) <span className="text-red-800">{calculateDmg(player, skill.warSkills.stat, skill.warSkills.dmgMin, skill.warSkills.divider)} - {calculateDmg(player, skill.warSkills.stat, skill.warSkills.dmgMax, skill.warSkills.divider)}</span>
-                                                    {hoveredSkill === skill && (
-                                                        <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 p-2 bg-gray-700 text-white text-xs rounded w-max max-w-xs md:max-w-md lg:max-w-lg">
-                                                            {skill.warSkills.description}
-                                                        </div>
-                                                    )}
-                                                </li>
-                                            ))}
-                                    </ul>
-                                )}
+                                    {/* Liste des sorts passifs */}
+                                    <div className="w-full">
+                                        <button
+                                            className="w-full bg-green-500 text-white py-2 px-4 rounded text-xl mb-2"
+                                            onClick={() => setPassiveOpen(!passiveOpen)}
+                                        >
+                                            {passiveOpen ? 'Cacher' : 'Afficher'} les sorts passifs
+                                        </button>
+                                        {passiveOpen && (
+                                            <ul className="list-disc list-inside w-full">
+                                                {playerSkill
+                                                    .filter(skill => skill.warSkills.type === 'passif')
+                                                    .map((skill, index) => (
+                                                        <li
+                                                            key={index}
+                                                            className="mt-2 group relative cursor-pointer"
+                                                            onMouseEnter={() => handleMouseEnter(skill)}
+                                                            onMouseLeave={handleMouseLeave}
+                                                        >
+                                                            <span className="font-bold">{skill.warSkills.name}</span>: ({skill.warSkills.cost} PA) <span className="text-red-800">{calculateDmg(player, skill.warSkills.stat, skill.warSkills.dmgMin, skill.warSkills.divider)} - {calculateDmg(player, skill.warSkills.stat, skill.warSkills.dmgMax, skill.warSkills.divider)}</span>
+                                                            {hoveredSkill === skill && (
+                                                                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 p-2 bg-gray-700 text-white text-xs rounded w-max max-w-xs md:max-w-md lg:max-w-lg">
+                                                                    {skill.warSkills.description}
+                                                                </div>
+                                                            )}
+                                                        </li>
+                                                    ))}
+                                            </ul>
+                                        )}
+                                    </div>
+                                </div>
+                                {/* Bouton pour fermer le menu */}
+                                <div className="relative w-full mt-4">
+                                    <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2">
+                                        <button onClick={closeModalSpell} className="bg-red-500 text-white py-2 px-4 rounded text-xl">Fermer</button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                        {/* Bouton pour fermer le menu */}
-                        <div className="relative w-full mt-4">
-                            <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2">
-                                <button onClick={closeModalSpell} className="bg-red-500 text-white py-2 px-4 rounded text-xl">Fermer</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )}
+                    )}
                     <nav className="menu flex justify-center">
                         <input type="checkbox" href="#" className="menu-open" name="menu-open" onChange={toggleMenu} id="menu-open" checked={isMenuOpen} />
                         <label className="menu-open-button" htmlFor="menu-open" >

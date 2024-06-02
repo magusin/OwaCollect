@@ -187,18 +187,31 @@ model warPlayers {
   name            String?           @db.VarChar(255)
   imageUrl        String?           @db.VarChar(255)
   mapId           Int?
-  str             Int               @default(0)
+  str             Int               @default(1)
   hit             Int               @default(0)
   level           Int               @default(1)
   xp              Int               @default(0)
   hp              Int               @default(50)
   hpMax           Int               @default(50)
-  dex             Int               @default(0)
-  intel           Int               @default(0)
-  def             Int               @default(1)
+  dex             Int               @default(1)
+  intel           Int               @default(1)
+  defP            Int               @default(1)
   defM            Int               @default(1)
-  acu             Int               @default(0)
+  acu             Int               @default(1)
   isDied          DateTime?         @db.Date
+  pa              Int               @default(20)
+  paMax           Int               @default(20)
+  regen           Int               @default(1)
+  crit            Int               @default(5)
+  defMStand       Int               @default(1)
+  defPStand       Int               @default(1)
+  defFire         Int               @default(1)
+  defStrike       Int               @default(1)
+  defLightning    Int               @default(1)
+  defSlash        Int               @default(1)
+  defHoly         Int               @default(1)
+  defPierce       Int               @default(1)
+  isLeveling      Boolean           @default(false)
   warPlayerSkills warPlayerSkills[]
   pets            pets              @relation(fields: [petId], references: [userId], onDelete: Cascade, map: "war_ibfk_1")
   map             map?              @relation(fields: [mapId], references: [id], onDelete: Cascade, map: "warPlayers_ibfk_2")
@@ -230,5 +243,6 @@ model warSkills {
   divider         Int
   stat            String            @db.VarChar(55)
   img             String            @db.VarChar(255)
+  crit            Int
   warPlayerSkills warPlayerSkills[]
 }
