@@ -46,6 +46,17 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
     const [hoveredSkill, setHoveredSkill] = useState(null);
     // Déclaration de l'état du spell sélectionné pour l'attaque
     const [selectedFightSpell, setSelectedFightSpell] = useState(null);
+    // Stocker les skills sélectionnés
+    const [selectedPassiveSkills, setSelectedPassiveSkills] = useState([]);
+
+    const togglePassiveSkill = (skill) => {
+        if (selectedPassiveSkills.includes(skill)) {
+            setSelectedPassiveSkills(selectedPassiveSkills.filter(s => s !== skill));
+        } else if (selectedPassiveSkills.length < 5) {
+            setSelectedPassiveSkills([...selectedPassiveSkills, skill]);
+        }
+    };
+
     // Fonction pour gérer le clic sur un joueur de la liste
     const handleClickPlayer = (player) => {
         // setSelectedTilePlayers(null)
@@ -74,6 +85,9 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
     const handleMouseLeave = () => {
         setHoveredSkill(null);
     };
+
+    const saveSelectedPassiveSkills = async () => {
+    }
 
     // Gestionnaire d'événements pour le clic sur une tuile
     const handleClickTile = (tile) => {
@@ -232,6 +246,7 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
         return a.position_x - b.position_x;
     });
     if (session) {
+        const upHp = player.warPlayerSkills.find(skill => skill.warSkills.upHp === 'Up HP');
         return (
             <>
                 <HeadView />
@@ -346,6 +361,42 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                                                 <div className="flex-1 text-center">
                                                     <p className="font-bold">Level</p>
                                                     <p>{selectedPlayer.level}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="mt-4">
+                                            <div className="flex flex-col sm:flex-row justify-center">
+                                                <div className="flex-1 text-center mb-2 sm:mb-0 sm:mr-4">
+                                                    <p className="font-bold">Force</p>
+                                                    <p>{selectedPlayer.str}</p>
+                                                </div>
+                                                <div className="flex-1 text-center">
+                                                    <p className="font-bold">Intelligence</p>
+                                                    <p>{selectedPlayer.intel}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="mt-4">
+                                            <div className="flex flex-col sm:flex-row justify-center">
+                                                <div className="flex-1 text-center mb-2 sm:mb-0 sm:mr-4">
+                                                    <p className="font-bold">Dextérité</p>
+                                                    <p>{selectedPlayer.dex}</p>
+                                                </div>
+                                                <div className="flex-1 text-center">
+                                                    <p className="font-bold">Acuité</p>
+                                                    <p>{selectedPlayer.acu}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="mt-4">
+                                            <div className="flex flex-col sm:flex-row justify-center">
+                                                <div className="flex-1 text-center mb-2 sm:mb-0 sm:mr-4">
+                                                    <p className="font-bold">Chance de Critique</p>
+                                                    <p>{selectedPlayer.crit} %</p>
+                                                </div>
+                                                <div className="flex-1 text-center">
+                                                    <p className="font-bold">Régénération</p>
+                                                    <p>{selectedPlayer.regen}</p>
                                                 </div>
                                             </div>
                                         </div>
@@ -609,7 +660,8 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                                                     .map((skill, index) => (
                                                         <li
                                                             key={index}
-                                                            className="mt-2 group relative cursor-pointer"
+                                                            className={`mt-2 group relative cursor-pointer p-2 ${selectedPassiveSkills.includes(skill) ? 'bg-gray-300' : ''}`}
+                                                            onClick={() => togglePassiveSkill(skill)}
                                                             onMouseEnter={() => handleMouseEnter(skill)}
                                                             onMouseLeave={handleMouseLeave}
                                                         >
@@ -627,7 +679,8 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                                 </div>
                                 {/* Bouton pour fermer le menu */}
                                 <div className="relative w-full mt-4">
-                                    <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2">
+                                    <div className="flex justify-center absolute bottom-2 left-1/2 transform -translate-x-1/2">
+                                    <button onClick={saveSelectedPassiveSkills} className="bg-green-500 text-white py-2 px-4 rounded text-xl mr-4">Sauvegarder</button>
                                         <button onClick={closeModalSpell} className="bg-red-500 text-white py-2 px-4 rounded text-xl">Fermer</button>
                                     </div>
                                 </div>
@@ -711,7 +764,6 @@ export async function getServerSideProps(context) {
             }
         })
         const war = await response.data;
-        console.log("war", war)
         const timestamp = new Date().getTime().toString();
         const signature = await axios.post(`${process.env.NEXTAUTH_URL}/api/generateSignature`, {
             timestamp: timestamp
