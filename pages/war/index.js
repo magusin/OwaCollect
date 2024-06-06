@@ -49,21 +49,21 @@ export default function War({ errorServer, war, player, totalPoints }) {
     }, []);
 
     // Utiliser useEffect pour mettre à jour la largeur de la tuile lorsque la taille de la fenêtre change
-    useEffect(() => {
-        if (windowSize.width < 640) {
-            setWidth(30);
-        } else if (windowSize.width < 768 && windowSize.width >= 640) {
-            setWidth(50);
-        } else if (windowSize.width < 1024 && windowSize.width >= 768) {
-            setWidth(60);
-        } else if (windowSize.width >= 1024 && windowSize.width < 1280) {
-            setWidth(80);
-        } else if (windowSize.width >= 1280 && windowSize.width < 1536) {
-            setWidth(100);
-        } else {
-            setWidth(120);
-        }
-    }, [windowSize.width]);
+    // useEffect(() => {
+    //     if (windowSize.width < 640) {
+    //         setWidth(30);
+    //     } else if (windowSize.width < 768 && windowSize.width >= 640) {
+    //         setWidth(50);
+    //     } else if (windowSize.width < 1024 && windowSize.width >= 768) {
+    //         setWidth(60);
+    //     } else if (windowSize.width >= 1024 && windowSize.width < 1280) {
+    //         setWidth(80);
+    //     } else if (windowSize.width >= 1280 && windowSize.width < 1536) {
+    //         setWidth(100);
+    //     } else {
+    //         setWidth(120);
+    //     }
+    // }, [windowSize.width]);
 
     if (errorServer) {
         return <div>{errorServer}</div>;
@@ -86,6 +86,7 @@ export default function War({ errorServer, war, player, totalPoints }) {
         }
         return a.position_y - b.position_y;
     });
+
     if (session) {
         // return (
         //     <div className="flex flex-col h-screen" style={{ marginTop: "80px" }}>
@@ -172,17 +173,17 @@ export default function War({ errorServer, war, player, totalPoints }) {
         return (
             <div className="flex flex-col h-screen" style={{ marginTop: "80px" }}>
                 <Header points={points} />
-                <div className="grid grid-cols-11 md:grid-cols-11 lg:grid-cols-11">
+                <div className="grid grid-cols-11 border-black">
                     {/* Afficher les tuiles autour du joueur dans l'ordre croissant de distance relative au joueur */}
                     {sortedTiles.map((tile, index) => (
-                        <div key={index} className="relative">
+                        <div key={index} className="relative cursor-pointer">
                             {/* Image de la tuile ou une div vide si la tuile est vide */}
                             {tile.image_url ? (
                                 <Image
                                     src={tile.image_url}
                                     alt={tile.alt}
-                                    width={150} // Définir une taille par défaut pour les images
-                                    height={150}
+                                    width={200} // Définir une taille par défaut pour les images
+                                    height={200}
                                     layout="responsive" // Assurer un layout responsive pour les images
                                 />
                             ) : (
@@ -203,9 +204,43 @@ export default function War({ errorServer, war, player, totalPoints }) {
                             )}
                         </div>
                     ))}
-                </div>
-            
+                    <nav class="menu">
+                        <input type="checkbox" href="#" class="menu-open" name="menu-open" id="menu-open" />
+                        <label class="menu-open-button" for="menu-open">
+                            <span class="hamburger hamburger-1"></span>
+                            <span class="hamburger hamburger-2"></span>
+                            <span class="hamburger hamburger-3"></span>
+                        </label>
 
+                        <a href="#" class="menu-item"> <i class="fa fa-bar-chart"></i> </a>
+                        <a href="#" class="menu-item"> <i class="fa fa-plus"></i> </a>
+                        <a href="#" class="menu-item"> <i class="fa fa-heart"></i> </a>
+                        <a href="#" class="menu-item"> <i class="fa fa-envelope"></i> </a>
+                        <a href="#" class="menu-item"> <i class="fa fa-cog"></i> </a>
+                        <a href="#" class="menu-item"> <i class="fa fa-ellipsis-h"></i> </a>
+
+                    </nav>
+
+                    <svg xmlns="http://www.w3.org/2000/svg" version="1.1">
+                        <defs>
+                            <filter id="shadowed-goo">
+
+                                <feGaussianBlur in="SourceGraphic" result="blur" stdDeviation="10" />
+                                <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -7" result="goo" />
+                                <feGaussianBlur in="goo" stdDeviation="3" result="shadow" />
+                                <feColorMatrix in="shadow" mode="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 -0.2" result="shadow" />
+                                <feOffset in="shadow" dx="1" dy="1" result="shadow" />
+                                <feComposite in2="shadow" in="goo" result="goo" />
+                                <feComposite in2="goo" in="SourceGraphic" result="mix" />
+                            </filter>
+                            <filter id="goo">
+                                <feGaussianBlur in="SourceGraphic" result="blur" stdDeviation="10" />
+                                <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -7" result="goo" />
+                                <feComposite in2="goo" in="SourceGraphic" result="mix" />
+                            </filter>
+                        </defs>
+                    </svg>
+                </div>
             </div>
         );
     }
