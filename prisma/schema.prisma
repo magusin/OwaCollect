@@ -44,7 +44,7 @@ model pets {
   playercards                 playercards[]
   secretsdiscovered           secretsdiscovered[]
   user_achievements           user_achievements[]
-  war                         war?
+  war                         warPlayers?
 }
 
 model user_achievements {
@@ -175,21 +175,94 @@ model secretsdiscovered {
 }
 
 model map {
-  id         Int    @id @default(autoincrement())
+  id         Int          @id @default(autoincrement())
   position_x Int
   position_y Int
-  image_url  String @db.VarChar(255)
+  image_url  String       @db.VarChar(255)
+  warPlayers warPlayers[]
 }
 
-model war {
-  petId      String  @id @db.VarChar(255)
-  name       String? @db.VarChar(255)
-  position_x Int?
-  position_y Int?
-  imageUrl   String? @db.VarChar(255)
-  str        Int     @default(0)
-  hit        Int     @default(0)
-  level      Int     @default(1)
-  xp         Int     @default(0)
-  pets       pets    @relation(fields: [petId], references: [userId], onDelete: Cascade, map: "war_ibfk_1")
+model warPlayers {
+  petId           String            @id @db.VarChar(255)
+  name            String?           @db.VarChar(255)
+  imageUrl        String?           @db.VarChar(255)
+  mapId           Int?
+  str             Int               @default(1)
+  hit             Int               @default(0)
+  level           Int               @default(1)
+  xp              Int               @default(0)
+  hp              Int               @default(50)
+  hpMax           Int               @default(50)
+  dex             Int               @default(1)
+  intel           Int               @default(1)
+  defP            Int               @default(1)
+  defM            Int               @default(1)
+  acu             Int               @default(1)
+  isDied          DateTime?         @db.Date
+  pa              Int               @default(20)
+  paMax           Int               @default(20)
+  regen           Int               @default(1)
+  crit            Int               @default(5)
+  defMStand       Int               @default(1)
+  defPStand       Int               @default(1)
+  defFire         Int               @default(1)
+  defStrike       Int               @default(1)
+  defLightning    Int               @default(1)
+  defSlash        Int               @default(1)
+  defHoly         Int               @default(1)
+  defPierce       Int               @default(1)
+  isLeveling      Boolean           @default(false)
+  warPlayerSkills warPlayerSkills[]
+  pets            pets              @relation(fields: [petId], references: [userId], onDelete: Cascade, map: "war_ibfk_1")
+  map             map?              @relation(fields: [mapId], references: [id], onDelete: Cascade, map: "warPlayers_ibfk_2")
+
+  @@index([mapId], map: "warPlayers_ibfk_2")
+}
+
+model warPlayerSkills {
+  petId      String     @db.VarChar(255)
+  skillId    Int
+  createdAt  DateTime   @db.Date
+  isSelected Int        @default(0) @db.TinyInt
+  warPlayers warPlayers @relation(fields: [petId], references: [petId], onDelete: Cascade, map: "warPlayerSkills_ibfk_1")
+  warSkills  warSkills  @relation(fields: [skillId], references: [id], onDelete: Cascade, map: "warPlayerSkills_ibfk_2")
+
+  @@id([petId, skillId])
+  @@index([skillId], map: "warPlayerSkills_ibfk_2")
+}
+
+model warSkills {
+  id              Int               @id @default(autoincrement())
+  name            String            @db.VarChar(255)
+  hit             Int
+  description     String            @db.VarChar(255)
+  dmgMin          Int
+  dmgMax          Int
+  type            String            @db.VarChar(55)
+  cost            Int
+  dist            Int
+  divider         Int
+  stat            String?           @db.VarChar(55)
+  img             String?           @db.VarChar(255)
+  crit            Int?
+  dmgType         String?           @db.VarChar(255)
+  upStr           Int               @default(0)
+  upIntel         Int               @default(0)
+  upHit           Int               @default(0)
+  upCrit          Int               @default(0)
+  upHp            Int               @default(0)
+  upRegen         Int               @default(0)
+  upAcu           Int               @default(0)
+  upDex           Int               @default(0)
+  upDefPstand     Int               @default(0)
+  upDefMStand     Int               @default(0)
+  upDefStrike     Int               @default(0)
+  upDefFire       Int               @default(0)
+  upDefSlash      Int               @default(0)
+  upDefLightning  Int               @default(0)
+  upDefPierce     Int               @default(0)
+  upDefHoly       Int               @default(0)
+  upDefP          Int               @default(0)
+  upDefM          Int               @default(0)
+  warPlayerSkills warPlayerSkills[]
 }

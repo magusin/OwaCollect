@@ -1,6 +1,8 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+@import 'swiper/css';
+@import 'swiper/css/navigation';
 
 :root {
   --foreground-rgb: 0, 0, 0;
@@ -13,6 +15,10 @@
     --foreground-rgb: 255, 255, 255;
     --background-start-rgb: 38, 40, 42;
     --background-end-rgb: 0, 0, 0;
+  }
+
+  .gray {
+    background-color: #374151
   }
 } 
 
@@ -77,204 +83,67 @@ body {
   visibility: visible; /* Visible au survol */
 }
 
-h1 {
-  font-size: 3em;
+.swiper {
+  padding-top: 1rem;
+  padding-bottom: 1rem;
 }
 
-.menu {
-  filter: url("#goo");
+.swiper-slide {
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
-.menu-item, .menu-open-button {
-  background: #e91e63;
-  border-radius: 100%;
-  width: 80px;
-  height: 80px;
-  margin-left: -40px;
-  position: absolute;
-  top: 20px;
-  color: white;
-  text-align: center;
-  line-height: 80px;
-  transform: translate3d(0, 0, 0);
-  transition: transform ease-out 200ms;
-}
-
-.menu-open {
-  display: none;
-}
-
-.hamburger {
-  width: 25px;
-  height: 3px;
-  background: white;
+.swiper-slide img {
   display: block;
+  max-width: 100%;
+}
+/* styles/globals.css ou un fichier CSS spécifique pour le composant */
+.aspect-w-16 {
+  position: relative;
+  width: 100%;
+}
+
+.aspect-w-16::before {
+  content: '';
+  display: block;
+  padding-top: 56.25%; /* 16:9 Aspect Ratio */
+}
+
+.aspect-w-16 img {
   position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* S'assure que l'image couvre la zone sans être déformée */
+}
+
+/* .swiper-button-next, .swiper-button-prev {
+  background-color: #000;
+  color: #fff;
+  width: 30px;
+  height: 30px;
   top: 50%;
-  left: 50%;
-  margin-left: -12.5px;
-  margin-top: -1.5px;
-  transition: transform 200ms;
+  transform: translateY(-50%);
+  z-index: 10;
 }
 
-.hamburger-1 {
-  transform: translate3d(0, -8px, 0);
+.swiper-button-next, .swiper-button-prev {
+  background-color: rgba(0, 0, 0, 0.5); 
+  color: white;
+  width: 30px;
+  height: 30px;
+  position: absolute; 
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1000; 
 }
 
-.hamburger-2 {
-  transform: translate3d(0, 0, 0);
-}
+.swiper-button-next::after, .swiper-button-prev::after {
+  font-size: 20px; 
+} */
 
-.hamburger-3 {
-  transform: translate3d(0, 8px, 0);
-}
-
-.menu-open:checked + .menu-open-button .hamburger-1 {
-  transform: translate3d(0, 0, 0) rotate(45deg);
-}
-.menu-open:checked + .menu-open-button .hamburger-2 {
-  transform: translate3d(0, 0, 0) scale(0.1, 1);
-}
-.menu-open:checked + .menu-open-button .hamburger-3 {
-  transform: translate3d(0, 0, 0) rotate(-45deg);
-}
-
-.menu {
-  position: fixed;
-  left: 50%;
-  
-  padding-top: 20px;
-  
-  width: 80px;
-  height: 80px;
-  box-sizing: border-box;
-  font-size: 20px;
-  text-align: left;
-  transition: transform ease-out 200ms;
-}
-
-.menu-item:hover {
-  background: white;
-  color: #e91e63;
-}
-.menu-item:nth-child(3) {
-  transition-duration: 180ms;
-}
-.menu-item:nth-child(4) {
-  transition-duration: 180ms;
-}
-.menu-item:nth-child(5) {
-  transition-duration: 180ms;
-}
-.menu-item:nth-child(6) {
-  transition-duration: 180ms;
-}
-.menu-item:nth-child(7) {
-  transition-duration: 180ms;
-}
-.menu-item:nth-child(8) {
-  transition-duration: 180ms;
-}
-.menu-item:nth-child(9) {
-  transition-duration: 180ms;
-}
-
-.menu-open-button {
-  z-index: 2;
-  transition-timing-function: cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  transition-duration: 400ms;
-  transform: scale(1.1, 1.1) translate3d(0, 0, 0);
-  cursor: pointer;
-  
-}
-
-.menu-open-button:hover {
-  transform: scale(1.2, 1.2) translate3d(0, 0, 0);
-}
-
-.menu-open:checked + .menu-open-button {
-  transition-timing-function: linear;
-  transition-duration: 200ms;
-  transform: scale(0.8, 0.8) translate3d(-250px, 125px, 0);
-}
-
-
-
-.menu-open:checked ~ .menu-item {
-  transition-timing-function: cubic-bezier(0.935, 0, 0.34, 1.33);
-}
-.menu-open:checked ~ .menu-item:nth-child(3) {
-  transition-duration: 180ms;
-  transform: translate3d(-205px, -9px, 0);
-}
-.menu-open:checked ~ .menu-item:nth-child(4) {
-  transition-duration: 280ms;
-  transform: translate3d(-110px, 55px, 0);
-}
-.menu-open:checked ~ .menu-item:nth-child(5) {
-  transition-duration: 380ms;
-  transform: translate3d(-110px, 155px, 0);
-}
-.menu-open:checked ~ .menu-item:nth-child(6) {
-  transition-duration: 480ms;
-  transform: translate3d(-205px, 209px, 0);
-}
-.menu-open:checked ~ .menu-item:nth-child(7) {
-  transition-duration: 580ms;
-  transform: translate3d(-295px, 155px, 0);
-}
-.menu-open:checked ~ .menu-item:nth-child(8) {
-  transition-duration: 680ms;
-  transform: translate3d(-295px, 55px, 0);
-}
-.menu-open:checked ~ .menu-item:nth-child(9) {
-  transition-duration: 780ms;
-  transform: translate3d(-205px, -9px, 0);
-}
-
-
-
-@media (max-width: 767px) {
-  .menu {
-    left: 50%;
-    margin-left: -150px;
-    width: 300px;
-    height: 200px;
-    padding-left: 150px;
-  }
-
-  .menu-item, .menu-open-button {
-    width: 60px;
-    height: 60px;
-    line-height: 60px;
-  }
-
-  .hamburger {
-    width: 20px;
-    height: 2px;
-    margin-left: -10px;
-    margin-top: -1px;
-  }
-}
-
-/* Pour les écrans de 768px à 1023px */
-@media (min-width: 768px) and (max-width: 1023px) {
-  .menu {
-    left: 100%;
-    margin-left: -170px;
-    width: 340px;
-    height: 220px;
-    padding-left: 170px;
-  }
-}
-
-/* Pour les écrans plus grands que 1023px */
-@media (min-width: 1024px) {
-  .menu {
-    left: 50%;
-   
-    width: 80px;
-    height: 80px;
-    
-  }
+.swiper-button-prev {
+  z-index: 90;
 }

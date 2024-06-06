@@ -99,8 +99,8 @@ export default function Leaderboard({ totalPoints, errorServer, leaderboard }) {
     const HeadView = () => {
         return (
             <Head>
-                <title>Owarida - Pantheon</title>
-                <meta name="description" content="Pantheon de la OwaCollect" />
+                <title>Owarida - Leaderboard</title>
+                <meta name="description" content="Leaderboard de la OwaCollect" />
                 <meta name="keywords" content="Owarida, Stream, Twitch, streameur, chaine" />
                 <link rel="icon" href="/favicon.ico" />
             </Head>
@@ -151,7 +151,7 @@ export default function Leaderboard({ totalPoints, errorServer, leaderboard }) {
                     {displayedLeaderboard.length > 0 ? (
                         <div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                             {displayedLeaderboard.map((player, index) => (
-                                <div key={index} className={`flex flex-col items-center p-4 ${darkMode ? 'bg-gray-700' : 'bg-white'} rounded-lg shadow`}>
+                                <div key={index} className={`flex flex-col items-center p-4 ${darkMode ? 'bg-gray-700' : 'bg-white'} gray rounded-lg shadow`}>
                                     <div className="flex items-center justify-center relative">
                                         <div className="flex absolute left-0 justify-center items-center" style={{ height: '200px', width: '50px', marginLeft: '-60px' }}>
                                             <span className="font-bold text-xl">#{player.rank}</span>

@@ -476,7 +476,7 @@ export default function Collection({ cards, totalPoints, errorServer }) {
                             ))}
                         </div>
                         {selectedCard && (
-                            <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 px-4 py-6 overflow-y-auto h-full w-full">
+                            <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-20 px-4 py-6 overflow-y-auto h-full w-full">
                                 <div className="flex flex-wrap flex-row p-4 h-full w-full items-center justify-center md:flex-col">
                                     {/* Button previous card */}
                                     <button className="w-20 xl:w-auto md:w-24">

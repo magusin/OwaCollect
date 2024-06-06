@@ -6,7 +6,7 @@ import { getToken } from "next-auth/jwt";
 // Initialiser le midleware Cors
 const allowedOrigins = [process.env.NEXTAUTH_URL]
 const corsOptions = {
-    methods: ['GET', 'HEAD'],
+    methods: ['POST', 'HEAD'],
     origin: (origin, callback) => {
         if (!origin || allowedOrigins.indexOf(origin) !== -1) {
             callback(null, true);
@@ -44,9 +44,10 @@ async function runMiddleware(req, res, fn) {
     })
 }
 
-// GET /api/card/[category]
-
+// POST /api/war/player
 export default async function handler(req, res) {
+    await runMiddleware(req, res, corsMiddleware);
+
     try {
         const nextToken = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
 
@@ -59,25 +60,31 @@ export default async function handler(req, res) {
         }
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
         if (!decoded) {
-            return res.status(401).json({ message: 'Token invalide ou expiré' });
+            return res.status(401).json({ message: 'Token invalide' });
         }
 
-        if (typeof req.query.category !== 'string' || !req.query.category) {
-            return res.status(400).json({ message: 'Catégorie invalide' });
+        if (req.method === 'POST') {
+            const { opponentId, spellId } = req.body;
+
+            if (!opponentId || !spellId) {
+                return res.status(400).json({ message: 'Paramètres manquants' });
+            }
+
+            const player = await prisma.player.findUnique({
+                where: {
+                    id: decoded.id
+                }
+            });
+
+            if (!player) {
+                return res.status(404).json({ message: 'Joueur non trouvé' });
+            }
+
+            return res.status(200).json(player);
+        } else {
+            return res.status(405).json({ message: 'Méthode non autorisée' });
         }
-        await runMiddleware(req, res, corsMiddleware)
-        switch (req.method) {
-            case 'GET':
-                const cards = await prisma.card.findMany({
-                    where: {
-                        category: req.query.category
-                    }
-                })
-                res.status(200).json(cards)
-                break
-            default:
-                res.status(405).end(`Method ${req.method} Not Allowed`)
-        }
-    } catch (err) { onError(err, res) }
-    finally { await prisma.$disconnect() }
+    } catch (err) {
+        onError(err, res);
+    }
 }

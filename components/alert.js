@@ -9,7 +9,7 @@ export default function Alert({ message, close, type }) {
     };
 
     return (
-        <div className={`flex space-x-2.5 justify-content-center items-center fixed bottom-0 right-0 z-1000 ${alertStyles.backgroundColor} ${alertStyles.borderColor} ${alertStyles.textColor} px-4 py-3 rounded`} role="alert">
+        <div className={`flex space-x-2.5 justify-content-center items-center fixed bottom-0 right-0 z-50 ${alertStyles.backgroundColor} ${alertStyles.borderColor} ${alertStyles.textColor} px-4 py-3 rounded`} role="alert">
             <strong className="font-bold">
                 {type === 'success' ?
                     (

@@ -10,7 +10,6 @@ import calculatePoints from '@/utils/calculatePoints';
 import Modal from 'C/modal';
 import Alert from 'C/alert';
 import CardsModal from 'C/cardsModal';
-import { getServerSession } from "next-auth";
 import { getSession } from "next-auth/react";
 import nextAuthOptions from "../../config/nextAuthOptions";
 import Footer from 'C/footer';
@@ -116,7 +115,7 @@ export default function Shop({ productsData, totalPoints, errorServer }) {
         return (
             <Head>
                 <title>Shop | Owarida</title>
-                <meta name="description" content="Achetez des packs de cartes dans le shop à Owarida" />
+                <meta name="description" content="Achetez des packs de cartes dans le shop d'Owarida" />
                 <meta name="keywords" content="Owarida, shop, cartes, packs, points, elden ring" />
                 <link rel="icon" href="/favicon.ico" />
             </Head>

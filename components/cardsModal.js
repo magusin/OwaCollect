@@ -24,7 +24,7 @@ export default function CardsModal({ cards, onClose }) {
     };
 
     return (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-70 flex justify-center items-center overflow-y-auto z-50 px-4 py-6 overflow-y-hidden">
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-70 flex justify-center items-center overflow-y-auto z-40 px-4 py-6 overflow-y-hidden">
             <div className="bg-white p-4 rounded-lg shadow-lg max-w-full sm:max-w-3/4 md:max-w-2/3 lg:max-w-1/2 xl:max-w-1/3 mx-auto overflow-y-auto max-h-screen">
                 <div className="grid grid-cols-2 gap-4 mb-4">
                     {currentCards.slice(0, 2).map((card, index) => (
