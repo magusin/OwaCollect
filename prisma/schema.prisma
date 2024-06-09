@@ -223,7 +223,7 @@ model warPlayerSkills {
   petId      String     @db.VarChar(255)
   skillId    Int
   createdAt  DateTime   @db.Date
-  isSelected Int        @default(0) @db.TinyInt
+  isSelected Boolean    @default(false)
   warPlayers warPlayers @relation(fields: [petId], references: [petId], onDelete: Cascade, map: "warPlayerSkills_ibfk_1")
   warSkills  warSkills  @relation(fields: [skillId], references: [id], onDelete: Cascade, map: "warPlayerSkills_ibfk_2")
 

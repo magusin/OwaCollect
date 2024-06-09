@@ -16,6 +16,7 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
     const [windowSize, setWindowSize] = useState({ width: 0, height: 0 });
     // data game
     const [player, setPlayer] = useState(initialPlayer);
+    
     const [coordinates, setCoordinates] = useState(war.allCoordinates);
     const [tiles, setTiles] = useState(war.tiles);
     // const [width, setWidth] = useState(0);
@@ -25,6 +26,7 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
     const positionPlayerX = player.map.position_x;
     const positionPlayerY = player.map.position_y;
     const playerSkill = player.warPlayerSkills;
+    console.log("playerSkill", playerSkill)
     // État pour contrôler l'ouverture des menus
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [selectedTilePlayers, setSelectedTilePlayers] = useState(null);
@@ -47,7 +49,7 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
     // Déclaration de l'état du spell sélectionné pour l'attaque
     const [selectedFightSpell, setSelectedFightSpell] = useState(null);
     // Stocker les skills sélectionnés
-    const [selectedPassiveSkills, setSelectedPassiveSkills] = useState([]);
+    const [selectedPassiveSkills, setSelectedPassiveSkills] = useState(playerSkill.filter(skill => skill.warSkills.type === 'passif' && skill.isSelected === true) || []);
 
     const togglePassiveSkill = (skill) => {
         if (selectedPassiveSkills.includes(skill)) {
@@ -87,6 +89,23 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
     };
 
     const saveSelectedPassiveSkills = async () => {
+        setLoading(true);
+        try {
+            const response = await axios.post(`/api/war/player/saveSpells`, {
+                spells: selectedPassiveSkills,
+            }, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${session.customJwt}`,
+                }
+            });
+            const updatedPlayer = await response.data;
+            console.log("responseData", updatedPlayer)
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setLoading(false);
+        }
     }
 
     // Gestionnaire d'événements pour le clic sur une tuile
@@ -122,6 +141,7 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
 
     // Fonction pour fermer la fenêtre modale de compétences
     const closeModalSpell = () => {
+        setSelectedPassiveSkills(playerSkill.filter(skill => skill.warSkills.type === 'passif' && skill.isSelected === true) || []);
         setIsModalSpell(false);
     }
 
@@ -654,8 +674,10 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                                         >
                                             {passiveOpen ? 'Cacher' : 'Afficher'} les sorts passifs
                                         </button>
+                                        
                                         {passiveOpen && (
-                                            <ul className="list-disc list-inside w-full">
+                                            <ul className="flex flex-col w-full">
+                                                <span className="text-center">(Vous pouvez sélectionner jusqu&apos;à 5 sorts passif)</span>
                                                 {playerSkill
                                                     .filter(skill => skill.warSkills.type === 'passif')
                                                     .map((skill, index) => (
@@ -663,15 +685,9 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                                                             key={index}
                                                             className={`mt-2 group relative cursor-pointer p-2 ${selectedPassiveSkills.includes(skill) ? 'bg-gray-300' : ''}`}
                                                             onClick={() => togglePassiveSkill(skill)}
-                                                            onMouseEnter={() => handleMouseEnter(skill)}
-                                                            onMouseLeave={handleMouseLeave}
                                                         >
                                                             <span className="font-bold">{skill.warSkills.name}</span>: ({skill.warSkills.cost} PA) <span className="text-red-800">{calculateDmg(player, skill.warSkills.stat, skill.warSkills.dmgMin, skill.warSkills.divider)} - {calculateDmg(player, skill.warSkills.stat, skill.warSkills.dmgMax, skill.warSkills.divider)}</span>
-                                                            {hoveredSkill === skill && (
-                                                                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 p-2 bg-gray-700 text-white text-xs rounded w-max max-w-xs md:max-w-md lg:max-w-lg">
-                                                                    {skill.warSkills.description}
-                                                                </div>
-                                                            )}
+                                                            
                                                         </li>
                                                     ))}
                                             </ul>
