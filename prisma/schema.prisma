@@ -254,7 +254,7 @@ model warSkills {
   upRegen         Int               @default(0)
   upAcu           Int               @default(0)
   upDex           Int               @default(0)
-  upDefPstand     Int               @default(0)
+  upDefPStand     Int               @default(0)
   upDefMStand     Int               @default(0)
   upDefStrike     Int               @default(0)
   upDefFire       Int               @default(0)

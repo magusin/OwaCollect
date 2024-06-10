@@ -138,13 +138,10 @@ export default async function handler(req, res) {
                 ]);
 
                 // Reprendre les infos du joueur avec les skills modifiés
-                const updatedPlayerSkills = await prisma.warPlayers.findUnique({
+                const updatedPlayerSkills = await prisma.warPlayerSkills.findMany({
                     where: { petId: decoded.id },
                     include: {
-                        map: true,
-                        warPlayerSkills: {
-                            include: { warSkills: true }
-                        }
+                        warSkills: true
                     }
                 });
 

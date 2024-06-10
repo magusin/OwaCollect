@@ -9,6 +9,7 @@ import Head from 'next/head';
 import Script from 'next/script'
 import calculateDmg from "../../utils/calculateDmg";
 import calculateDef from "../../utils/calculateDef";
+import calculatePassiveSpellsStats from "../../utils/calculatePassiveSpellsStats";
 
 
 export default function War({ errorServer, war, initialPlayer, totalPoints }) {
@@ -25,8 +26,9 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
     const positionPlayer = player.map.id;
     const positionPlayerX = player.map.position_x;
     const positionPlayerY = player.map.position_y;
-    const playerSkill = player.warPlayerSkills;
-    console.log("playerSkill", playerSkill)
+    // État pour stocker les compétences du joueur
+    const [playerSkill, setPlayerSkill] = useState(initialPlayer.warPlayerSkills);
+    
     // État pour contrôler l'ouverture des menus
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [selectedTilePlayers, setSelectedTilePlayers] = useState(null);
@@ -49,8 +51,41 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
     // Déclaration de l'état du spell sélectionné pour l'attaque
     const [selectedFightSpell, setSelectedFightSpell] = useState(null);
     // Stocker les skills sélectionnés
-    const [selectedPassiveSkills, setSelectedPassiveSkills] = useState(playerSkill.filter(skill => skill.warSkills.type === 'passif' && skill.isSelected === true) || []);
+    const [selectedPassiveSkills, setSelectedPassiveSkills] = useState([]);
 
+    const passiveSpellsStats = calculatePassiveSpellsStats(selectedPassiveSkills);
+
+    useEffect(() => {
+        // Initialize selectedPassiveSkills with already selected skills
+        const initiallySelected = playerSkill
+            .filter(skill => skill.warSkills.type === 'passif' && skill.isSelected)
+            .map(skill => skill);
+        setSelectedPassiveSkills(initiallySelected);
+    }, [playerSkill]);
+
+    // Fonction pour calculer les statistiques totales du joueur
+    const updatedPlayerStats = {
+        ...player,
+        hp: player.hp + passiveSpellsStats.upHp,
+        str: player.str + passiveSpellsStats.upStr,
+        intel: player.intel + passiveSpellsStats.upIntel,
+        dex: player.dex + passiveSpellsStats.upDex,
+        acu: player.acu + passiveSpellsStats.upAcu,
+        crit: player.crit + passiveSpellsStats.upCrit,
+        regen: player.regen + passiveSpellsStats.upRegen,
+        defP: player.defP + passiveSpellsStats.upDefP,
+        defPStand: player.defPStand + passiveSpellsStats.upDefPStand,
+        defM: player.defM + passiveSpellsStats.upDefM,
+        defMStand: player.defMStand + passiveSpellsStats.upDefMStand,
+        defStrike: player.defStrike + passiveSpellsStats.upDefStrike,
+        defFire: player.defFire + passiveSpellsStats.upDefFire,
+        defSlash: player.defSlash + passiveSpellsStats.upDefSlash,
+        defLightning: player.defLightning + passiveSpellsStats.upDefLightning,
+        defPierce: player.defPierce + passiveSpellsStats.upDefPierce,
+        defHoly: player.defHoly + passiveSpellsStats.upDefHoly
+    };
+
+    // Fonction pour gérer le clic sur un sort passif
     const togglePassiveSkill = (skill) => {
         if (selectedPassiveSkills.includes(skill)) {
             setSelectedPassiveSkills(selectedPassiveSkills.filter(s => s !== skill));
@@ -58,6 +93,8 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
             setSelectedPassiveSkills([...selectedPassiveSkills, skill]);
         }
     };
+
+    console.log('playerSkill', playerSkill)
 
     // Fonction pour gérer le clic sur un joueur de la liste
     const handleClickPlayer = (player) => {
@@ -87,7 +124,7 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
     const handleMouseLeave = () => {
         setHoveredSkill(null);
     };
-
+    // Fonction pour sauvegarder les compétences passives sélectionnées
     const saveSelectedPassiveSkills = async () => {
         setLoading(true);
         try {
@@ -99,8 +136,9 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                     Authorization: `Bearer ${session.customJwt}`,
                 }
             });
-            const updatedPlayer = await response.data;
-            console.log("responseData", updatedPlayer)
+            const updatedPlayerSkills = await response.data;
+            console.log("responseData", updatedPlayerSkills)
+            setPlayerSkill(updatedPlayerSkills.updatedPlayerSkills)
         } catch (error) {
             console.error(error);
         } finally {
@@ -168,7 +206,7 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
     const toggleMenu = () => {
         setIsMenuOpen(!isMenuOpen);
     };
-
+    // Fonction pour déplacer le joueur
     const movePlayer = async (direction) => {
         setLoading(true);
         try {
@@ -267,7 +305,6 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
     });
 
     if (session) {
-        const upHp = player.warPlayerSkills.find(skill => skill.warSkills.upHp === 'Up HP');
         return (
             <>
                 <HeadView />
@@ -389,11 +426,11 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                                             <div className="flex flex-col sm:flex-row justify-center">
                                                 <div className="flex-1 text-center mb-2 sm:mb-0 sm:mr-4">
                                                     <p className="font-bold">Force</p>
-                                                    <p>{selectedPlayer.str}</p>
+                                                    <p>{updatedPlayerStats.str}</p>
                                                 </div>
                                                 <div className="flex-1 text-center">
                                                     <p className="font-bold">Intelligence</p>
-                                                    <p>{selectedPlayer.intel}</p>
+                                                    <p>{updatedPlayerStats.intel}</p>
                                                 </div>
                                             </div>
                                         </div>
@@ -401,11 +438,11 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                                             <div className="flex flex-col sm:flex-row justify-center">
                                                 <div className="flex-1 text-center mb-2 sm:mb-0 sm:mr-4">
                                                     <p className="font-bold">Dextérité</p>
-                                                    <p>{selectedPlayer.dex}</p>
+                                                    <p>{updatedPlayerStats.dex}</p>
                                                 </div>
                                                 <div className="flex-1 text-center">
                                                     <p className="font-bold">Acuité</p>
-                                                    <p>{selectedPlayer.acu}</p>
+                                                    <p>{updatedPlayerStats.acu}</p>
                                                 </div>
                                             </div>
                                         </div>
@@ -413,11 +450,11 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                                             <div className="flex flex-col sm:flex-row justify-center">
                                                 <div className="flex-1 text-center mb-2 sm:mb-0 sm:mr-4">
                                                     <p className="font-bold">Chance de Critique</p>
-                                                    <p>{selectedPlayer.crit} %</p>
+                                                    <p>{updatedPlayerStats.crit} %</p>
                                                 </div>
                                                 <div className="flex-1 text-center">
                                                     <p className="font-bold">Régénération</p>
-                                                    <p>{selectedPlayer.regen}</p>
+                                                    <p>{updatedPlayerStats.regen}</p>
                                                 </div>
                                             </div>
                                         </div>
@@ -426,11 +463,11 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                                             <div className="flex flex-col sm:flex-row justify-center">
                                                 <div className="flex-1 text-center mb-2 sm:mb-0 sm:mr-4">
                                                     <p className="font-bold">Défense Physique</p>
-                                                    <p>{selectedPlayer.defP}</p>
+                                                    <p>{updatedPlayerStats.defP}</p>
                                                 </div>
                                                 <div className="flex-1 text-center">
                                                     <p className="font-bold">Défense Magique</p>
-                                                    <p>{selectedPlayer.defM}</p>
+                                                    <p>{updatedPlayerStats.defM}</p>
                                                 </div>
                                             </div>
                                         </div>
@@ -439,14 +476,14 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                                             <div className="flex flex-col sm:flex-row justify-center mb-2">
                                                 <div className="flex-1 text-center mb-2 sm:mb-0 sm:mr-4 relative group">
                                                     <p className="font-bold">Défense Standard</p>
-                                                    <p>{selectedPlayer.defPStand + selectedPlayer.defP}</p>
+                                                    <p>{updatedPlayerStats.defPStand + updatedPlayerStats.defP}</p>
                                                     <div className="absolute left-1/2 transform -translate-x-1/2 -top-8 hidden group-hover:block bg-gray-700 text-white text-xs rounded py-1 px-2">
                                                         {selectedPlayer.defPStand} + {selectedPlayer.defP} = {calculateDef(selectedPlayer, 'Pstandard')}% de réduction
                                                     </div>
                                                 </div>
                                                 <div className="flex-1 text-center relative group">
                                                     <p className="font-bold">Résistance Standard</p>
-                                                    <p>{selectedPlayer.defMStand + selectedPlayer.defM}</p>
+                                                    <p>{updatedPlayerStats.defMStand + updatedPlayerStats.defM}</p>
                                                     <div className="absolute left-1/2 transform -translate-x-1/2 -top-8 hidden group-hover:block bg-gray-700 text-white text-xs rounded py-1 px-2">
                                                         {selectedPlayer.defMStand} + {selectedPlayer.defM} = {calculateDef(selectedPlayer, 'Mstandard')}% de réduction
                                                     </div>
@@ -455,14 +492,14 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                                             <div className="flex flex-col sm:flex-row justify-center mb-2">
                                                 <div className="flex-1 text-center mb-2 sm:mb-0 sm:mr-4 relative group">
                                                     <p className="font-bold">Défense Perçante</p>
-                                                    <p>{selectedPlayer.defPierce + selectedPlayer.defP}</p>
+                                                    <p>{updatedPlayerStats.defPierce + updatedPlayerStats.defP}</p>
                                                     <div className="absolute left-1/2 transform -translate-x-1/2 -top-8 hidden group-hover:block bg-gray-700 text-white text-xs rounded py-1 px-2">
                                                         {selectedPlayer.defPierce} + {selectedPlayer.defP} = {calculateDef(selectedPlayer, 'Pierce')}% de réduction
                                                     </div>
                                                 </div>
                                                 <div className="flex-1 text-center relative group">
                                                     <p className="font-bold">Résistance Feu</p>
-                                                    <p>{selectedPlayer.defFire + selectedPlayer.defM}</p>
+                                                    <p>{updatedPlayerStats.defFire + updatedPlayerStats.defM}</p>
                                                     <div className="absolute left-1/2 transform -translate-x-1/2 -top-8 hidden group-hover:block bg-gray-700 text-white text-xs rounded py-1 px-2">
                                                         {selectedPlayer.defFire} + {selectedPlayer.defM} = {calculateDef(selectedPlayer, 'Fire')}% de réduction
                                                     </div>
@@ -471,14 +508,14 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                                             <div className="flex flex-col sm:flex-row justify-center mb-2">
                                                 <div className="flex-1 text-center mb-2 sm:mb-0 sm:mr-4 relative group">
                                                     <p className="font-bold">Défense Tranchante</p>
-                                                    <p>{selectedPlayer.defSlash + selectedPlayer.defP}</p>
+                                                    <p>{updatedPlayerStats.defSlash + updatedPlayerStats.defP}</p>
                                                     <div className="absolute left-1/2 transform -translate-x-1/2 -top-8 hidden group-hover:block bg-gray-700 text-white text-xs rounded py-1 px-2">
                                                         {selectedPlayer.defSlash} + {selectedPlayer.defP} = {calculateDef(selectedPlayer, 'Slash')}% de réduction
                                                     </div>
                                                 </div>
                                                 <div className="flex-1 text-center relative group">
                                                     <p className="font-bold">Résistance Foudre</p>
-                                                    <p>{selectedPlayer.defLightning + selectedPlayer.defM}</p>
+                                                    <p>{updatedPlayerStats.defLightning + updatedPlayerStats.defM}</p>
                                                     <div className="absolute left-1/2 transform -translate-x-1/2 -top-8 hidden group-hover:block bg-gray-700 text-white text-xs rounded py-1 px-2">
                                                         {selectedPlayer.defLightning} + {selectedPlayer.defM} = {calculateDef(selectedPlayer, 'Lightning')}% de réduction
                                                     </div>
@@ -487,14 +524,14 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                                             <div className="flex flex-col sm:flex-row justify-center mb-2">
                                                 <div className="flex-1 text-center mb-2 sm:mb-0 sm:mr-4 relative group">
                                                     <p className="font-bold">Défense Percutante</p>
-                                                    <p>{selectedPlayer.defStrike + selectedPlayer.defP}</p>
+                                                    <p>{updatedPlayerStats.defStrike + updatedPlayerStats.defP}</p>
                                                     <div className="absolute left-1/2 transform -translate-x-1/2 -top-8 hidden group-hover:block bg-gray-700 text-white text-xs rounded py-1 px-2">
                                                         {selectedPlayer.defHoly} + {selectedPlayer.defP} = {calculateDef(selectedPlayer, 'Strike')}% de réduction
                                                     </div>
                                                 </div>
                                                 <div className="flex-1 text-center relative group">
                                                     <p className="font-bold">Résistance Sacrée</p>
-                                                    <p>{selectedPlayer.defHoly + selectedPlayer.defM}</p>
+                                                    <p>{updatedPlayerStats.defHoly + updatedPlayerStats.defM}</p>
                                                     <div className="absolute left-1/2 transform -translate-x-1/2 -top-8 hidden group-hover:block bg-gray-700 text-white text-xs rounded py-1 px-2">
                                                         {selectedPlayer.defHoly} + {selectedPlayer.defM} = {calculateDef(selectedPlayer, 'Holy')}% de réduction
                                                     </div>
