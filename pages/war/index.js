@@ -413,7 +413,7 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                                                     <p>{selectedPlayer.hp}/{selectedPlayer.hpMax}</p>
                                                 <div
                                                     className="bg-red-600 h-2.5 rounded-full"
-                                                    style={{ width: `${(selectedPlayer.hp / selectedPlayer.maxHp) * 100}%` }}>
+                                                    style={{ width: `${(selectedPlayer.hp / selectedPlayer.hpMax) * 100}%` }}>
                                                 </div>
                                                 </div>
                                                 <div className="flex-1 text-center">
@@ -424,25 +424,37 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                                         </div>
                                         <div className="mt-4">
                                             <div className="flex flex-col sm:flex-row justify-center">
-                                                <div className="flex-1 text-center mb-2 sm:mb-0 sm:mr-4">
+                                                <div className="flex-1 text-center mb-2 sm:mb-0 sm:mr-4 relative group">
                                                     <p className="font-bold">Force</p>
                                                     <p>{updatedPlayerStats.str}</p>
+                                                    <div className="absolute left-1/2 transform -translate-x-1/2 -top-8 hidden group-hover:block bg-gray-700 text-white text-xs rounded py-1 px-2">
+                                                        Influe sur les dégats physiques
+                                                    </div>
                                                 </div>
-                                                <div className="flex-1 text-center">
+                                                <div className="flex-1 text-center relative group">
                                                     <p className="font-bold">Intelligence</p>
                                                     <p>{updatedPlayerStats.intel}</p>
+                                                    <div className="absolute left-1/2 transform -translate-x-1/2 -top-8 hidden group-hover:block bg-gray-700 text-white text-xs rounded py-1 px-2">
+                                                        Influe sur les dégats magiques
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
                                         <div className="mt-4">
                                             <div className="flex flex-col sm:flex-row justify-center">
-                                                <div className="flex-1 text-center mb-2 sm:mb-0 sm:mr-4">
+                                                <div className="flex-1 text-center mb-2 sm:mb-0 sm:mr-4 relative group">
                                                     <p className="font-bold">Dextérité</p>
                                                     <p>{updatedPlayerStats.dex}</p>
+                                                    <div className="absolute left-1/2 transform -translate-x-1/2 -top-8 hidden group-hover:block bg-gray-700 text-white text-xs rounded py-1 px-2">
+                                                        Permet d&apos;esquiver les attaques physiques
+                                                    </div>
                                                 </div>
-                                                <div className="flex-1 text-center">
+                                                <div className="flex-1 text-center relative group">
                                                     <p className="font-bold">Acuité</p>
                                                     <p>{updatedPlayerStats.acu}</p>
+                                                    <div className="absolute left-1/2 transform -translate-x-1/2 -top-8 hidden group-hover:block bg-gray-700 text-white text-xs rounded py-1 px-2">
+                                                        Permet de bloquer les attaques magiques
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -452,9 +464,12 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                                                     <p className="font-bold">Chance de Critique</p>
                                                     <p>{updatedPlayerStats.crit} %</p>
                                                 </div>
-                                                <div className="flex-1 text-center">
+                                                <div className="flex-1 text-center relative group">
                                                     <p className="font-bold">Régénération</p>
                                                     <p>{updatedPlayerStats.regen}</p>
+                                                    <div className="absolute left-1/2 transform -translate-x-1/2 -top-8 hidden group-hover:block bg-gray-700 text-white text-xs rounded py-1 px-2">
+                                                        Récupération de {updatedPlayerStats.regen} points de vie par heure
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -478,14 +493,14 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                                                     <p className="font-bold">Défense Standard</p>
                                                     <p>{updatedPlayerStats.defPStand + updatedPlayerStats.defP}</p>
                                                     <div className="absolute left-1/2 transform -translate-x-1/2 -top-8 hidden group-hover:block bg-gray-700 text-white text-xs rounded py-1 px-2">
-                                                        {selectedPlayer.defPStand} + {selectedPlayer.defP} = {calculateDef(selectedPlayer, 'Pstandard')}% de réduction
+                                                        {updatedPlayerStats.defPStand} + {updatedPlayerStats.defP} = {calculateDef(updatedPlayerStats, 'Pstandard')}% de réduction (max 80%)
                                                     </div>
                                                 </div>
                                                 <div className="flex-1 text-center relative group">
                                                     <p className="font-bold">Résistance Standard</p>
                                                     <p>{updatedPlayerStats.defMStand + updatedPlayerStats.defM}</p>
                                                     <div className="absolute left-1/2 transform -translate-x-1/2 -top-8 hidden group-hover:block bg-gray-700 text-white text-xs rounded py-1 px-2">
-                                                        {selectedPlayer.defMStand} + {selectedPlayer.defM} = {calculateDef(selectedPlayer, 'Mstandard')}% de réduction
+                                                        {updatedPlayerStats.defMStand} + {updatedPlayerStats.defM} = {calculateDef(updatedPlayerStats, 'Mstandard')}% de réduction (max 80%)
                                                     </div>
                                                 </div>
                                             </div>
@@ -494,14 +509,14 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                                                     <p className="font-bold">Défense Perçante</p>
                                                     <p>{updatedPlayerStats.defPierce + updatedPlayerStats.defP}</p>
                                                     <div className="absolute left-1/2 transform -translate-x-1/2 -top-8 hidden group-hover:block bg-gray-700 text-white text-xs rounded py-1 px-2">
-                                                        {selectedPlayer.defPierce} + {selectedPlayer.defP} = {calculateDef(selectedPlayer, 'Pierce')}% de réduction
+                                                        {updatedPlayerStats.defPierce} + {updatedPlayerStats.defP} = {calculateDef(updatedPlayerStats, 'Pierce')}% de réduction (max 80%)
                                                     </div>
                                                 </div>
                                                 <div className="flex-1 text-center relative group">
                                                     <p className="font-bold">Résistance Feu</p>
                                                     <p>{updatedPlayerStats.defFire + updatedPlayerStats.defM}</p>
                                                     <div className="absolute left-1/2 transform -translate-x-1/2 -top-8 hidden group-hover:block bg-gray-700 text-white text-xs rounded py-1 px-2">
-                                                        {selectedPlayer.defFire} + {selectedPlayer.defM} = {calculateDef(selectedPlayer, 'Fire')}% de réduction
+                                                        {updatedPlayerStats.defFire} + {updatedPlayerStats.defM} = {calculateDef(updatedPlayerStats, 'Fire')}% de réduction (max 80%)
                                                     </div>
                                                 </div>
                                             </div>
@@ -510,14 +525,14 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                                                     <p className="font-bold">Défense Tranchante</p>
                                                     <p>{updatedPlayerStats.defSlash + updatedPlayerStats.defP}</p>
                                                     <div className="absolute left-1/2 transform -translate-x-1/2 -top-8 hidden group-hover:block bg-gray-700 text-white text-xs rounded py-1 px-2">
-                                                        {selectedPlayer.defSlash} + {selectedPlayer.defP} = {calculateDef(selectedPlayer, 'Slash')}% de réduction
+                                                        {updatedPlayerStats.defSlash} + {updatedPlayerStats.defP} = {calculateDef(updatedPlayerStats, 'Slash')}% de réduction (max 80%)
                                                     </div>
                                                 </div>
                                                 <div className="flex-1 text-center relative group">
                                                     <p className="font-bold">Résistance Foudre</p>
                                                     <p>{updatedPlayerStats.defLightning + updatedPlayerStats.defM}</p>
                                                     <div className="absolute left-1/2 transform -translate-x-1/2 -top-8 hidden group-hover:block bg-gray-700 text-white text-xs rounded py-1 px-2">
-                                                        {selectedPlayer.defLightning} + {selectedPlayer.defM} = {calculateDef(selectedPlayer, 'Lightning')}% de réduction
+                                                        {updatedPlayerStats.defLightning} + {updatedPlayerStats.defM} = {calculateDef(updatedPlayerStats, 'Lightning')}% de réduction (max 80%)
                                                     </div>
                                                 </div>
                                             </div>
@@ -526,14 +541,14 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                                                     <p className="font-bold">Défense Percutante</p>
                                                     <p>{updatedPlayerStats.defStrike + updatedPlayerStats.defP}</p>
                                                     <div className="absolute left-1/2 transform -translate-x-1/2 -top-8 hidden group-hover:block bg-gray-700 text-white text-xs rounded py-1 px-2">
-                                                        {selectedPlayer.defHoly} + {selectedPlayer.defP} = {calculateDef(selectedPlayer, 'Strike')}% de réduction
+                                                        {updatedPlayerStats.defHoly} + {updatedPlayerStats.defP} = {calculateDef(updatedPlayerStats, 'Strike')}% de réduction (max 80%)
                                                     </div>
                                                 </div>
                                                 <div className="flex-1 text-center relative group">
                                                     <p className="font-bold">Résistance Sacrée</p>
                                                     <p>{updatedPlayerStats.defHoly + updatedPlayerStats.defM}</p>
                                                     <div className="absolute left-1/2 transform -translate-x-1/2 -top-8 hidden group-hover:block bg-gray-700 text-white text-xs rounded py-1 px-2">
-                                                        {selectedPlayer.defHoly} + {selectedPlayer.defM} = {calculateDef(selectedPlayer, 'Holy')}% de réduction
+                                                        {updatedPlayerStats.defHoly} + {updatedPlayerStats.defM} = {calculateDef(updatedPlayerStats, 'Holy')}% de réduction (max 80%)
                                                     </div>
                                                 </div>
                                             </div>
@@ -623,10 +638,10 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                                                 </div>
                                                 <span className="font-bold">{skill.warSkills.name} ({skill.warSkills.cost} PA)</span>
                                                 <span className={`${skill.warSkills.stat === 'str' ? 'text-orange-500' : 'text-green-500'} ml-2 md:ml-4`}>
-                                                    {calculateDmg(player, skill.warSkills.stat, skill.warSkills.dmgMin, skill.warSkills.divider)} - {calculateDmg(player, skill.warSkills.stat, skill.warSkills.dmgMax, skill.warSkills.divider)} dmg
+                                                    {calculateDmg(updatedPlayerStats, skill.warSkills.stat, skill.warSkills.dmgMin, skill.warSkills.divider)} - {calculateDmg(updatedPlayerStats, skill.warSkills.stat, skill.warSkills.dmgMax, skill.warSkills.divider)} dmg
                                                 </span>
                                                 <span className="ml-2 text-red-500 md:ml-4">
-                                                    Crit {calculateDmg(player, skill.warSkills.stat, skill.warSkills.crit, skill.warSkills.divider)} dmg
+                                                    Crit {calculateDmg(updatedPlayerStats, skill.warSkills.stat, skill.warSkills.crit, skill.warSkills.divider)} dmg
                                                 </span>
                                                 <span className="ml-2 md:ml-4">
                                                     Portée {skill.warSkills.dist}
