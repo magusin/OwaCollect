@@ -2,6 +2,7 @@ import Cors from 'cors'
 import { PrismaClient } from '@prisma/client'
 import jwt from 'jsonwebtoken';
 import { getToken } from "next-auth/jwt";
+import { calculateDistance, calculatePassiveSpellsStats, finalStats } from '../../fight';
 
 // Initialiser le midleware Cors
 const allowedOrigins = [process.env.NEXTAUTH_URL]
@@ -70,9 +71,17 @@ export default async function handler(req, res) {
                 return res.status(400).json({ message: 'Paramètres manquants' });
             }
 
-            const player = await prisma.player.findUnique({
+            const player = await prisma.warPlayers.findUnique({
                 where: {
-                    id: decoded.id
+                    petId: decoded.id
+                },
+                include: {
+                    map: true,
+                    warPlayerSkills: {
+                        include: {
+                            warSkills: true
+                        }
+                    }
                 }
             });
 
@@ -80,6 +89,56 @@ export default async function handler(req, res) {
                 return res.status(404).json({ message: 'Joueur non trouvé' });
             }
 
+            const opponent = await prisma.warPlayers.findUnique({
+                where: {
+                    petId: opponentId
+                },
+                include: {
+                    map: true,
+                    warPlayerSkills: {
+                        include: {
+                            warSkills: true
+                        }
+                    }
+                }
+            });
+
+            if (!opponent) {
+                return res.status(404).json({ message: 'Adversaire non trouvé' });
+            }
+
+            const skill = await prisma.warPlayerSkills.findUnique({
+                where: {
+                    petId_skillId : {
+                    petId: decoded.id,
+                    skillId: spellId
+                    }
+                },
+                include: {
+                    warSkills: true
+                }
+            });   
+
+            if (!skill) {
+                return res.status(404).json({ message: 'Sort non trouvé' });
+            }
+
+            if (player.pa < skill.warSkills.cost) {
+                return res.status(400).json({ message: 'Pas assez de PA pour lancer le sort' });
+            }
+
+            const distance = calculateDistance(player.map, opponent.map);
+            
+            if (distance > skill.warSkills.dist) {
+                return res.status(400).json({ message: 'Cible hors de portée' });
+            }
+
+            const playerPassifSkillsStats = calculatePassiveSpellsStats(player.warPlayerSkills.filter(skill => skill.warSkills.type === 'passif' && skill.isSelected === true) || []);
+            const opponentPassifSkillsStats = calculatePassiveSpellsStats(opponent.warPlayerSkills.filter(skill => skill.warSkills.type === 'passif' && skill.isSelected === true) || []);
+            const playerFinalStats = finalStats(player, playerPassifSkillsStats);
+            const opponentFinalStats = finalStats(opponent, opponentPassifSkillsStats);
+
+            console.log("playerFinalStats", playerFinalStats);
             return res.status(200).json(player);
         } else {
             return res.status(405).json({ message: 'Méthode non autorisée' });

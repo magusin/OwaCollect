@@ -85,10 +85,10 @@ export default async function handler(req, res) {
 
                 switch (direction) {
                     case 'up':
-                        playerY -= 1
+                        playerY += 1
                         break;
                     case 'down':
-                        playerY += 1
+                        playerY -= 1
                         break;
                     case 'left':
                         playerX -= 1
@@ -98,7 +98,7 @@ export default async function handler(req, res) {
                         break;
                 }
 
-                if (playerX < 1 || playerY < 1 || playerX > 11 || playerY > 11) {
+                if (playerX < 1 || playerY < 1 || playerX > 20 || playerY > 20) {
                     return res.status(400).json({ message: 'Déplacement impossible' });
                 }
 
@@ -120,9 +120,9 @@ export default async function handler(req, res) {
 
                 // Déterminez les coordonnées de la plage de tuiles autour du joueur
                 const startX = Math.max(1, playerX - 5);
-                const endX = Math.min(11, playerX + 5);
+                const endX = Math.min(20, playerX + 5);
                 const startY = Math.max(1, playerY - 5);
-                const endY = Math.min(11, playerY + 5);
+                const endY = Math.min(20, playerY + 5);
 
                 // Sélectionnez les tuiles dans la plage de coordonnées
                 const tiles = await prisma.map.findMany({

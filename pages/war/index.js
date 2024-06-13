@@ -5,12 +5,12 @@ import axios from "axios";
 import calculatePoints from "../../utils/calculatePoints";
 import { signOut, useSession } from 'next-auth/react';
 import Header from 'C/header';
+import Alert from "C/alert";
 import Head from 'next/head';
 import Script from 'next/script'
 import calculateDmg from "../../utils/calculateDmg";
 import calculateDef from "../../utils/calculateDef";
 import calculatePassiveSpellsStats from "../../utils/calculatePassiveSpellsStats";
-
 
 export default function War({ errorServer, war, initialPlayer, totalPoints }) {
     const { data: session, status } = useSession();
@@ -52,6 +52,10 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
     const [selectedFightSpell, setSelectedFightSpell] = useState(null);
     // Stocker les skills sélectionnés
     const [selectedPassiveSkills, setSelectedPassiveSkills] = useState([]);
+    // Alert
+    const [alertMessage, setAlertMessage] = useState('');
+    const [showAlert, setShowAlert] = useState(false);
+    const [alertType, setAlertType] = useState(null);
 
     const passiveSpellsStats = calculatePassiveSpellsStats(selectedPassiveSkills);
 
@@ -94,8 +98,6 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
         }
     };
 
-    console.log('playerSkill', playerSkill)
-
     // Fonction pour gérer le clic sur un joueur de la liste
     const handleClickPlayer = (player) => {
         // setSelectedTilePlayers(null)
@@ -106,7 +108,7 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
     };
 
     const handleSelectFightSpell = (spell) => {
-        setIsModalFight(false);
+        attackPlayer(selectedPlayer.petId, spell.skillId);
     }
 
     const handleClickFight = () => {
@@ -137,7 +139,6 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                 }
             });
             const updatedPlayerSkills = await response.data;
-            console.log("responseData", updatedPlayerSkills)
             setPlayerSkill(updatedPlayerSkills.updatedPlayerSkills)
         } catch (error) {
             console.error(error);
@@ -193,10 +194,10 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
     const handleClickMove = () => {
         // Logique pour déterminer les directions disponibles pour le déplacement du joueur
         const directions = {
-            up: positionPlayerY > 1,
-            down: positionPlayerY < 11,
+            up: positionPlayerY < 20,
+            down: positionPlayerY > 1,
             left: positionPlayerX > 1,
-            right: positionPlayerX < 11
+            right: positionPlayerX < 20
         };
         setAvailableDirections(directions);
         setIsMenuMoveOpen(true);
@@ -228,7 +229,12 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
             // setIsModalOpen(false);
 
         } catch (error) {
-            console.error(error);
+            setAlertMessage(`${error.response.data.message}`);
+            setAlertType('error');
+            setShowAlert(true);
+            setTimeout(() => {
+            setShowAlert(false);
+            }, 5000);
         } finally {
             setLoading(false);
         }
@@ -238,7 +244,7 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
         setLoading(true);
         try {
             const response = await axios.post(`/api/war/player/fight`, {
-                opponentId,
+                opponentId, spellId
             }, {
                 headers: {
                     'Content-Type': 'application/json',
@@ -246,13 +252,20 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                 }
             });
             const updatedPlayer = await response.data;
-            console.log("responseData", updatedPlayer)
+            console.log(updatedPlayer);
+
             // setPlayer(updatedPlayer.updatedUser);
             // setTiles(updatedPlayer.tiles);
             // setCoordinates(updatedPlayer.allCoordinates);
             // setIsModalOpen(false);
         } catch (error) {
-            console.error(error);
+            setAlertMessage(`${error.response.data.message}`);
+            setAlertType('error');
+            setShowAlert(true);
+            setTimeout(() => {
+            setShowAlert(false);
+            }, 5000);
+            
         } finally {
             setLoading(false);
         }
@@ -299,7 +312,7 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
     // Trier les tuiles en fonction de leur position X et Y croissantes
     const sortedTiles = tilesWithEmpty.sort((a, b) => {
         if (a.position_y !== b.position_y) {
-            return a.position_y - b.position_y;
+            return b.position_y - a.position_y;
         }
         return a.position_x - b.position_x;
     });
@@ -463,6 +476,24 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                                                 <div className="flex-1 text-center mb-2 sm:mb-0 sm:mr-4">
                                                     <p className="font-bold">Chance de Critique</p>
                                                     <p>{updatedPlayerStats.crit} %</p>
+                                                </div>
+                                                <div className="flex-1 text-center mb-2 sm:mb-0 sm:mr-4 relative group">
+                                                    <p className="font-bold">Chance de Toucher</p>
+                                                    <p>+{updatedPlayerStats.hit} %</p>
+                                                    <div className="absolute left-1/2 transform -translate-x-1/2 -top-8 hidden group-hover:block bg-gray-700 text-white text-xs rounded py-1 px-2">
+                                                        S&apos;additionne aux chance de toucher de chaque sort (max 95%)
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="mt-4">
+                                            <div className="flex flex-col sm:flex-row justify-center">
+                                                <div className="flex-1 text-center mb-2 sm:mb-0 sm:mr-4 relative group">
+                                                    <p className="font-bold">Points d&apos;Action</p>
+                                                    <p>{updatedPlayerStats.pa}</p>
+                                                    <div className="absolute left-1/2 transform -translate-x-1/2 -top-8 hidden group-hover:block bg-gray-700 text-white text-xs rounded py-1 px-2">
+                                                        Récupération de 4 PA par heure (max {updatedPlayerStats.paMax})
+                                                    </div>
                                                 </div>
                                                 <div className="flex-1 text-center relative group">
                                                     <p className="font-bold">Régénération</p>
@@ -657,7 +688,7 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                                 </ul>
                                 {/* Bouton pour fermer la fenêtre modale */}
                                 <div className="flex justify-center absolute bottom-4 left-1/2 transform -translate-x-1/2">
-                                    <button disabled={selectedFightSpell === null} onClick={() => handleSelectFightSpell(spell)} className={`bg-green-500 text-white py-2 px-4 rounded mr-4 ${selectedFightSpell === null ? 'bg-stone-500' : ''}`}>Confirmer</button>
+                                    <button disabled={selectedFightSpell === null} onClick={() => handleSelectFightSpell(selectedFightSpell)} className={`bg-green-500 text-white py-2 px-4 rounded mr-4 ${selectedFightSpell === null ? 'bg-stone-500' : ''}`}>Confirmer</button>
                                     <button onClick={closeModalFight} className="bg-red-500 text-white py-2 px-4 rounded">Retour</button>
                                 </div>
                             </div>
@@ -792,6 +823,13 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                             </filter>
                         </defs>
                     </svg>
+                    {showAlert && (
+                        <Alert
+                        type={alertType}
+                        message={alertMessage}
+                        close={setShowAlert}
+                        />
+                        )}
                 </div>
             </>
         );

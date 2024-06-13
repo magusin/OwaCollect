@@ -100,8 +100,6 @@ export default function Login() {
   }
 
   if (session && user) {
-    console.log('session', session)
-
     return (
       <>
       <HeadView />

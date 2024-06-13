@@ -52,11 +52,12 @@ export default function SecretShop({ cards, totalPoints, errorServer }) {
         setShowModal(false);
         if (points >= cost) {
             try {
-                const response = await axiosInstance.put('/api/user/card/buy', { 
-                    id, 
-                    cost }, {
-                        customConfig: { session: session }
-                    });
+                const response = await axiosInstance.put('/api/user/card/buy', {
+                    id,
+                    cost
+                }, {
+                    customConfig: { session: session }
+                });
                 if (response.status === 200) {
                     const data = await response.data
                     localStorage.setItem('userOC', JSON.stringify(data.userData));
@@ -72,7 +73,7 @@ export default function SecretShop({ cards, totalPoints, errorServer }) {
                     }, 5000);
 
                     let selectedCard = data.allPlayerCards.find(card => card.card.id === data.updatedCard.cardId);
-                    setSelectedCard(selectedCard.card)  
+                    setSelectedCard(selectedCard.card)
                 }
 
             } catch (error) {
@@ -133,14 +134,14 @@ export default function SecretShop({ cards, totalPoints, errorServer }) {
     if (error) {
         return (
             <>
-            <HeadView />
-            <div className="flex flex-col h-screen" style={{ marginTop: "80px" }}>
-                <Header points={points} />
-                <div className="flex-grow flex justify-center items-center">
-                    <span className="text-center text-red-500">⚠ {error}</span>
+                <HeadView />
+                <div className="flex flex-col h-screen" style={{ marginTop: "80px" }}>
+                    <Header points={points} />
+                    <div className="flex-grow flex justify-center items-center">
+                        <span className="text-center text-red-500">⚠ {error}</span>
+                    </div>
+                    <Footer />
                 </div>
-                <Footer />
-            </div>
             </>
         );
     }
@@ -148,14 +149,14 @@ export default function SecretShop({ cards, totalPoints, errorServer }) {
     if (status === "loading" || loading) {
         return (
             <>
-            <HeadView />
-            <div className="flex flex-col h-screen" style={{ marginTop: "80px" }}>
-                <Header points={points} />
-                <div className="flex-grow flex justify-center items-center">
-                    <span className="text-center"><svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24"><path fill="#1f2937" d="M12,4a8,8,0,0,1,7.89,6.7A1.53,1.53,0,0,0,21.38,12h0a1.5,1.5,0,0,0,1.48-1.75,11,11,0,0,0-21.72,0A1.5,1.5,0,0,0,2.62,12h0a1.53,1.53,0,0,0,1.49-1.3A8,8,0,0,1,12,4Z"><animateTransform attributeName="transform" dur="0.75s" repeatCount="indefinite" type="rotate" values="0 12 12;360 12 12" /></path></svg></span>
+                <HeadView />
+                <div className="flex flex-col h-screen" style={{ marginTop: "80px" }}>
+                    <Header points={points} />
+                    <div className="flex-grow flex justify-center items-center">
+                        <span className="text-center"><svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24"><path fill="#1f2937" d="M12,4a8,8,0,0,1,7.89,6.7A1.53,1.53,0,0,0,21.38,12h0a1.5,1.5,0,0,0,1.48-1.75,11,11,0,0,0-21.72,0A1.5,1.5,0,0,0,2.62,12h0a1.53,1.53,0,0,0,1.49-1.3A8,8,0,0,1,12,4Z"><animateTransform attributeName="transform" dur="0.75s" repeatCount="indefinite" type="rotate" values="0 12 12;360 12 12" /></path></svg></span>
+                    </div>
+                    <Footer />
                 </div>
-                <Footer />
-            </div>
             </>
         )
     }
@@ -166,39 +167,39 @@ export default function SecretShop({ cards, totalPoints, errorServer }) {
             const ownedCardIds = new Set(playerCards.map(card => card.cardId));
             // const secretCardsToBuy = [74, 99, 100].filter(number => !ownedCardIds.has(number));
             const secretCardsToBuy = [];
-                if (selectedCategory === "Elden Ring") {
-                    const eldenRingCardsIds = [74, 99, 100];
-                    for (const id of eldenRingCardsIds) {
-                        const card = ownedCardIds.has(id)
-                        if (!card) {
-                            secretCardsToBuy.push({ card: { cardId: id, number: id } });
-                        }
+            if (selectedCategory === "Elden Ring") {
+                const eldenRingCardsIds = [74, 99, 100];
+                for (const id of eldenRingCardsIds) {
+                    const card = ownedCardIds.has(id)
+                    if (!card) {
+                        secretCardsToBuy.push({ card: { cardId: id, number: id } });
                     }
-                } else if (selectedCategory === "Dark Souls") {
-                    const darkSoulsCardsIds = [170];
-                    for (const id of darkSoulsCardsIds) {
-                        const card = ownedCardIds.has(id)
-                        if (!card) {
-                            secretCardsToBuy.push({ card: { cardId: id, number: 49 } });
-                        }
+                }
+            } else if (selectedCategory === "Dark Souls") {
+                const darkSoulsCardsIds = [170];
+                for (const id of darkSoulsCardsIds) {
+                    const card = ownedCardIds.has(id)
+                    if (!card) {
+                        secretCardsToBuy.push({ card: { cardId: id, number: 49 } });
                     }
-                }   
-            
+                }
+            }
+
             return (
                 <>
-            <HeadView />
-                <div className="flex flex-col h-screen" >
-                    <Header points={points} />
-                    <div className="flex-grow mt-4 flex flex-col items-center" style={{ marginTop: "80px" }}>
-                        <Image
-                            src="/images/salesman.webp"
-                            alt="salesman"
-                            priority={true}
-                            width={600}
-                            height={525}
-                        />
-                    </div>
-                    <div className="flex flex-wrap justify-center">
+                    <HeadView />
+                    <div className="flex flex-col h-screen" >
+                        <Header points={points} />
+                        <div className="flex-grow mt-4 flex flex-col items-center" style={{ marginTop: "80px" }}>
+                            <Image
+                                src="/images/salesman.webp"
+                                alt="salesman"
+                                priority={true}
+                                width={600}
+                                height={525}
+                            />
+                        </div>
+                        <div className="flex flex-wrap justify-center">
                             <div className={`cursor-pointer relative w-16 w-[200px] h-[100px] sm:w-[250px] md:w-[300px] lg:w-[350px] xl:w-[400px] 2xl:w-[450px] m-4 ${selectedCategory === 'Elden Ring' ? 'opacity-100' : 'opacity-50'}`} onClick={() => handleCategoryChange('Elden Ring')} >
                                 <Image
                                     src="/images/elden-ring-banner.webp"
@@ -220,91 +221,91 @@ export default function SecretShop({ cards, totalPoints, errorServer }) {
                                 />
                             </div>
                         </div>
-                    <div className="flex-grow mt-4 flex flex-wrap justify-center">
-                        {secretCardsToBuy.map(card => (
-                            <div key={card.card.cardId} className={`p-4 border-2 ${darkMode ? 'border-white' : 'border-black'} rounded-lg m-2 text-center max-w-xs md:max-w-sm lg:max-w-md xl:max-w-lg`}>
-                                <h3 className="font-bold mb-4">Carte {card.card.number}</h3>
-                                <p className="mb-4">Prix: <b>500 OC</b></p>
-                                <button
-                                    className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700 transition duration-300"
-                                    onClick={() => handleBuyCard(card.card.cardId)}
-                                >
-                                    Acheter
-                                </button>
-                                {showModal && (
-                                    <Modal
-                                        setShowModal={setShowModal}
-                                        handleConfirm={() => handleConfirmBuyCard(cardToBuy, 500)}
-                                        title="Confirmation d'achat"
-                                        message={
-                                            <>
-                                                {/* eslint-disable-next-line react/no-unescaped-entities */}
-                                                Êtes-vous sûr de vouloir acheter la carte {cardToBuy} pour <b>500 OC</b> ?
-                                            </>
-                                        }
-                                    />
-                                )}
-                            </div>
-                        ))}
-                    </div>
-                    {selectedCard && (
-                        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-20 px-4 py-6 overflow-y-auto h-full w-full">
-                        <div className="flex flex-wrap flex-row p-4 h-full w-full items-center justify-center md:flex-col">
-                            {/* Image card */}
-                            <div className="relative h-full" style={{ width: '100%', maxWidth: '100vh' }}>
-                                <div className="aspect-w-1 aspect-h-1 ">
-                                    <Image
-                                        priority={true}
-                                        src={`${selectedCard.picture}.png`}
-                                        alt={'Dos de la carte ' + selectedCard.id}
-                                        layout="fill"
-                                        objectFit="contain"
-                                        sizes="100%"
-                                    />
+                        <div className="flex-grow mt-4 flex flex-wrap justify-center">
+                            {secretCardsToBuy.map(card => (
+                                <div key={card.card.cardId} className={`p-4 border-2 ${darkMode ? 'border-white' : 'border-black'} rounded-lg m-2 text-center max-w-xs md:max-w-sm lg:max-w-md xl:max-w-lg`}>
+                                    <h3 className="font-bold mb-4">Carte {card.card.number}</h3>
+                                    <p className="mb-4">Prix: <b>500 OC</b></p>
+                                    <button
+                                        className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700 transition duration-300"
+                                        onClick={() => handleBuyCard(card.card.cardId)}
+                                    >
+                                        Acheter
+                                    </button>
+                                    {showModal && (
+                                        <Modal
+                                            setShowModal={setShowModal}
+                                            handleConfirm={() => handleConfirmBuyCard(cardToBuy, 500)}
+                                            title="Confirmation d'achat"
+                                            message={
+                                                <>
+                                                    {/* eslint-disable-next-line react/no-unescaped-entities */}
+                                                    Êtes-vous sûr de vouloir acheter la carte {cardToBuy} pour <b>500 OC</b> ?
+                                                </>
+                                            }
+                                        />
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                        {selectedCard && (
+                            <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-20 px-4 py-6 overflow-y-auto h-full w-full">
+                                <div className="flex flex-wrap flex-row p-4 h-full w-full items-center justify-center md:flex-col">
+                                    {/* Image card */}
+                                    <div className="relative h-full" style={{ width: '100%', maxWidth: '100vh' }}>
+                                        <div className="aspect-w-1 aspect-h-1 ">
+                                            <Image
+                                                priority={true}
+                                                src={`${selectedCard.picture}.png`}
+                                                alt={'Dos de la carte ' + selectedCard.id}
+                                                layout="fill"
+                                                objectFit="contain"
+                                                sizes="100%"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    {/* Button close */}
+                                    <button onClick={closeEnlargeView} className="w-full sm:w-auto bg-red-500 text-white py-2 px-4 rounded mt-4 sm:mt-0 sm:absolute sm:top-2 sm:right-2">
+                                        Fermer
+                                    </button>
                                 </div>
                             </div>
-                            
-                            {/* Button close */}
-                            <button onClick={closeEnlargeView} className="w-full sm:w-auto bg-red-500 text-white py-2 px-4 rounded mt-4 sm:mt-0 sm:absolute sm:top-2 sm:right-2">
-                                Fermer
-                            </button>
-                        </div>
-                    </div>
-                    )}
-                    {showAlert && (
-                        <Alert
-                        type={alertType}
-                        message={alertMessage}
-                        close={setShowAlert}
-                        />
+                        )}
+                        {showAlert && (
+                            <Alert
+                                type={alertType}
+                                message={alertMessage}
+                                close={setShowAlert}
+                            />
                         )}
                         <Footer />
-                </div>
-                        </>
+                    </div>
+                </>
             );
         } else {
             return (
                 <>
-                <HeadView />
-                <div className="flex flex-col h-screen">
-                    <Header points={points} />
-                    <div className="flex-grow items-start justify-center" >
-                        <div className="relative w-full h-screen">
-                        <button className='absolute z-20 right-5 top-1/2 -translate-y-1/2 bg-white bg-opacity-20 hover:bg-opacity-50 md:text-xl text-white font-bold py-2 px-4 rounded-full'
-                    onClick={() => router.push('/scribe')}>Scribe</button>
-                            <Image
-                                src="/images/closed.png"
-                                alt="Fond"
-                                layout="fill"
-                                objectFit="cover"
-                                objectPosition={"center"}
-                                priority={true}
-                            />
+                    <HeadView />
+                    <div className="flex flex-col h-screen">
+                        <Header points={points} />
+                        <div className="flex-grow items-start justify-center" >
+                            <div className="relative w-full h-screen">
+                                <button className='absolute z-20 right-5 top-1/2 -translate-y-1/2 bg-white bg-opacity-20 hover:bg-opacity-50 md:text-xl text-white font-bold py-2 px-4 rounded-full'
+                                    onClick={() => router.push('/scribe')}>Scribe</button>
+                                <Image
+                                    src="/images/closed.png"
+                                    alt="Fond"
+                                    layout="fill"
+                                    objectFit="cover"
+                                    objectPosition={"center"}
+                                    priority={true}
+                                />
+                            </div>
                         </div>
+                        <Footer />
                     </div>
-                    <Footer />
-                </div>
-                    </>
+                </>
             );
         }
     }
@@ -321,7 +322,7 @@ export async function getServerSideProps(context) {
         };
     }
 
-    
+
     try {
         const response = await axios.get(`${process.env.NEXTAUTH_URL}/api/user/card`, {
             headers: {
@@ -333,7 +334,7 @@ export async function getServerSideProps(context) {
         const cards = await response.data;
         const timestamp = new Date().getTime().toString();
         const signature = await axios.post(`${process.env.NEXTAUTH_URL}/api/generateSignature`, {
-            timestamp: timestamp       
+            timestamp: timestamp
         }, {
             headers: {
                 'Content-Type': 'application/json',

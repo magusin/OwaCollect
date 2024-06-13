@@ -62,7 +62,6 @@ export default async function handler(req, res) {
         }
 
         const { spells } = req.body;
-        console.log(spells);
         if (!spells) {
             return res.status(400).json({ message: 'Spells non fournis' });
         }

@@ -55,7 +55,7 @@ export default async function handler(req, res) {
             return res.status(401).json({ message: 'Utilisateur non authentifié' });
         }
         const token = req.headers.authorization?.split(' ')[1];
-        // console.log('req.headers', req.headers)
+       
         if (!token) {
             return res.status(401).json({ message: 'Token non fourni' });
         }
