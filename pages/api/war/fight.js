@@ -1,69 +1,78 @@
-export function calculateDefensePercent(defense) {
-    return defense / (100 + defense);
+function calculateDef (player, type) {
+    if (type === 'Pstandard') {
+        return ((player.defPStand + player.defP) / (100 + player.defPStand + player.level + player.defP) * 100).toFixed(2)
+    }
+
+    if (type === 'Mstandard') {
+        return ((player.defMStand + player.defM) / (100 + player.defMStand + player.level + player.defM) * 100).toFixed(2)
+    }
+
+    if (type === 'Pierce') {
+        return ((player.defPierce + player.defP) / (100 + player.defPierce + player.level + player.defP) * 100).toFixed(2) 
+    }
+
+    if (type === 'Strike') {
+        return ((player.defStrike + player.defP) / (100 + player.defStrike + player.level + player.defP) * 100).toFixed(2) 
+    }
+
+    if (type === 'Slash') {
+        return ((player.defSlash + player.defP) / (100 + player.defSlash + player.level + player.defP) * 100).toFixed(2)
+    }
+
+    if (type === 'Fire') {
+        return ((player.defFire + player.defM) / (100 + player.defFire + player.level + player.defM) * 100).toFixed(2)
+    }
+                                                                                                                                                                         
+    if (type === 'Lightning') {
+        return ((player.defLightning + player.defM) / (100 + player.defLightning + player.level + player.defM) * 100).toFixed(2) 
+    }
+
+    if (type === 'Holy') {
+        return ((player.defHoly + player.defM) / (100 + player.defHoly + player.level + player.defM) * 100).toFixed(2)
+    }
 }
 
-function calculateDamage(attacker, spell, defender, isPhysical) {
-    const baseDamage = isPhysical ? attacker.str : attacker.intel;
+export function calculateDamage(attacker, spell, defender) {
+    const baseDamage = spell.stat === 'str' ? attacker.str : attacker.intel;
     const minDamage = spell.dmgMin;
     const maxDamage = spell.dmgMax;
     const randomDamage = Math.floor(Math.random() * (maxDamage - minDamage + 1)) + minDamage;
-    const rawDamage = Math.ceil(baseDamage / spell.divider) + randomDamage;
+    const rawDamage = Math.floor(baseDamage / spell.divider) + randomDamage;
 
-    let defense = isPhysical ? defender.def : defender.defM;
-    let defensePercent = calculateDefensePercent(defense);
-
+    let defense = calculateDef(defender, spell.dmgType)
     // Réduction des dégâts par la défense en pourcentage
-    const reducedDamage = rawDamage * (1 - defensePercent);
+    const totalDamage = rawDamage - Math.ceil(rawDamage * defense / 100) 
 
-    return reducedDamage > 0 ? reducedDamage : 0; // Les dégâts ne peuvent pas être négatifs
+    return totalDamage > 0 ? totalDamage : 1; // Les dégâts doivent être d'un minimum de 1
 }
 
-function castSpell(attacker, defender, spell) {
-    // Vérifier si l'attaquant a assez de PA
-    if (attacker.pa < spell.cost) {
-        console.log(`${attacker.name} n'a pas assez de PA pour lancer ${spell.name}`);
-        return;
-    }
+export function calculateDamageCrit(attacker, spell, defender) {
+    const baseDamage = spell.stat === 'str' ? attacker.str : attacker.intel;
+    const critDamage = spell.crit;
+    const rawDamage = Math.floor(baseDamage / spell.divider) + critDamage;
 
-    // Réduire les PA de l'attaquant
-    attacker.pa -= spell.cost;
+    let defense = calculateDef(defender, spell.dmgType)
+    // Réduction des dégâts par la défense en pourcentage
+    const totalDamage = rawDamage - Math.ceil(rawDamage * defense / 100) 
 
-    // Vérifier si l'attaque touche
-    if (!
-        (attacker, defender)) {
-        console.log(`${attacker.name} a raté son attaque ${spell.name}`);
-        return;
-    }
-
-    // Vérifier si le défenseur esquive
-    if (calculateEvade(defender, attacker)) {
-        console.log(`${defender.name} a esquivé l'attaque ${spell.name}`);
-        return;
-    }
-
-    // Calculer les dégâts
-    const isPhysical = spell.type === 'physique';
-    const damage = calculateDamage(attacker, spell, defender, isPhysical);
-    defender.hp -= damage;
-    console.log(`${attacker.name} inflige ${damage} dégâts avec ${spell.name} à ${defender.name}. Il reste ${defender.hp} points de vie à ${defender.name}.`);
-
-    if (defender.hp <= 0) {
-        console.log(`${defender.name} est vaincu! ${attacker.name} gagne!`);
-    }
+    return totalDamage > 0 ? totalDamage : 1; // Les dégâts doivent être d'un minimum de 1
 }
 
-export function calculateHit(attacker, defender) {
-    const levelDifference = defender.level - attacker.level;
-    const hitChance = attacker.hit - (levelDifference * 2); // Ajuste la précision basée sur la différence de niveaux
+export function calculateHit(attacker, spell) {
+    const hitChance = Math.min(95, attacker.hit + spell.hit)
     const randomValue = Math.random() * 100;
-    return randomValue < hitChance; // L'attaque touche si la valeur aléatoire est inférieure à la précision ajustée
+    return randomValue <= hitChance; // L'attaque touche si la valeur aléatoire est inférieure à la précision ajustée
 }
 
-function calculateEvade(defender, attacker) {
-    const levelDifference = defender.level - attacker.level;
-    const evadeChance = defender.dex * 2 + (levelDifference * 2); // Ajuste l'esquive basée sur la différence de niveaux
+export function calculateEvade(defender, type) {
+    let evadeChance = type === 'str' ? defender.dex - defender.level : defender.acu - defender.level;
+
+    // Assurez-vous que l'esquive est toujours entre 0 et 30
+    evadeChance = Math.max(0, Math.min(30, evadeChance));
+
     const randomValue = Math.random() * 100;
-    return randomValue < evadeChance; // L'ennemi esquive si la valeur aléatoire est inférieure à la chance d'esquive ajustée
+
+    return randomValue <= evadeChance; // L'ennemi esquive si la valeur aléatoire est inférieure à la chance d'esquive ajustée
 }
 
 export const calculatePassiveSpellsStats = (selectedSkills) => {

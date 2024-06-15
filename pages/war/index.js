@@ -7,7 +7,7 @@ import { signOut, useSession } from 'next-auth/react';
 import Header from 'C/header';
 import Alert from "C/alert";
 import Head from 'next/head';
-import Script from 'next/script'
+import Script from 'next/script';
 import calculateDmg from "../../utils/calculateDmg";
 import calculateDef from "../../utils/calculateDef";
 import calculatePassiveSpellsStats from "../../utils/calculatePassiveSpellsStats";
@@ -17,6 +17,8 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
     const [windowSize, setWindowSize] = useState({ width: 0, height: 0 });
     // data game
     const [player, setPlayer] = useState(initialPlayer);
+   
+    const [messages, setMessages] = useState(initialPlayer.warMessages || []);
     
     const [coordinates, setCoordinates] = useState(war.allCoordinates);
     const [tiles, setTiles] = useState(war.tiles);
@@ -36,6 +38,7 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
     const [isMenuMoveOpen, setIsMenuMoveOpen] = useState(false);
     const [isModalSpell, setIsModalSpell] = useState(false);
     const [isModalFight, setIsModalFight] = useState(false);
+    const [isModalMessage, setIsModalMessage] = useState(false);
     // Stocker les coordonnées de la tuile sélectionnée
     const [selectedTileX, setSelectedTileX] = useState(null);
     const [selectedTileY, setSelectedTileY] = useState(null);
@@ -119,6 +122,10 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
         setIsModalSpell(true);
     }
 
+    const handleClickMessage = () => {
+        setIsModalMessage(true);
+    }
+
     const handleMouseEnter = (skill) => {
         setHoveredSkill(skill);
     };
@@ -171,6 +178,11 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
     const closeModalPlayer = () => {
         // setIsModalOpen(false);
         setSelectedPlayer(null);
+    };
+
+    // Fonction pour fermer la fenêtre modale de message
+    const closeModalMessage = () => {
+        setIsModalMessage(false);
     };
 
     // Fonction pour fermer le menu de déplacement
@@ -252,7 +264,6 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                 }
             });
             const updatedPlayer = await response.data;
-            console.log(updatedPlayer);
 
             // setPlayer(updatedPlayer.updatedUser);
             // setTiles(updatedPlayer.tiles);
@@ -261,10 +272,12 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
         } catch (error) {
             setAlertMessage(`${error.response.data.message}`);
             setAlertType('error');
+            setShowAlert(false);
             setShowAlert(true);
             setTimeout(() => {
             setShowAlert(false);
             }, 5000);
+            console.error(error);
             
         } finally {
             setLoading(false);
@@ -787,6 +800,33 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                             </div>
                         </div>
                     )}
+                    {isModalMessage && (
+                        <div className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center bg-black bg-opacity-50 text-black z-10">
+                            <div className="bg-white p-4 rounded-lg relative w-3/4 h-3/4 max-h-3/4 overflow-auto flex flex-col justify-between">
+                                <h2 className="text-2xl font-bold mb-8 text-center">Messages</h2>
+                                <div className="flex flex-col items-center space-y-4 mb-8 w-full">
+                                    <div className="w-full">
+                                            <ul className="flex flex-col">
+                                                {messages.map((message, index) => (
+                                                    <li key={index} className="mt-2">
+                                                        <div className="flex items-center">
+                                                        <span className="font-bold">{new Date(message.createdAt).toLocaleString()}</span>
+                                                            <span className="ml-2">{message.message}</span>
+                                                        </div>
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                    </div>
+                                </div>
+                                {/* Bouton pour fermer la modal messages */}
+                                <div className="relative w-full mt-4">
+                                    <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2">
+                                        <button onClick={closeModalMessage} className="bg-red-500 text-white py-2 px-4 rounded text-xl">Fermer</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
                     <nav className="menu flex justify-center">
                         <input type="checkbox" href="#" className="menu-open" name="menu-open" onChange={toggleMenu} id="menu-open" checked={isMenuOpen} />
                         <label className="menu-open-button" htmlFor="menu-open" >
@@ -795,12 +835,12 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                             <span className="hamburger hamburger-3"></span>
                         </label>
 
-                        <button className="menu-item flex items-center justify-center"> <img src="images/inventory.webp" className="rounded-full h-5/6" alt="Icon 1" /> </button>
+                        <button className="menu-item flex items-center justify-center"> </button>
                         <button className="menu-item flex items-center justify-center"> <img src="images/run.webp" className="rounded-full h-5/6" alt="Icon 2" onClick={() => handleClickMove()} /> </button>
                         <button className="menu-item flex items-center justify-center"> <img src="images/inventory.webp" className="rounded-full h-5/6" alt="Icon 3" /> </button>
                         <button className="menu-item flex items-center justify-center"> <img src="images/player.webp" className="rounded-full h-5/6" alt="Icon 4" onClick={() => handleClickPlayer(player)} /> </button>
                         <button className="menu-item flex items-center justify-center"> <img src="images/spell.webp" className="rounded-full h-5/6" alt="Icon 5" onClick={() => handleClickSpell()} /> </button>
-                        <button className="menu-item flex items-center justify-center"> </button>
+                        <button className="menu-item flex items-center justify-center"> <img src="images/notification.webp" className="rounded-full h-5/6" alt="Icon 5" onClick={() => handleClickMessage()} /> </button>
 
                     </nav>
 

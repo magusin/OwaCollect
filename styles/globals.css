@@ -283,10 +283,10 @@ body {
   transition-duration: 580ms;
   transform: translate3d(-90.86291px, 52.62064px, 0);
 }
-/* .menu-open:checked ~ .menu-item:nth-child(8) {
+.menu-open:checked ~ .menu-item:nth-child(8) {
   transition-duration: 680ms;
-  transform: translate3d(-91.03006px, -52.33095px, 0);
-} */
+  transform: translate3d(-165.03006px, -12.33095px, 0);
+} 
 .menu-open:checked ~ .menu-item:nth-child(9) {
   transition-duration: 780ms;
   transform: translate3d(-0.25084px, -104.9997px, 0);

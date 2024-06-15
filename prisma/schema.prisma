@@ -199,9 +199,9 @@ model warPlayers {
   defM            Int               @default(1)
   acu             Int               @default(1)
   isDied          DateTime?         @db.Date
-  pa              Int               @default(20)
-  paMax           Int               @default(20)
-  regen           Int               @default(1)
+  pa              Int               @default(30)
+  paMax           Int               @default(30)
+  regen           Int               @default(2)
   crit            Int               @default(5)
   defMStand       Int               @default(1)
   defPStand       Int               @default(1)
@@ -212,6 +212,7 @@ model warPlayers {
   defHoly         Int               @default(1)
   defPierce       Int               @default(1)
   isLeveling      Boolean           @default(false)
+  warMessages     warMessages[]
   warPlayerSkills warPlayerSkills[]
   pets            pets              @relation(fields: [petId], references: [userId], onDelete: Cascade, map: "war_ibfk_1")
   map             map?              @relation(fields: [mapId], references: [id], onDelete: Cascade, map: "warPlayers_ibfk_2")
@@ -222,7 +223,7 @@ model warPlayers {
 model warPlayerSkills {
   petId      String     @db.VarChar(255)
   skillId    Int
-  createdAt  DateTime   @db.Date
+  createdAt  DateTime   @default(now()) @db.DateTime(0)
   isSelected Boolean    @default(false)
   warPlayers warPlayers @relation(fields: [petId], references: [petId], onDelete: Cascade, map: "warPlayerSkills_ibfk_1")
   warSkills  warSkills  @relation(fields: [skillId], references: [id], onDelete: Cascade, map: "warPlayerSkills_ibfk_2")
@@ -265,4 +266,16 @@ model warSkills {
   upDefP          Int               @default(0)
   upDefM          Int               @default(0)
   warPlayerSkills warPlayerSkills[]
+}
+
+model warMessages {
+  id         Int        @id @default(autoincrement())
+  petId      String     @db.VarChar(255)
+  message    String     @db.VarChar(255)
+  createdAt  DateTime   @default(now()) @db.DateTime(0)
+  readed     Boolean    @default(false)
+  expiresAt  DateTime?  @default(dbgenerated("(now() + interval 7 day)")) @db.DateTime(0)
+  warPlayers warPlayers @relation(fields: [petId], references: [petId], onDelete: Cascade, map: "warMessages_ibfk_1")
+
+  @@index([petId], map: "petId")
 }

@@ -2,7 +2,7 @@ import Cors from 'cors'
 import { PrismaClient } from '@prisma/client'
 import jwt from 'jsonwebtoken';
 import { getToken } from "next-auth/jwt";
-import { calculateDistance, calculatePassiveSpellsStats, finalStats } from '../../fight';
+import { calculateDistance, calculatePassiveSpellsStats, finalStats, calculateHit, calculateEvade, calculateDamage, calculateDamageCrit } from '../../fight';
 
 // Initialiser le midleware Cors
 const allowedOrigins = [process.env.NEXTAUTH_URL]
@@ -43,6 +43,16 @@ async function runMiddleware(req, res, fn) {
             return resolve(result)
         })
     })
+}
+
+// Fonction pour ajouter une notification
+async function addMessages(playerId, message) {
+    await prisma.warMessages.create({
+        data: {
+            petId: playerId,
+            message: message
+        },
+    });
 }
 
 // POST /api/war/player
@@ -132,13 +142,76 @@ export default async function handler(req, res) {
             if (distance > skill.warSkills.dist) {
                 return res.status(400).json({ message: 'Cible hors de portée' });
             }
-
+            
             const playerPassifSkillsStats = calculatePassiveSpellsStats(player.warPlayerSkills.filter(skill => skill.warSkills.type === 'passif' && skill.isSelected === true) || []);
             const opponentPassifSkillsStats = calculatePassiveSpellsStats(opponent.warPlayerSkills.filter(skill => skill.warSkills.type === 'passif' && skill.isSelected === true) || []);
             const playerFinalStats = finalStats(player, playerPassifSkillsStats);
             const opponentFinalStats = finalStats(opponent, opponentPassifSkillsStats);
+            
+            const hit = calculateHit(playerFinalStats, skill.warSkills);
 
-            console.log("playerFinalStats", playerFinalStats);
+            if (!hit) {
+                // Choisir un message parmis une liste de messages aléatoires
+
+                const missMessages = skill.warSkills.stat === 'str' ? [
+                    `Vous avez manqué votre attaque sur ${opponent.name}`,
+                    `Votre coup sur ${opponent.name} a raté`,
+                    `L'attaque sur ${opponent.name} a échoué`,
+                    `Votre tentative d'attaque sur ${opponent.name} a été un échec`
+                ] : [
+                    `Votre avez manqué votre sort sur ${opponent.name}`,
+                    `Votre sort n'a pas touché ${opponent.name}`,
+                    `Le sort a manqué ${opponent.name}`,
+                    `Votre tentative de lancer de sort sur ${opponent.name} a échoué`
+                ]
+                const randomMissMessage = missMessages[Math.floor(Math.random() * missMessages.length)];
+                return res.status(400).json({ message: randomMissMessage });
+            }
+
+            const evade = calculateEvade(opponentFinalStats, skill.warSkills.stat);
+            if (evade) {
+                // Choisir un message parmis une liste de messages aléatoires
+                const evadeMessages = skill.warSkills.stat === 'str' ? [
+                    `${opponent.name} a esquivé votre attaque`,
+                    `L'attaque a été esquivée par ${opponent.name}`,
+                    `Votre coup a été évité par ${opponent.name}`
+                ] : [
+                    `${opponent.name} a bloqué votre sort`,
+                    `Le sort a été stoppé par ${opponent.name}`,
+                    `Votre sort a été bloqué par ${opponent.name}`
+                ]
+                const randomEvadeMessage = evadeMessages[Math.floor(Math.random() * evadeMessages.length)];
+
+                return res.status(400).json({ message: randomEvadeMessage });
+            }
+
+            const crit = Math.random() * 100 <= playerFinalStats.crit;
+
+            let xp = player.xp;
+            let damage = 0;
+            let hp = opponent.hp;
+            console.log("crit", crit);
+            if (crit) {
+                damage = calculateDamageCrit(playerFinalStats, skill.warSkills, opponentFinalStats);
+                console.log("damage", damage);
+                hp -= damage;
+                if (hp <= 0) {
+                    hp = 0;
+                    xp += player.level + 10 + 1;  
+                }
+
+                
+            } else {
+                damage = calculateDamage(playerFinalStats, skill.warSkills, opponentFinalStats);
+                hp -= damage;
+                if (hp <= 0) {
+                    hp = 0;
+                    xp += player.level + 10 + 1;
+                }
+                addMessages(decoded.id, `Vous avez infligé ${damage} à ${opponent.name}`);
+                
+            }
+
             return res.status(200).json(player);
         } else {
             return res.status(405).json({ message: 'Méthode non autorisée' });

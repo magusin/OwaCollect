@@ -70,6 +70,9 @@ export default async function handler(req, res) {
                     map: true,
                     warPlayerSkills: {
                         include: { warSkills: true }
+                    },
+                    warMessages: {
+                        orderBy: { createdAt: "desc" }
                     }
                 }
             });
@@ -84,7 +87,7 @@ export default async function handler(req, res) {
                         petId: decoded.id,
                         name: decoded.name,
                         imageUrl: decoded.image,
-                        mapId: Math.floor(Math.random() * 121) + 1
+                        mapId: Math.floor(Math.random() * 400) + 1
                     }
                 });
 
@@ -92,8 +95,7 @@ export default async function handler(req, res) {
                 await prisma.warPlayerSkills.create({
                     data: {
                         petId: createPlayer.petId,
-                        skillId: 1,
-                        createdAt: new Date() // Date de création
+                        skillId: 1
                     }
                 });
 
@@ -104,6 +106,9 @@ export default async function handler(req, res) {
                         map: true,
                         warPlayerSkills: {
                             include: { warSkills: true }
+                        },
+                        warMessages: {
+                            orderBy: { createdAt: "desc" }
                         }
                     }
                 });
