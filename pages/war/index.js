@@ -11,26 +11,15 @@ import Script from 'next/script';
 import calculateDmg from "../../utils/calculateDmg";
 import calculateDef from "../../utils/calculateDef";
 import calculatePassiveSpellsStats from "../../utils/calculatePassiveSpellsStats";
+import { useRouter } from "next/router";
 
 export default function War({ errorServer, war, initialPlayer, totalPoints }) {
+    const [error, setError] = React.useState(errorServer || null);
     const { data: session, status } = useSession();
     const [windowSize, setWindowSize] = useState({ width: 0, height: 0 });
-    // data game
-    const [player, setPlayer] = useState(initialPlayer);
-   
-    const [messages, setMessages] = useState(initialPlayer.warMessages || []);
-    
-    const [coordinates, setCoordinates] = useState(war.allCoordinates);
-    const [tiles, setTiles] = useState(war.tiles);
     // const [width, setWidth] = useState(0);
     const [points, setPoints] = useState(totalPoints || 0);
     const [availableDirections, setAvailableDirections] = useState({ up: true, down: true, left: true, right: true });
-    const positionPlayer = player.map.id;
-    const positionPlayerX = player.map.position_x;
-    const positionPlayerY = player.map.position_y;
-    // État pour stocker les compétences du joueur
-    const [playerSkill, setPlayerSkill] = useState(initialPlayer.warPlayerSkills);
-    
     // État pour contrôler l'ouverture des menus
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [selectedTilePlayers, setSelectedTilePlayers] = useState(null);
@@ -59,38 +48,50 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
     const [alertMessage, setAlertMessage] = useState('');
     const [showAlert, setShowAlert] = useState(false);
     const [alertType, setAlertType] = useState(null);
+    // Router
+    const router = useRouter();
 
     const passiveSpellsStats = calculatePassiveSpellsStats(selectedPassiveSkills);
 
     useEffect(() => {
+
+        localStorage.setItem('points', points);
+
+        if (error === 'Erreur avec votre Token ou il est expiré. Veuillez vous reconnecter.') {
+            setTimeout(() => {
+                localStorage.removeItem('userOC');
+                localStorage.removeItem('points');
+                signOut()
+                router.push('/');
+            }, 3000);
+        }
+
+        if (status === 'unauthenticated') {
+            router.push('/');
+        }
+
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [status, error, router, points]);
+
+    // data game
+    const [player, setPlayer] = useState(initialPlayer);
+   
+    const [messages, setMessages] = useState(initialPlayer?.warMessages || []);
+    
+    const [coordinates, setCoordinates] = useState(war?.allCoordinates);
+    const [tiles, setTiles] = useState(war?.tiles);
+    const positionPlayer = player?.map.id;
+    const positionPlayerX = player?.map.position_x;
+    const positionPlayerY = player?.map.position_y;
+    // État pour stocker les compétences du joueur
+    const [playerSkill, setPlayerSkill] = useState(initialPlayer?.warPlayerSkills);
+
+    useEffect(() => {
         // Initialize selectedPassiveSkills with already selected skills
-        const initiallySelected = playerSkill
-            .filter(skill => skill.warSkills.type === 'passif' && skill.isSelected)
+        const initiallySelected = playerSkill?.filter(skill => skill.warSkills.type === 'passif' && skill.isSelected)
             .map(skill => skill);
         setSelectedPassiveSkills(initiallySelected);
     }, [playerSkill]);
-
-    // Fonction pour calculer les statistiques totales du joueur
-    const updatedPlayerStats = {
-        ...player,
-        hp: player.hp + passiveSpellsStats.upHp,
-        str: player.str + passiveSpellsStats.upStr,
-        intel: player.intel + passiveSpellsStats.upIntel,
-        dex: player.dex + passiveSpellsStats.upDex,
-        acu: player.acu + passiveSpellsStats.upAcu,
-        crit: player.crit + passiveSpellsStats.upCrit,
-        regen: player.regen + passiveSpellsStats.upRegen,
-        defP: player.defP + passiveSpellsStats.upDefP,
-        defPStand: player.defPStand + passiveSpellsStats.upDefPStand,
-        defM: player.defM + passiveSpellsStats.upDefM,
-        defMStand: player.defMStand + passiveSpellsStats.upDefMStand,
-        defStrike: player.defStrike + passiveSpellsStats.upDefStrike,
-        defFire: player.defFire + passiveSpellsStats.upDefFire,
-        defSlash: player.defSlash + passiveSpellsStats.upDefSlash,
-        defLightning: player.defLightning + passiveSpellsStats.upDefLightning,
-        defPierce: player.defPierce + passiveSpellsStats.upDefPierce,
-        defHoly: player.defHoly + passiveSpellsStats.upDefHoly
-    };
 
     // Fonction pour gérer le clic sur un sort passif
     const togglePassiveSkill = (skill) => {
@@ -295,8 +296,18 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
         )
     }
 
-    if (errorServer) {
-        return <div>{errorServer}</div>;
+    if (error) {
+        return (
+            <>
+                <HeadView />
+                <div className="flex flex-col h-screen" style={{ marginTop: "80px" }}>
+                    <Header points={points} />
+                    <div className="flex-grow flex justify-center items-center">
+                        <span className="text-center text-red-500">⚠ {error}</span>
+                    </div>
+                </div>
+            </>
+        );
     }
 
     if (status === "loading" || loading) {
@@ -312,25 +323,47 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
         )
     }
 
-    // Filtrer les tuiles récupérées par le backend pour ne garder que celles qui sont reçues
-    const receivedTilesMap = new Map(war.tiles.map(tile => [`${tile.position_x},${tile.position_y}`, tile]));
+    // // Filtrer les tuiles récupérées par le backend pour ne garder que celles qui sont reçues
+    // const receivedTilesMap = new Map(war.tiles.map(tile => [`${tile.position_x},${tile.position_y}`, tile]));
 
-    // Créer une liste de tuiles en incluant les tuiles vides
-    const tilesWithEmpty = coordinates.map(({ position_x, position_y }) => {
-        const key = `${position_x},${position_y}`;
-        const matchingTile = tiles.find(tile => tile.position_x === position_x && tile.position_y === position_y);
-        return matchingTile || { position_x, position_y, image_url: "", alt: "" };
-    });
-
-    // Trier les tuiles en fonction de leur position X et Y croissantes
-    const sortedTiles = tilesWithEmpty.sort((a, b) => {
-        if (a.position_y !== b.position_y) {
-            return b.position_y - a.position_y;
-        }
-        return a.position_x - b.position_x;
-    });
-
+    
     if (session) {
+        // Créer une liste de tuiles en incluant les tuiles vides
+        const tilesWithEmpty = coordinates.map(({ position_x, position_y }) => {
+            const key = `${position_x},${position_y}`;
+            const matchingTile = tiles.find(tile => tile.position_x === position_x && tile.position_y === position_y);
+            return matchingTile || { position_x, position_y, image_url: "", alt: "" };
+        });
+    
+        // Trier les tuiles en fonction de leur position X et Y croissantes
+        const sortedTiles = tilesWithEmpty.sort((a, b) => {
+            if (a.position_y !== b.position_y) {
+                return b.position_y - a.position_y;
+            }
+            return a.position_x - b.position_x;
+        });
+
+        // Fonction pour calculer les statistiques totales du joueur
+    const updatedPlayerStats = {
+        ...player,
+        hp: player.hp + passiveSpellsStats.upHp,
+        str: player.str + passiveSpellsStats.upStr,
+        intel: player.intel + passiveSpellsStats.upIntel,
+        dex: player.dex + passiveSpellsStats.upDex,
+        acu: player.acu + passiveSpellsStats.upAcu,
+        crit: player.crit + passiveSpellsStats.upCrit,
+        regen: player.regen + passiveSpellsStats.upRegen,
+        defP: player.defP + passiveSpellsStats.upDefP,
+        defPStand: player.defPStand + passiveSpellsStats.upDefPStand,
+        defM: player.defM + passiveSpellsStats.upDefM,
+        defMStand: player.defMStand + passiveSpellsStats.upDefMStand,
+        defStrike: player.defStrike + passiveSpellsStats.upDefStrike,
+        defFire: player.defFire + passiveSpellsStats.upDefFire,
+        defSlash: player.defSlash + passiveSpellsStats.upDefSlash,
+        defLightning: player.defLightning + passiveSpellsStats.upDefLightning,
+        defPierce: player.defPierce + passiveSpellsStats.upDefPierce,
+        defHoly: player.defHoly + passiveSpellsStats.upDefHoly
+    };
         return (
             <>
                 <HeadView />
@@ -388,18 +421,18 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                             <div className="bg-white p-4 rounded-lg relative w-3/4 h-3/4 max-h-3/4 overflow-auto">
                                 <h2 className="text-lg font-bold mb-4 text-center">X {selectedTileX}, Y {selectedTileY}</h2>
                                 <h3 className="text-lg mb-2 text-center">{selectedTilePlayers.length > 0 ? "Joueur" : "Aucun joueur"}</h3>
-                                <ul>
+                                <ul className="flex flex-col">
                                     {selectedTilePlayers.map((playerTile, index) => (
 
                                         <li key={index}
-                                            className={`flex items-center ${playerTile.petId != player.petId ? "cursor-pointer" : ''}`}
+                                            className={`flex items-center p-2 border-b ${playerTile.petId != player.petId ? "cursor-pointer" : ''}`}
                                             onClick={playerTile.petId !== player.petId ? () => handleClickPlayer(playerTile) : null}
                                         >
                                             {/* Image du joueur */}
                                             <img
                                                 src={playerTile.imageUrl}
                                                 alt={playerTile.name}
-                                                className="w-8 h-8 rounded-full mr-2"
+                                                className="w-20 h-20 rounded-full mr-2"
 
                                             />
                                             {/* Nom du joueur */}
@@ -417,6 +450,7 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                     {isModalOpen && selectedPlayer && isModalFight === false && (
                         <div className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center bg-black bg-opacity-50 text-black z-10">
                             <div className="bg-white p-4 rounded-lg relative w-3/4 h-3/4 max-h-3/4 overflow-auto">
+                                
                                 {/* Image du joueur */}
                                 <img
                                     src={selectedPlayer.imageUrl}
@@ -427,7 +461,7 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                                 <h2 className="text-xl font-bold text-center mb-2">{selectedPlayer.name}</h2>
                                 {/* Stats du joueur */}
                                 {selectedPlayer.petId != player.petId ? (
-                                    <p className="font-bold text-center mb-4">Level : {selectedPlayer.level}</p>
+                                    <div className="font-bold text-center mb-4">Level : {selectedPlayer.level}</div>
 
                                 ) : (
                                     <>
@@ -601,14 +635,19 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                                     </>
                                 )}
                                 {/* Bouton pour fermer le menu */}
-                                <div className="relative w-full mt-4">
-                                    <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2">
-                                        {selectedPlayer.petId != player.petId && (
+                                {selectedPlayer.petId != player.petId ? (
+                                    <div className="flex justify-center absolute bottom-4 left-1/2 transform -translate-x-1/2">
                                             <button className="bg-green-500 text-white py-2 px-4 rounded mr-4" onClick={handleClickFight}>Attaquer</button>
-                                        )}
+                                            <button onClick={closeModalPlayer} className="bg-red-500 text-white py-2 px-4 rounded">Fermer</button>
+                                </div>
+                                 ) : (
+                                    <div className="relative w-full mt-4">
+                                    <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2">
                                         <button onClick={closeModalPlayer} className="bg-red-500 text-white py-2 px-4 rounded">Fermer</button>
                                     </div>
                                 </div>
+                                )}
+                                
                             </div>
                         </div>
                     )}
@@ -847,7 +886,6 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                     <svg xmlns="http://www.w3.org/2000/svg" version="1.1">
                         <defs>
                             <filter id="shadowed-goo">
-
                                 <feGaussianBlur in="SourceGraphic" result="blur" stdDeviation="10" />
                                 <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -7" result="goo" />
                                 <feGaussianBlur in="goo" stdDeviation="3" result="shadow" />

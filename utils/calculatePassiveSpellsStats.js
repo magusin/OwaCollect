@@ -20,7 +20,7 @@ const calculatePassiveSpellsStats = (selectedSkills) => {
         upDefM: 0
     };
 
-    selectedSkills.forEach(skill => {
+    selectedSkills?.forEach(skill => {
         totalStats.upStr += skill.warSkills.upStr || 0;
         totalStats.upIntel += skill.warSkills.upIntel || 0;
         totalStats.upHit += skill.warSkills.upHit || 0;
