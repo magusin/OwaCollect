@@ -75,16 +75,37 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
 
     // data game
     const [player, setPlayer] = useState(initialPlayer);
-   
-    const [messages, setMessages] = useState(initialPlayer?.warMessages || []);
-    
+
+    const [messages, setMessages] = useState(player?.warMessages || []);
+
     const [coordinates, setCoordinates] = useState(war?.allCoordinates);
     const [tiles, setTiles] = useState(war?.tiles);
     const positionPlayer = player?.map.id;
     const positionPlayerX = player?.map.position_x;
     const positionPlayerY = player?.map.position_y;
     // État pour stocker les compétences du joueur
-    const [playerSkill, setPlayerSkill] = useState(initialPlayer?.warPlayerSkills);
+    const [playerSkill, setPlayerSkill] = useState(player?.warPlayerSkills);
+    // Temps restant avant la résurrection du joueur
+    const [timeRemaining, setTimeRemaining] = useState(0);
+
+    useEffect(() => {
+        if (player.isDied) {
+            const remaining = calculateTimeRemaining(player.isDied);
+            setTimeRemaining(remaining);
+
+            const interval = setInterval(() => {
+                const remaining = calculateTimeRemaining(player.isDied);
+                if (remaining <= 0) {
+                    clearInterval(interval);
+                    setTimeRemaining(0);
+                } else {
+                    setTimeRemaining(remaining);
+                }
+            }, 1000);
+
+            return () => clearInterval(interval);
+        }
+    }, [player.isDied]);
 
     useEffect(() => {
         // Initialize selectedPassiveSkills with already selected skills
@@ -100,6 +121,13 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
         } else if (selectedPassiveSkills.length < 5) {
             setSelectedPassiveSkills([...selectedPassiveSkills, skill]);
         }
+    };
+
+    // Fonction utilitaire pour calculer le temps restant
+    const calculateTimeRemaining = (endTime) => {
+        const now = new Date();
+        const end = new Date(endTime);
+        return Math.max(0, end - now);
     };
 
     // Fonction pour gérer le clic sur un joueur de la liste
@@ -246,7 +274,7 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
             setAlertType('error');
             setShowAlert(true);
             setTimeout(() => {
-            setShowAlert(false);
+                setShowAlert(false);
             }, 5000);
         } finally {
             setLoading(false);
@@ -264,22 +292,34 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                     Authorization: `Bearer ${session.customJwt}`,
                 }
             });
-            const updatedPlayer = await response.data;
+            const data = await response.data;
 
-            // setPlayer(updatedPlayer.updatedUser);
-            // setTiles(updatedPlayer.tiles);
-            // setCoordinates(updatedPlayer.allCoordinates);
-            // setIsModalOpen(false);
-        } catch (error) {
-            setAlertMessage(`${error.response.data.message}`);
-            setAlertType('error');
             setShowAlert(false);
+            setAlertMessage(`${data.message}`);
+            if (data.type === 'error') {
+                setAlertType('error');
+            } else {
+                setAlertType('success');
+            }
             setShowAlert(true);
             setTimeout(() => {
-            setShowAlert(false);
+                setShowAlert(false);
             }, 5000);
+            setPlayer(data.updatedPlayer);
+            setTiles(data.tiles);
+            setCoordinates(data.allCoordinates);
+            setMessages(data.updatedPlayer.warMessages);
+        } catch (error) {
+            setShowAlert(false);
             console.error(error);
-            
+            setAlertMessage(`${error.response.data.message}`);
+            setAlertType('error');
+            setShowAlert(true);
+            setTimeout(() => {
+                setShowAlert(false);
+                router.reload();
+            }, 5000);
+
         } finally {
             setLoading(false);
         }
@@ -326,7 +366,7 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
     // // Filtrer les tuiles récupérées par le backend pour ne garder que celles qui sont reçues
     // const receivedTilesMap = new Map(war.tiles.map(tile => [`${tile.position_x},${tile.position_y}`, tile]));
 
-    
+
     if (session) {
         // Créer une liste de tuiles en incluant les tuiles vides
         const tilesWithEmpty = coordinates.map(({ position_x, position_y }) => {
@@ -334,7 +374,7 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
             const matchingTile = tiles.find(tile => tile.position_x === position_x && tile.position_y === position_y);
             return matchingTile || { position_x, position_y, image_url: "", alt: "" };
         });
-    
+
         // Trier les tuiles en fonction de leur position X et Y croissantes
         const sortedTiles = tilesWithEmpty.sort((a, b) => {
             if (a.position_y !== b.position_y) {
@@ -344,26 +384,56 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
         });
 
         // Fonction pour calculer les statistiques totales du joueur
-    const updatedPlayerStats = {
-        ...player,
-        hp: player.hp + passiveSpellsStats.upHp,
-        str: player.str + passiveSpellsStats.upStr,
-        intel: player.intel + passiveSpellsStats.upIntel,
-        dex: player.dex + passiveSpellsStats.upDex,
-        acu: player.acu + passiveSpellsStats.upAcu,
-        crit: player.crit + passiveSpellsStats.upCrit,
-        regen: player.regen + passiveSpellsStats.upRegen,
-        defP: player.defP + passiveSpellsStats.upDefP,
-        defPStand: player.defPStand + passiveSpellsStats.upDefPStand,
-        defM: player.defM + passiveSpellsStats.upDefM,
-        defMStand: player.defMStand + passiveSpellsStats.upDefMStand,
-        defStrike: player.defStrike + passiveSpellsStats.upDefStrike,
-        defFire: player.defFire + passiveSpellsStats.upDefFire,
-        defSlash: player.defSlash + passiveSpellsStats.upDefSlash,
-        defLightning: player.defLightning + passiveSpellsStats.upDefLightning,
-        defPierce: player.defPierce + passiveSpellsStats.upDefPierce,
-        defHoly: player.defHoly + passiveSpellsStats.upDefHoly
-    };
+        const updatedPlayerStats = {
+            ...player,
+            hp: player.hp + passiveSpellsStats.upHp,
+            str: player.str + passiveSpellsStats.upStr,
+            intel: player.intel + passiveSpellsStats.upIntel,
+            dex: player.dex + passiveSpellsStats.upDex,
+            acu: player.acu + passiveSpellsStats.upAcu,
+            crit: player.crit + passiveSpellsStats.upCrit,
+            regen: player.regen + passiveSpellsStats.upRegen,
+            defP: player.defP + passiveSpellsStats.upDefP,
+            defPStand: player.defPStand + passiveSpellsStats.upDefPStand,
+            defM: player.defM + passiveSpellsStats.upDefM,
+            defMStand: player.defMStand + passiveSpellsStats.upDefMStand,
+            defStrike: player.defStrike + passiveSpellsStats.upDefStrike,
+            defFire: player.defFire + passiveSpellsStats.upDefFire,
+            defSlash: player.defSlash + passiveSpellsStats.upDefSlash,
+            defLightning: player.defLightning + passiveSpellsStats.upDefLightning,
+            defPierce: player.defPierce + passiveSpellsStats.upDefPierce,
+            defHoly: player.defHoly + passiveSpellsStats.upDefHoly
+        };
+
+        const formatTime = (ms) => {
+            const totalSeconds = Math.floor(ms / 1000);
+            const hours = Math.floor(totalSeconds / 3600);
+            const minutes = Math.floor((totalSeconds % 3600) / 60);
+            const seconds = totalSeconds % 60;
+
+            return `${hours}h ${minutes}m ${seconds}s`;
+        };
+
+        // Call pour réssusciter le joueur
+        const resurrectPlayer = async () => {
+            setLoading(true);
+            try {
+                const response = await axios.post(`/api/war/player/resurrect`, {}, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${session.customJwt}`,
+                    }
+                });
+                const updatedPlayer = await response.data;
+                setPlayer(updatedPlayer.updatedUser);
+                setMessages(updatedPlayer.updatedUser.warMessages);
+            } catch (error) {
+                console.error(error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
         return (
             <>
                 <HeadView />
@@ -450,7 +520,7 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                     {isModalOpen && selectedPlayer && isModalFight === false && (
                         <div className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center bg-black bg-opacity-50 text-black z-10">
                             <div className="bg-white p-4 rounded-lg relative w-3/4 h-3/4 max-h-3/4 overflow-auto">
-                                
+
                                 {/* Image du joueur */}
                                 <img
                                     src={selectedPlayer.imageUrl}
@@ -465,16 +535,16 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
 
                                 ) : (
                                     <>
-                                        
+
                                         <div className="mt-4">
-                                        <div className="flex flex-col sm:flex-row justify-center">
+                                            <div className="flex flex-col sm:flex-row justify-center">
                                                 <div className="flex-1 text-center mb-2 sm:mb-0 sm:mr-4">
                                                     <p className="font-bold">Vie</p>
                                                     <p>{selectedPlayer.hp}/{selectedPlayer.hpMax}</p>
-                                                <div
-                                                    className="bg-red-600 h-2.5 rounded-full"
-                                                    style={{ width: `${(selectedPlayer.hp / selectedPlayer.hpMax) * 100}%` }}>
-                                                </div>
+                                                    <div
+                                                        className="bg-red-600 h-2.5 rounded-full"
+                                                        style={{ width: `${(selectedPlayer.hp / selectedPlayer.hpMax) * 100}%` }}>
+                                                    </div>
                                                 </div>
                                                 <div className="flex-1 text-center">
                                                     <p className="font-bold">Level</p>
@@ -637,17 +707,17 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                                 {/* Bouton pour fermer le menu */}
                                 {selectedPlayer.petId != player.petId ? (
                                     <div className="flex justify-center absolute bottom-4 left-1/2 transform -translate-x-1/2">
-                                            <button className="bg-green-500 text-white py-2 px-4 rounded mr-4" onClick={handleClickFight}>Attaquer</button>
-                                            <button onClick={closeModalPlayer} className="bg-red-500 text-white py-2 px-4 rounded">Fermer</button>
-                                </div>
-                                 ) : (
-                                    <div className="relative w-full mt-4">
-                                    <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2">
+                                        <button className="bg-green-500 text-white py-2 px-4 rounded mr-4" onClick={handleClickFight}>Attaquer</button>
                                         <button onClick={closeModalPlayer} className="bg-red-500 text-white py-2 px-4 rounded">Fermer</button>
                                     </div>
-                                </div>
+                                ) : (
+                                    <div className="relative w-full mt-4">
+                                        <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2">
+                                            <button onClick={closeModalPlayer} className="bg-red-500 text-white py-2 px-4 rounded">Fermer</button>
+                                        </div>
+                                    </div>
                                 )}
-                                
+
                             </div>
                         </div>
                     )}
@@ -809,7 +879,7 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                                         >
                                             {passiveOpen ? 'Cacher' : 'Afficher'} les sorts passifs
                                         </button>
-                                        
+
                                         {passiveOpen && (
                                             <ul className="flex flex-col w-full">
                                                 <span className="text-center">(Vous pouvez sélectionner jusqu&apos;à 5 sorts passif)</span>
@@ -822,7 +892,7 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                                                             onClick={() => togglePassiveSkill(skill)}
                                                         >
                                                             <span className="font-bold">{skill.warSkills.name}</span>: ({skill.warSkills.cost} PA) <span className="text-red-800">{calculateDmg(player, skill.warSkills.stat, skill.warSkills.dmgMin, skill.warSkills.divider)} - {calculateDmg(player, skill.warSkills.stat, skill.warSkills.dmgMax, skill.warSkills.divider)}</span>
-                                                            
+
                                                         </li>
                                                     ))}
                                             </ul>
@@ -832,7 +902,7 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                                 {/* Bouton pour fermer le menu */}
                                 <div className="relative w-full mt-4">
                                     <div className="flex justify-center absolute bottom-2 left-1/2 transform -translate-x-1/2">
-                                    <button onClick={saveSelectedPassiveSkills} className="bg-green-500 text-white py-2 px-4 rounded text-xl mr-4">Sauvegarder</button>
+                                        <button onClick={saveSelectedPassiveSkills} className="bg-green-500 text-white py-2 px-4 rounded text-xl mr-4">Sauvegarder</button>
                                         <button onClick={closeModalSpell} className="bg-red-500 text-white py-2 px-4 rounded text-xl">Fermer</button>
                                     </div>
                                 </div>
@@ -845,16 +915,16 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                                 <h2 className="text-2xl font-bold mb-8 text-center">Messages</h2>
                                 <div className="flex flex-col items-center space-y-4 mb-8 w-full">
                                     <div className="w-full">
-                                            <ul className="flex flex-col">
-                                                {messages.map((message, index) => (
-                                                    <li key={index} className="mt-2">
-                                                        <div className="flex items-center">
+                                        <ul className="flex flex-col">
+                                            {messages.map((message, index) => (
+                                                <li key={index} className="mt-2">
+                                                    <div className="flex items-center">
                                                         <span className="font-bold">{new Date(message.createdAt).toLocaleString()}</span>
-                                                            <span className="ml-2">{message.message}</span>
-                                                        </div>
-                                                    </li>
-                                                ))}
-                                            </ul>
+                                                        <span className="ml-2">{message.message}</span>
+                                                    </div>
+                                                </li>
+                                            ))}
+                                        </ul>
                                     </div>
                                 </div>
                                 {/* Bouton pour fermer la modal messages */}
@@ -865,6 +935,23 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                                 </div>
                             </div>
                         </div>
+                    )}
+                    {/* Joueur mort */}
+                    {player.isDied && (
+                        <div className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center bg-black bg-opacity-50 text-black z-10">
+                        <div className="bg-white p-4 rounded-lg relative w-3/4 h-3/4 max-h-3/4 overflow-auto flex flex-col ">
+                            <h2 className="text-2xl font-bold mb-8 text-center">Vous êtes mort</h2>
+                            <div className="flex flex-col items-center justify-center space-y-4 mb-8 w-full">
+                                <p>Temps restant avant la résurrection : {formatTime(timeRemaining)}</p>
+                                {timeRemaining <= 0 && (
+                                    <button onClick={resurrectPlayer} className="bg-green-500 text-white py-2 px-4 rounded">Résurrection</button>
+                                )}
+                                {timeRemaining > 0 && (
+                                    <button onClick={resurrectPlayer} disabled={points < player.level * 10} className="bg-red-500 text-white py-2 px-4 rounded">Résusiter maintenant pour {player.level * 10} OC</button>
+                                )}
+                            </div>
+                        </div>
+                    </div>
                     )}
                     <nav className="menu flex justify-center">
                         <input type="checkbox" href="#" className="menu-open" name="menu-open" onChange={toggleMenu} id="menu-open" checked={isMenuOpen} />
@@ -903,11 +990,11 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                     </svg>
                     {showAlert && (
                         <Alert
-                        type={alertType}
-                        message={alertMessage}
-                        close={setShowAlert}
+                            type={alertType}
+                            message={alertMessage}
+                            close={setShowAlert}
                         />
-                        )}
+                    )}
                 </div>
             </>
         );

@@ -1,3 +1,7 @@
+import { PrismaClient } from '@prisma/client'
+
+const prisma = new PrismaClient()
+
 function calculateDef (player, type) {
     if (type === 'Pstandard') {
         return ((player.defPStand + player.defP) / (100 + player.defPStand + player.level + player.defP) * 100).toFixed(2)
@@ -65,10 +69,10 @@ export function calculateHit(attacker, spell) {
 }
 
 export function calculateEvade(defender, type) {
-    let evadeChance = type === 'str' ? defender.dex - defender.level : defender.acu - defender.level;
+    let evadeValue = type === 'str' ? defender.dex - defender.level : defender.acu - defender.level;
 
     // Assurez-vous que l'esquive est toujours entre 0 et 30
-    evadeChance = Math.max(0, Math.min(30, evadeChance));
+    const evadeChance = Math.max(0, Math.min(30, evadeValue));
 
     const randomValue = Math.random() * 100;
 
@@ -147,4 +151,48 @@ export const finalStats = (player, passiveSpellsStats) => {
 
 export const calculateDistance = (player, opponent) => {
     return Math.abs(player.position_x - opponent.position_x) + Math.abs(player.position_y - opponent.position_y);
+}
+
+export async function getTilesandCoordinates(playerPosition) {
+
+    const positionXValue = playerPosition.position_x;
+    const positionYValue = playerPosition.position_y;
+    const limitValue = 5;
+
+    // Déterminez les coordonnées de la plage de tuiles autour du joueur
+    const startX = Math.max(1, positionXValue - limitValue);
+    const endX = Math.min(20, positionXValue + limitValue);
+    const startY = Math.max(1, positionYValue - limitValue);
+    const endY = Math.min(20, positionYValue + limitValue);
+
+    // Sélectionnez les tuiles dans la plage de coordonnées
+    const tiles = await prisma.map.findMany({
+        where: {
+            position_x: { gte: startX, lte: endX },
+            position_y: { gte: startY, lte: endY },
+        },
+        include: {
+            warPlayers: {
+                select: {
+                    petId: true,
+                    name: true,
+                    imageUrl: true,
+                    mapId: true,
+                    level: true
+                }
+            }
+        }
+    });
+
+    const allCoordinates = [];
+    for (let x = positionXValue - 5; x <= positionXValue + 5; x++) {
+        for (let y = positionYValue - 5; y <= positionYValue + 5; y++) {
+            allCoordinates.push({ position_x: x, position_y: y });
+        }
+    }
+    return { tiles, allCoordinates };
+}
+
+export const xpToNextLevel = (level) => {
+    return Math.floor(level * 10 + 5 * Math.pow(1.2, level -1));
 }
