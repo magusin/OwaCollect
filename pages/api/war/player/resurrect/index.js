@@ -70,7 +70,8 @@ export default async function handler(req, res) {
                 const player = await prisma.warPlayers.findUnique({
                     where: {
                         petId: decoded.id
-                    }
+                    },
+
                 });
 
                 if (!player) {
@@ -133,16 +134,36 @@ export default async function handler(req, res) {
                     });
 
                     // Récupérer les coordonnées des tuiles autour du joueur
-                    const { tiles, allCoordinates } = await getTilesandCoordinates(playerResurrect);
+                    const { tiles, allCoordinates } = await getTilesandCoordinates(playerResurrect.map);
 
-                    // a continuer
+                    return res.status(200).json({ message: `Vous avez ressuscité pour ${player.level * 10} OC`, playerResurrect, tiles, allCoordinates, type: 'success'  });
                 }
 
+                // Réinitialiser les hp du joueur et sa position
+                const playerResurrect = await prisma.warPlayers.update({
+                    where: {
+                        petId: decoded.id
+                    },
+                    data: {
+                        hp: player.hpMax,
+                        isDied: null,
+                        mapId: Math.floor(Math.random() * 400) + 1
+                    },
+                    include: {
+                        map: true,
+                        warPlayerSkills: {
+                            include: { warSkills: true }
+                        },
+                        warMessages: {
+                            orderBy: { createdAt: "desc" }
+                        }
+                    }
+                });
 
                 // Récupérer les coordonnées des tuiles autour du joueur
-                const { tiles, allCoordinates } = await getTilesandCoordinates(player);
+                const { tiles, allCoordinates } = await getTilesandCoordinates(playerResurrect.map);
 
-                return res.status(200).json({ player: playerFinalStats, tiles });
+                return res.status(200).json({ message: `Vous avez ressuscité`, playerResurrect, tiles, allCoordinates, type: 'success'  });
             default:
                 res.status(405).end(`Method ${req.method} Not Allowed`)
         }

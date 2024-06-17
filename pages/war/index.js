@@ -325,6 +325,35 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
         }
     }
 
+    // Call pour réssusciter le joueur
+    const resurrectPlayer = async () => {
+        setLoading(true);
+        try {
+            const response = await axios.get(`/api/war/player/resurrect`, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${session.customJwt}`,
+                }
+            });
+            const data = await response.data;
+            setShowAlert(false);
+            setAlertMessage(`${data.message}`);
+            setAlertType('success');
+            setShowAlert(true);
+            setTimeout(() => {
+                setShowAlert(false);
+            }, 5000);
+            setPlayer(data.playerResurrect);
+            setTiles(data.tiles);
+            setCoordinates(data.allCoordinates);
+            setMessages(data.playerResurrect.warMessages);
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     function HeadView() {
         return (
             <Head>
@@ -412,26 +441,6 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
             const seconds = totalSeconds % 60;
 
             return `${hours}h ${minutes}m ${seconds}s`;
-        };
-
-        // Call pour réssusciter le joueur
-        const resurrectPlayer = async () => {
-            setLoading(true);
-            try {
-                const response = await axios.post(`/api/war/player/resurrect`, {}, {
-                    headers: {
-                        'Content-Type': 'application/json',
-                        Authorization: `Bearer ${session.customJwt}`,
-                    }
-                });
-                const updatedPlayer = await response.data;
-                setPlayer(updatedPlayer.updatedUser);
-                setMessages(updatedPlayer.updatedUser.warMessages);
-            } catch (error) {
-                console.error(error);
-            } finally {
-                setLoading(false);
-            }
         };
 
         return (

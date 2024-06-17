@@ -264,30 +264,58 @@ export default async function handler(req, res) {
             let hpFinal = opponentFinalStats.hp;
             let hpReal = opponent.hp;
             let isPlayerDied = null;
+            let xpWin = 0;
 
             if (crit) {
                 damage = calculateDamageCrit(playerFinalStats, skill.warSkills, opponentFinalStats);
 
                 hpFinal -= damage;
                 if (hpFinal <= 0) {
-                    hpFinal = 0;
-                    xpPlayer += 10;
+                    xpPlayer += opponent.level +1;
+                    xpWin += opponent.level + 1;
                     isPlayerDied = new Date(new Date().getTime() + player.level * 60 * 60 * 1000); // Date actuelle + 1 heure par niveau
                 }
                 xpPlayer += player.level + 1;
-                const critMessage = skill.warSkills.stat === 'str' ? [
-                    `Vous avez infligé un coup critique de ${damage} dommages à ${opponent.name}`,
-                    `Votre coup critique de ${damage}points de dégats a touché ${opponent.name}`,
-                    `Le coup critique de ${damage} dommage a été porté à ${opponent.name}`
+                xpWin += player.level + 1;
+                let critMessage = [];
+                if (hpFinal <= 0) {
+                    critMessage = skill.warSkills.stat === 'str' ? [
+                        `Vous avez infligé un coup critique de ${damage} dommages à ${opponent.name} qui a succombé à votre attaque, vous gagnez ${xpWin} XP`,
+                        `Vous avez vaincu ${opponent.name} avec un coup critique de ${damage} points de dégats, vous obtenez ${xpWin} XP`,
+                        `Votre coup critique de ${damage} dommages a été fatal à ${opponent.name}, vous gagnez ${xpWin} XP`
+                    ] : [
+                        `Vous avez lancé un sort critique de ${damage} points de dégats à ${opponent.name} qui a succombé à votre attaque, vous gagnez ${xpWin} XP`,
+                        `Vous avez vaincu ${opponent.name} avec un sort critique de ${damage} points de dégats, vous obtenez ${xpWin} XP`,
+                        `Votre sort critique de ${damage} a été fatal à ${opponent.name}, vous gagnez ${xpWin} XP`
+                    ]
+                } else {
+                critMessage = skill.warSkills.stat === 'str' ? [
+                    `Vous avez infligé un coup critique de ${damage} dommages à ${opponent.name}, vous gagnez ${xpWin} XP`,
+                    `Votre coup critique de ${damage} points de dégats a touché ${opponent.name}, vous obtenez ${xpWin} XP`,
+                    `Votre coup critique de ${damage} dommage a été porté à ${opponent.name}, vous gagnez ${xpWin} XP`
                 ] : [
-                    `Vous avez lancé un sort critique de ${damage} points de dégats à ${opponent.name}`,
-                    `Votre sort critique de ${damage} dommages a touché ${opponent.name}`,
-                    `Le sort critique de ${damage} a été lancé à ${opponent.name}`
+                    `Vous avez lancé un sort critique de ${damage} points de dégats à ${opponent.name}, vous gagnez ${xpWin} XP`,
+                    `Votre sort critique de ${damage} dommages a touché ${opponent.name}, vous obtenez ${xpWin} XP`,
+                    `Votre sort critique de ${damage} a été lancé sur ${opponent.name}, vous gagnez ${xpWin} XP`
                 ]
+            }
                 const randomCritMessage = critMessage[Math.floor(Math.random() * critMessage.length)];
                 addMessages(decoded.id, randomCritMessage);
 
-                const opponentCritMessage = skill.warSkills.stat === 'str' ? [
+                let opponentCritMessage = [];
+
+                if (hpFinal <= 0) {
+                    opponentCritMessage = skill.warSkills.stat === 'str' ? [
+                        `${player.name} vous a infligé un coup critique de ${damage} points de dégats qui vous a été fatal`,
+                        `Vous n'avez pas survécu au coup critique de ${player.name} de ${damage} points de dégats`,
+                        `Le coup critique de ${player.name} vous a infligé ${damage} points de dégats vous tuant sur le coup`
+                    ] : [
+                        `${player.name} vous a lancé un sort critique de ${damage} points de dégats qui vous a été fatal`,
+                        `Vous n'avez pas survécu au sort critique de ${player.name} de ${damage} points de dégats`,
+                        `Le sort critique de ${player.name} vous a infligé ${damage} points de dégats vous tuant sur le coup`
+                    ]
+                } else {
+                opponentCritMessage = skill.warSkills.stat === 'str' ? [
                     `${player.name} vous a infligé un coup critique de ${damage} points de dégats`,
                     `Le coup critique de ${player.name} vous a touché de ${damage} points de dégats`,
                     `Le coup critique de ${player.name} vous a infligé ${damage} points de dégats`
@@ -296,6 +324,7 @@ export default async function handler(req, res) {
                     `Le sort critique de ${player.name} vous a touché de ${damage} points de dégats`,
                     `Le sort critique de ${player.name} vous a infligé ${damage} points de dégats`
                 ]
+            }
                 const randomOpponentCritMessage = opponentCritMessage[Math.floor(Math.random() * opponentCritMessage.length)];
                 addMessages(opponentId, randomOpponentCritMessage);
 
@@ -305,24 +334,53 @@ export default async function handler(req, res) {
                 hpFinal -= damage;
                 if (hpFinal <= 0) {
                     hpFinal = 0;
-                    xpPlayer += 10;
+                    xpPlayer += opponent.level + 1;
+                    xpWin += opponent.level + 1;
                     isPlayerDied = new Date(new Date().getTime() + player.level * 60 * 60 * 1000); // Date actuelle + 1 heure par niveau
                 }
                 xpPlayer += player.level + 1;
-                // Mettre à jour les joueurs
-                const damageMessage = skill.warSkills.stat === 'str' ? [
-                    `Vous avez infligé ${damage} dommages à ${opponent.name}`,
-                    `Votre coup de ${damage} points de dégats a touché ${opponent.name}`,
-                    `Le coup de ${damage} dommages a été porté à ${opponent.name}`
+                xpWin += player.level + 1;
+
+                let damageMessage = [];
+                
+                if (hpFinal <= 0) {
+                    damageMessage = skill.warSkills.stat === 'str' ? [
+                        `Vous avez infligé ${damage} dommages à ${opponent.name} qui a succombé à votre attaque, vous gagnez ${xpWin} XP`,
+                        `Vous avez vaincu ${opponent.name} avec un coup de ${damage} points de dégats, vous obtenez ${xpWin} XP`,
+                        `Votre coup de ${damage} dommages a été fatal à ${opponent.name}, vous gagnez ${xpWin} XP`
+                    ] : [
+                        `Vous avez lancé un sort de ${damage} points de dégats à ${opponent.name} qui a succombé à votre attaque, vous gagnez ${xpWin} XP`,
+                        `Vous avez vaincu ${opponent.name} avec un sort de ${damage} points de dégats, vous obtenez ${xpWin} XP`,
+                        `Votre sort de ${damage} a été fatal à ${opponent.name}, vous gagnez ${xpWin} XP`
+                    ]
+                } else {
+                damageMessage = skill.warSkills.stat === 'str' ? [
+                    `Vous avez infligé ${damage} dommages à ${opponent.name}, vous gagnez ${xpWin} XP`,
+                    `Votre coup de ${damage} points de dégats a touché ${opponent.name}, vous obtenez ${xpWin} XP`,
+                    `Le coup de ${damage} dommages a été porté à ${opponent.name}, vous gagnez ${xpWin} XP`
                 ] : [
-                    `Vous avez lancé un sort de ${damage} points de dégats à ${opponent.name}`,
-                    `Votre sort de ${damage} dommages a touché ${opponent.name}`,
-                    `Le sort de ${damage} dommages a été lancé à ${opponent.name}`
+                    `Vous avez lancé un sort de ${damage} points de dégats à ${opponent.name}, vous gagnez ${xpWin} XP`,
+                    `Votre sort de ${damage} dommages a touché ${opponent.name}, vous obtenez ${xpWin} XP`,
+                    `Le sort de ${damage} dommages a été lancé à ${opponent.name}, vous gagnez ${xpWin} XP`
                 ]
+            }
                 const randomDamageMessage = damageMessage[Math.floor(Math.random() * damageMessage.length)];
                 addMessages(decoded.id, randomDamageMessage);
 
-                const opponentDamageMessage = skill.warSkills.stat === 'str' ? [
+                let opponentDamageMessage = [];
+
+                if (hpFinal <= 0) {
+                    opponentDamageMessage = skill.warSkills.stat === 'str' ? [
+                        `${player.name} vous a infligé ${damage} points de dégats qui vous a été fatal`,
+                        `Vous n'avez pas survécu au coup de ${player.name} de ${damage} points de dégats`,
+                        `Le coup de ${player.name} vous a infligé ${damage} points de dégats vous tuant sur le coup`
+                    ] : [
+                        `${player.name} vous a lancé un sort de ${damage} points de dégats qui vous a été fatal`,
+                        `Vous n'avez pas survécu au sort de ${player.name} de ${damage} points de dégats`,
+                        `Le sort de ${player.name} vous a infligé ${damage} points de dégats vous tuant sur le coup`
+                    ]
+                } else {
+                opponentDamageMessage = skill.warSkills.stat === 'str' ? [
                     `${player.name} vous a infligé ${damage} points de dégats`,
                     `Le coup de ${player.name} vous a touché de ${damage} points de dégats`,
                     `Le coup de ${player.name} vous a infligé ${damage} points de dégats`
@@ -331,6 +389,7 @@ export default async function handler(req, res) {
                     `Le sort de ${player.name} vous a touché de ${damage} points de dégats`,
                     `Le sort de ${player.name} vous a infligé ${damage} points de dégats`
                 ]
+            }
                 const randomOpponentDamageMessage = opponentDamageMessage[Math.floor(Math.random() * opponentDamageMessage.length)];
                 addMessages(opponentId, randomOpponentDamageMessage);
 
