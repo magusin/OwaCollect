@@ -11,6 +11,7 @@ import Script from 'next/script';
 import calculateDmg from "../../utils/calculateDmg";
 import calculateDef from "../../utils/calculateDef";
 import calculatePassiveSpellsStats from "../../utils/calculatePassiveSpellsStats";
+import xpToNextLevel from "../../utils/xpToNextLevel";
 import { useRouter } from "next/router";
 
 export default function War({ errorServer, war, initialPlayer, totalPoints }) {
@@ -454,50 +455,50 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                     <div className="grid grid-cols-11">
                         {/* Afficher les tuiles autour du joueur dans l'ordre croissant de distance relative au joueur */}
                         {sortedTiles.map((tile, index) => {
-    // Trouver le premier joueur vivant sur la tuile
-    const alivePlayer = tile.warPlayers ? tile.warPlayers.find(player => player.isDied === null) : null;
+                            // Trouver le premier joueur vivant sur la tuile
+                            const alivePlayer = tile.warPlayers ? tile.warPlayers.find(player => player.isDied === null) : null;
 
-    return (
-        <div key={index} className="relative cursor-pointer" onClick={() => handleClickTile(tile)}>
-            {tile.image_url ? (
-                <Image
-                    src={tile.image_url}
-                    alt={tile.alt}
-                    width={150} // Définir une taille par défaut pour les images
-                    height={150}
-                    layout="responsive" // Assurer un layout responsive pour les images
-                />
-            ) : (
-                <div style={{ width: '100%', paddingBottom: '100%' }} />
-            )}
-            {tile.id === positionPlayer ? (
-                <div className="absolute inset-0 flex items-center justify-center">
-                    <div style={{ width: 'auto', height: 'auto', maxWidth: '80%', maxHeight: '80%' }}>
-                        <Image
-                            src={player.imageUrl}
-                            alt={player.name}
-                            className="rounded-full"
-                            layout="fill"
-                        />
-                    </div>
-                </div>
-            ) : (
-                alivePlayer && (
-                    <div className="absolute inset-0 flex items-center justify-center">
-                        <div style={{ width: 'auto', height: 'auto', maxWidth: '80%', maxHeight: '80%' }}>
-                            <Image
-                                src={alivePlayer.imageUrl}
-                                alt={alivePlayer.name}
-                                className="rounded-full"
-                                layout="fill"
-                            />
-                        </div>
-                    </div>
-                )
-            )}
-        </div>
-    );
-})}
+                            return (
+                                <div key={index} className="relative cursor-pointer" onClick={() => handleClickTile(tile)}>
+                                    {tile.image_url ? (
+                                        <Image
+                                            src={tile.image_url}
+                                            alt={tile.alt}
+                                            width={150} // Définir une taille par défaut pour les images
+                                            height={150}
+                                            layout="responsive" // Assurer un layout responsive pour les images
+                                        />
+                                    ) : (
+                                        <div style={{ width: '100%', paddingBottom: '100%' }} />
+                                    )}
+                                    {tile.id === positionPlayer ? (
+                                        <div className="absolute inset-0 flex items-center justify-center">
+                                            <div style={{ width: 'auto', height: 'auto', maxWidth: '80%', maxHeight: '80%' }}>
+                                                <Image
+                                                    src={player.imageUrl}
+                                                    alt={player.name}
+                                                    className="rounded-full"
+                                                    layout="fill"
+                                                />
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        alivePlayer && (
+                                            <div className="absolute inset-0 flex items-center justify-center">
+                                                <div style={{ width: 'auto', height: 'auto', maxWidth: '80%', maxHeight: '80%' }}>
+                                                    <Image
+                                                        src={alivePlayer.imageUrl}
+                                                        alt={alivePlayer.name}
+                                                        className="rounded-full"
+                                                        layout="fill"
+                                                    />
+                                                </div>
+                                            </div>
+                                        )
+                                    )}
+                                </div>
+                            );
+                        })}
 
                     </div>
 
@@ -560,14 +561,36 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                                                 <div className="flex-1 text-center mb-2 sm:mb-0 sm:mr-4">
                                                     <p className="font-bold">Vie</p>
                                                     <p>{selectedPlayer.hp}/{selectedPlayer.hpMax}</p>
-                                                    <div
-                                                        className="bg-red-600 h-2.5 rounded-full"
-                                                        style={{ width: `${(selectedPlayer.hp / selectedPlayer.hpMax) * 100}%` }}>
+                                                    <div className="relative h-2.5 rounded-full bg-gray-300">
+                                                        <div
+                                                            className="bg-red-600 h-2.5 rounded-full"
+                                                            style={{ width: `${(selectedPlayer.hp / selectedPlayer.hpMax) * 100}%` }}>
+                                                        </div>
+
                                                     </div>
                                                 </div>
                                                 <div className="flex-1 text-center">
                                                     <p className="font-bold">Level</p>
                                                     <p>{selectedPlayer.level}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="mt-4">
+                                            <div className="flex flex-col sm:flex-row justify-center">
+                                                <div className="flex-1 text-center mb-2 sm:mb-0 sm:mr-4">
+                                                    <p className="font-bold">XP</p>
+                                                    <div className="relative h-2.5 rounded-full bg-gray-300">
+                                                        <div
+                                                            className="bg-blue-600 h-2.5 rounded-full"
+                                                            style={{ width: `${Math.min((selectedPlayer.xp / xpToNextLevel(selectedPlayer.level)) * 100, 100)}%` }}>
+                                                        </div>
+                                                    </div>
+                                                    <p>{selectedPlayer.xp}/{xpToNextLevel(selectedPlayer.level)} XP</p>
+                                                    {selectedPlayer.xp >= xpToNextLevel(selectedPlayer.level) && (
+                                                        <div className="mt-2">
+                                                            <i className="fas fa-star text-yellow-500"></i>
+                                                        </div>
+                                                    )}
                                                 </div>
                                             </div>
                                         </div>
