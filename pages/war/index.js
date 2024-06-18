@@ -443,6 +443,8 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
             return `${hours}h ${minutes}m ${seconds}s`;
         };
 
+
+
         return (
             <>
                 <HeadView />
@@ -451,48 +453,52 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                     <Header points={points} />
                     <div className="grid grid-cols-11">
                         {/* Afficher les tuiles autour du joueur dans l'ordre croissant de distance relative au joueur */}
-                        {sortedTiles.map((tile, index) => (
-                            <div key={index} className="relative cursor-pointer" onClick={() => handleClickTile(tile)}>
-                                {/* Image de la tuile ou une div vide si la tuile est vide */}
-                                {tile.image_url ? (
-                                    <Image
-                                        src={tile.image_url}
-                                        alt={tile.alt}
-                                        width={150} // Définir une taille par défaut pour les images
-                                        height={150}
-                                        layout="responsive" // Assurer un layout responsive pour les images
-                                    />
-                                ) : (
-                                    <div style={{ width: '100%', paddingBottom: '100%' }} />
-                                )}
-                                {/* Image du joueur */}
-                                {tile.id === positionPlayer ? (
-                                    <div className="absolute inset-0 flex items-center justify-center">
-                                        <div style={{ width: 'auto', height: 'auto', maxWidth: '80%', maxHeight: '80%' }}>
-                                            <Image
-                                                src={player.imageUrl}
-                                                alt={player.name}
-                                                className="rounded-full"
-                                                layout="fill"
-                                            />
-                                        </div>
-                                    </div>
-                                ) : (
-                                    tile.warPlayers && tile.warPlayers.length > 0 && (
-                                        <div className="absolute inset-0 flex items-center justify-center">
-                                            <div style={{ width: 'auto', height: 'auto', maxWidth: '80%', maxHeight: '80%' }}>
-                                                <Image
-                                                    src={tile.warPlayers[0].imageUrl}
-                                                    alt={tile.warPlayers[0].name}
-                                                    className="rounded-full"
-                                                    layout="fill"
-                                                />
-                                            </div>
-                                        </div>
-                                    )
-                                )}
-                            </div>
-                        ))}
+                        {sortedTiles.map((tile, index) => {
+    // Trouver le premier joueur vivant sur la tuile
+    const alivePlayer = tile.warPlayers ? tile.warPlayers.find(player => player.isDied === null) : null;
+
+    return (
+        <div key={index} className="relative cursor-pointer" onClick={() => handleClickTile(tile)}>
+            {tile.image_url ? (
+                <Image
+                    src={tile.image_url}
+                    alt={tile.alt}
+                    width={150} // Définir une taille par défaut pour les images
+                    height={150}
+                    layout="responsive" // Assurer un layout responsive pour les images
+                />
+            ) : (
+                <div style={{ width: '100%', paddingBottom: '100%' }} />
+            )}
+            {tile.id === positionPlayer ? (
+                <div className="absolute inset-0 flex items-center justify-center">
+                    <div style={{ width: 'auto', height: 'auto', maxWidth: '80%', maxHeight: '80%' }}>
+                        <Image
+                            src={player.imageUrl}
+                            alt={player.name}
+                            className="rounded-full"
+                            layout="fill"
+                        />
+                    </div>
+                </div>
+            ) : (
+                alivePlayer && (
+                    <div className="absolute inset-0 flex items-center justify-center">
+                        <div style={{ width: 'auto', height: 'auto', maxWidth: '80%', maxHeight: '80%' }}>
+                            <Image
+                                src={alivePlayer.imageUrl}
+                                alt={alivePlayer.name}
+                                className="rounded-full"
+                                layout="fill"
+                            />
+                        </div>
+                    </div>
+                )
+            )}
+        </div>
+    );
+})}
+
                     </div>
 
                     {isModalOpen && selectedTilePlayers && selectedPlayer === null && (
@@ -501,23 +507,27 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                                 <h2 className="text-lg font-bold mb-4 text-center">X {selectedTileX}, Y {selectedTileY}</h2>
                                 <h3 className="text-lg mb-2 text-center">{selectedTilePlayers.length > 0 ? "Joueur" : "Aucun joueur"}</h3>
                                 <ul className="flex flex-col">
-                                    {selectedTilePlayers.map((playerTile, index) => (
+                                    {selectedTilePlayers.map((playerTile, index) => {
+                                        console.log("playerTile", playerTile);
+                                        const alivePlayer = playerTile.isDied === null;
+                                        if (!alivePlayer) return null; // Ne pas afficher les joueurs morts
 
-                                        <li key={index}
-                                            className={`flex items-center p-2 border-b ${playerTile.petId != player.petId ? "cursor-pointer" : ''}`}
-                                            onClick={playerTile.petId !== player.petId ? () => handleClickPlayer(playerTile) : null}
-                                        >
-                                            {/* Image du joueur */}
-                                            <img
-                                                src={playerTile.imageUrl}
-                                                alt={playerTile.name}
-                                                className="w-20 h-20 rounded-full mr-2"
-
-                                            />
-                                            {/* Nom du joueur */}
-                                            {playerTile.name}
-                                        </li>
-                                    ))}
+                                        return (
+                                            <li key={index}
+                                                className={`flex items-center p-2 border-b ${playerTile.petId !== player.petId ? "cursor-pointer" : ''}`}
+                                                onClick={playerTile.petId !== player.petId ? () => handleClickPlayer(playerTile) : null}
+                                            >
+                                                {/* Image du joueur */}
+                                                <img
+                                                    src={playerTile.imageUrl}
+                                                    alt={playerTile.name}
+                                                    className="w-20 h-20 rounded-full mr-2"
+                                                />
+                                                {/* Nom du joueur */}
+                                                {playerTile.name}
+                                            </li>
+                                        );
+                                    })}
                                 </ul>
                                 {/* Bouton pour fermer la fenêtre modale */}
                                 <div className="flex justify-center absolute bottom-4 left-1/2 transform -translate-x-1/2">
@@ -948,19 +958,19 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                     {/* Joueur mort */}
                     {player.isDied && (
                         <div className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center bg-black bg-opacity-50 text-black z-10">
-                        <div className="bg-white p-4 rounded-lg relative w-3/4 h-3/4 max-h-3/4 overflow-auto flex flex-col ">
-                            <h2 className="text-2xl font-bold mb-8 text-center">Vous êtes mort</h2>
-                            <div className="flex flex-col items-center justify-center space-y-4 mb-8 w-full">
-                                <p>Temps restant avant la résurrection : {formatTime(timeRemaining)}</p>
-                                {timeRemaining <= 0 && (
-                                    <button onClick={resurrectPlayer} className="bg-green-500 text-white py-2 px-4 rounded">Résurrection</button>
-                                )}
-                                {timeRemaining > 0 && (
-                                    <button onClick={resurrectPlayer} disabled={points < player.level * 10} className="bg-red-500 text-white py-2 px-4 rounded">Résusiter maintenant pour {player.level * 10} OC</button>
-                                )}
+                            <div className="bg-white p-4 rounded-lg relative w-3/4 h-3/4 max-h-3/4 overflow-auto flex flex-col ">
+                                <h2 className="text-2xl font-bold mb-8 text-center">Vous êtes mort</h2>
+                                <div className="flex flex-col items-center justify-center space-y-4 mb-8 w-full">
+                                    <p>Temps restant avant la résurrection : {formatTime(timeRemaining)}</p>
+                                    {timeRemaining <= 0 && (
+                                        <button onClick={resurrectPlayer} className="bg-green-500 text-white py-2 px-4 rounded">Résurrection</button>
+                                    )}
+                                    {timeRemaining > 0 && (
+                                        <button onClick={resurrectPlayer} disabled={points < player.level * 10} className="bg-red-500 text-white py-2 px-4 rounded">Résusiter maintenant pour {player.level * 10} OC</button>
+                                    )}
+                                </div>
                             </div>
                         </div>
-                    </div>
                     )}
                     <nav className="menu flex justify-center">
                         <input type="checkbox" href="#" className="menu-open" name="menu-open" onChange={toggleMenu} id="menu-open" checked={isMenuOpen} />

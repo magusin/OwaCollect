@@ -2,6 +2,7 @@ import Cors from 'cors'
 import { PrismaClient } from '@prisma/client'
 import jwt from 'jsonwebtoken';
 import { getToken } from "next-auth/jwt";
+import { getTilesandCoordinates } from '../../fight';
 
 // Initialiser le midleware Cors
 const allowedOrigins = [process.env.NEXTAUTH_URL]
@@ -112,44 +113,21 @@ export default async function handler(req, res) {
 
                 const updatedUser = await prisma.warPlayers.update({
                     where: { petId: decoded.id },
-                    include: { map: true },
+                    include: {
+                        map: true,
+                        warPlayerSkills: {
+                            include: { warSkills: true }
+                        },
+                        warMessages: {
+                            orderBy: { createdAt: "desc" }
+                        }
+                    },
                     data: {
                         mapId: mapDestination.id
                     }
                 });
 
-                // Déterminez les coordonnées de la plage de tuiles autour du joueur
-                const startX = Math.max(1, playerX - 5);
-                const endX = Math.min(20, playerX + 5);
-                const startY = Math.max(1, playerY - 5);
-                const endY = Math.min(20, playerY + 5);
-
-                // Sélectionnez les tuiles dans la plage de coordonnées
-                const tiles = await prisma.map.findMany({
-                    where: {
-                        position_x: { gte: startX, lte: endX },
-                        position_y: { gte: startY, lte: endY },
-                    },
-                    include: {
-                        warPlayers: {
-                            select: {
-                                petId: true,
-                                name: true,
-                                imageUrl: true,
-                                mapId: true,
-                                level: true
-                            }
-                        }
-                    }
-                });
-
-                // Créer une liste de toutes les coordonnées possibles
-                const allCoordinates = [];
-                for (let x = playerX - 5; x <= playerX + 5; x++) {
-                    for (let y = playerY - 5; y <= playerY + 5; y++) {
-                        allCoordinates.push({ position_x: x, position_y: y });
-                    }
-                }
+                const { tiles, allCoordinates } = await getTilesandCoordinates(updatedUser.map);
 
                 res.status(200).json({updatedUser, tiles, allCoordinates});
                 break;

@@ -178,7 +178,8 @@ export async function getTilesandCoordinates(playerPosition) {
                     name: true,
                     imageUrl: true,
                     mapId: true,
-                    level: true
+                    level: true,
+                    isDied: true
                 }
             }
         }

@@ -2,6 +2,7 @@ import Cors from 'cors'
 import { PrismaClient } from '@prisma/client'
 import jwt from 'jsonwebtoken';
 import { getToken } from "next-auth/jwt";
+import { getTilesandCoordinates } from '../fight';
 
 // Initialiser le midleware Cors
 const allowedOrigins = [process.env.NEXTAUTH_URL]
@@ -81,48 +82,15 @@ export default async function handler(req, res) {
                 
                 const mapPlayer = await prisma.map.findFirst({
                     where: { id: mapIdValue },
-                });
-                
+                });  
                 
                 if (!mapPlayer) {
                     return res.status(404).json({ message: 'Carte introuvable' });
                 }
                 
-                const positionXValue = mapPlayer.position_x;
-                const positionYValue = mapPlayer.position_y;
-                
-                // Déterminez les coordonnées de la plage de tuiles autour du joueur
-                const startX = Math.max(1, positionXValue - limitValue);
-                const endX = Math.min(20, positionXValue + limitValue);
-                const startY = Math.max(1, positionYValue - limitValue);
-                const endY = Math.min(20, positionYValue + limitValue);
-                
-                // Sélectionnez les tuiles dans la plage de coordonnées
-                const tiles = await prisma.map.findMany({
-                    where: {
-                        position_x: { gte: startX, lte: endX },
-                        position_y: { gte: startY, lte: endY },
-                    },
-                    include: {
-                        warPlayers: {
-                            select: {
-                                petId: true,
-                                name: true,
-                                imageUrl: true,
-                                mapId: true,
-                                level: true
-                            }
-                        }
-                    }
-                });
+                // Récupérer les coordonnées des tuiles autour du joueur
+                const { tiles, allCoordinates } = await getTilesandCoordinates(mapPlayer);
 
-                // Créer une liste de toutes les coordonnées possibles
-                const allCoordinates = [];
-                for (let x = positionXValue - 5; x <= positionXValue + 5; x++) {
-                    for (let y = positionYValue - 5; y <= positionYValue + 5; y++) {
-                        allCoordinates.push({ position_x: x, position_y: y });
-                    }
-                }
 
                 res.status(200).json({ tiles, allCoordinates });
                 break
