@@ -71,7 +71,6 @@ export default async function handler(req, res) {
                     where: {
                         petId: decoded.id
                     },
-
                 });
 
                 if (!player) {
@@ -107,7 +106,7 @@ export default async function handler(req, res) {
                         },
                         data: {
                             pointsUsed: {
-                                decrement: player.level * 10
+                                increment: player.level * 10
                             }
                         }
                     });
@@ -136,7 +135,7 @@ export default async function handler(req, res) {
                     // Récupérer les coordonnées des tuiles autour du joueur
                     const { tiles, allCoordinates } = await getTilesandCoordinates(playerResurrect.map);
 
-                    return res.status(200).json({ message: `Vous avez ressuscité pour ${player.level * 10} OC`, playerResurrect, tiles, allCoordinates, type: 'success'  });
+                    return res.status(200).json({ message: `Vous avez ressuscité pour ${player.level * 10} OC`, playerResurrect, tiles, allCoordinates, type: 'success', totalPoints: availablePoints - player.level * 10 });
                 }
 
                 // Réinitialiser les hp du joueur et sa position

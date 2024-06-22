@@ -209,7 +209,7 @@ export default async function handler(req, res) {
             }
 
             const evade = calculateEvade(opponentFinalStats, skill.warSkills.stat);
-            console.log('evade', evade);
+
             if (evade) {
                 // Choisir un message parmis une liste de messages aléatoires
                 const evadeMessages = skill.warSkills.stat === 'str' ? [

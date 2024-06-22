@@ -211,7 +211,7 @@ model warPlayers {
   defSlash        Int               @default(1)
   defHoly         Int               @default(1)
   defPierce       Int               @default(1)
-  isLeveling      Boolean           @default(false)
+  levelChoices    Json?
   warMessages     warMessages[]
   warPlayerSkills warPlayerSkills[]
   pets            pets              @relation(fields: [petId], references: [userId], onDelete: Cascade, map: "war_ibfk_1")
@@ -278,4 +278,17 @@ model warMessages {
   warPlayers warPlayers @relation(fields: [petId], references: [petId], onDelete: Cascade, map: "warMessages_ibfk_1")
 
   @@index([petId], map: "petId")
+}
+
+model warLevelChoices {
+  id       Int    @id @default(autoincrement())
+  name     String @db.VarChar(55)
+  imageUrl String @db.VarChar(255)
+  str      Int    @default(0)
+  hp       Int    @default(0)
+  dex      Int    @default(0)
+  intel    Int    @default(0)
+  acu      Int    @default(0)
+  defP     Int    @default(0)
+  defM     Int    @default(0)
 }

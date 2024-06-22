@@ -76,21 +76,20 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
 
     // data game
     const [player, setPlayer] = useState(initialPlayer);
-
     const [messages, setMessages] = useState(player?.warMessages || []);
-
     const [coordinates, setCoordinates] = useState(war?.allCoordinates);
     const [tiles, setTiles] = useState(war?.tiles);
     const positionPlayer = player?.map.id;
     const positionPlayerX = player?.map.position_x;
     const positionPlayerY = player?.map.position_y;
+    const [playerLevelChoices, setPlayerLevelChoices] = useState(player?.levelChoices || []);
     // État pour stocker les compétences du joueur
     const [playerSkill, setPlayerSkill] = useState(player?.warPlayerSkills);
     // Temps restant avant la résurrection du joueur
     const [timeRemaining, setTimeRemaining] = useState(0);
 
     useEffect(() => {
-        if (player.isDied) {
+        if (player.isDied != null) {
             const remaining = calculateTimeRemaining(player.isDied);
             setTimeRemaining(remaining);
 
@@ -106,7 +105,7 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
 
             return () => clearInterval(interval);
         }
-    }, [player.isDied]);
+    }, [player]);
 
     useEffect(() => {
         // Initialize selectedPassiveSkills with already selected skills
@@ -268,8 +267,6 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
             setCoordinates(updatedPlayer.allCoordinates);
             setIsMenuMoveOpen(false);
             setIsMenuOpen(true);
-            // setIsModalOpen(false);
-
         } catch (error) {
             setAlertMessage(`${error.response.data.message}`);
             setAlertType('error');
@@ -282,6 +279,7 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
         }
     }
 
+    // Fonction pour attaquer un joueur
     const attackPlayer = async (opponentId, spellId) => {
         setLoading(true);
         try {
@@ -312,7 +310,6 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
             setMessages(data.updatedPlayer.warMessages);
         } catch (error) {
             setShowAlert(false);
-            console.error(error);
             setAlertMessage(`${error.response.data.message}`);
             setAlertType('error');
             setShowAlert(true);
@@ -325,6 +322,72 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
             setLoading(false);
         }
     }
+
+    // Fonction pour level up choice
+    const levelUpChoice = async () => {
+        setLoading(true);
+        try {
+            const response = await axios.get(`/api/war/player/level/choices`, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${session.customJwt}`,
+                }
+            });
+            const data = await response.data;
+           
+            setShowAlert(false);
+            setPoints(data.totalPoints);
+            setAlertMessage('Vous avez level Up, choisissez une amélioration');
+            setAlertType('success');
+            setShowAlert(true);
+            setTimeout(() => {
+                setShowAlert(false);
+            }, 5000);
+            setPlayerLevelChoices(data.levelChoices);
+        } catch (error) {
+            setShowAlert(false);
+            setAlertMessage(`${error.response.data.message}`);
+            setAlertType('error');
+            setShowAlert(true);
+            console.error(error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Fonction pour levelUp
+    const levelUp = async (choiceId) => {
+        setLoading(true);
+        try {
+            const response = await axios.post(`/api/war/player/level`, {
+                choiceId
+            }, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${session.customJwt}`,
+                }
+            });
+            const data = await response.data;
+            setShowAlert(false);
+            setAlertMessage(`${data.message}`);
+            setAlertType('success');
+            setShowAlert(true);
+            setTimeout(() => {
+                setShowAlert(false);
+            }
+                , 5000);
+            setPlayer(data.user);
+            setPlayerLevelChoices([]);
+        } catch (error) {
+            setShowAlert(false);
+            setAlertMessage(`${error.response.data.message}`);
+            setAlertType('error');
+            setShowAlert(true);
+            console.error(error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     // Call pour réssusciter le joueur
     const resurrectPlayer = async () => {
@@ -349,7 +412,10 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
             setCoordinates(data.allCoordinates);
             setMessages(data.playerResurrect.warMessages);
         } catch (error) {
-            console.error(error);
+            setShowAlert(false);
+            setAlertMessage(`${error.response.data.message}`);
+            setAlertType('error');
+            setShowAlert(true);
         } finally {
             setLoading(false);
         }
@@ -393,10 +459,6 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
         )
     }
 
-    // // Filtrer les tuiles récupérées par le backend pour ne garder que celles qui sont reçues
-    // const receivedTilesMap = new Map(war.tiles.map(tile => [`${tile.position_x},${tile.position_y}`, tile]));
-
-
     if (session) {
         // Créer une liste de tuiles en incluant les tuiles vides
         const tilesWithEmpty = coordinates.map(({ position_x, position_y }) => {
@@ -434,7 +496,7 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
             defPierce: player.defPierce + passiveSpellsStats.upDefPierce,
             defHoly: player.defHoly + passiveSpellsStats.upDefHoly
         };
-
+        // Fonction pour calculer la distance entre le joueur et un adversaire
         const formatTime = (ms) => {
             const totalSeconds = Math.floor(ms / 1000);
             const hours = Math.floor(totalSeconds / 3600);
@@ -443,8 +505,18 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
 
             return `${hours}h ${minutes}m ${seconds}s`;
         };
-
-
+        // Fonction pour formater les statistiques de choix pour level du joueur
+        const formatStats = (option) => {
+            const stats = [];
+            if (option.str > 0) stats.push(`Force: ${option.str}`);
+            if (option.intel > 0) stats.push(`Intelligence: ${option.intel}`);
+            if (option.hp > 0) stats.push(`Vie: ${option.hp}`);
+            if (option.dex > 0) stats.push(`Dextérité: ${option.dex}`);
+            if (option.acu > 0) stats.push(`Acuité: ${option.acu}`);
+            if (option.defP > 0) stats.push(`Défense Physique: ${option.defP}`);
+            if (option.defM > 0) stats.push(`Résistance Magique: ${option.defM}`);
+            return stats;
+        };
 
         return (
             <>
@@ -509,7 +581,6 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                                 <h3 className="text-lg mb-2 text-center">{selectedTilePlayers.length > 0 ? "Joueur" : "Aucun joueur"}</h3>
                                 <ul className="flex flex-col">
                                     {selectedTilePlayers.map((playerTile, index) => {
-                                        console.log("playerTile", playerTile);
                                         const alivePlayer = playerTile.isDied === null;
                                         if (!alivePlayer) return null; // Ne pas afficher les joueurs morts
 
@@ -588,7 +659,7 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                                                     <p>{selectedPlayer.xp}/{xpToNextLevel(selectedPlayer.level)} XP</p>
                                                     {selectedPlayer.xp >= xpToNextLevel(selectedPlayer.level) && (
                                                         <div className="mt-2">
-                                                            <i className="fas fa-star text-yellow-500"></i>
+                                                            <i className="cursor-pointer fa fa-level-up text-yellow-500" disabled={calculatePoints(player) < selectedPlayer.level * 10} onClick={levelUpChoice}> level up pour {selectedPlayer.level * 10} OC</i>
                                                         </div>
                                                     )}
                                                 </div>
@@ -994,6 +1065,32 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                                 </div>
                             </div>
                         </div>
+                    )}
+                    {playerLevelChoices.length > 0 && !player.isDied && (
+                        <div className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center bg-black bg-opacity-50 text-black z-10">
+                        <div className="bg-white p-4 rounded-lg relative w-3/4 h-3/4 max-h-3/4 overflow-auto">
+                            <h2 className="text-2xl font-bold mb-8 text-center">Choisissez votre amélioration</h2>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                {playerLevelChoices.map((option) => (
+                                    <div key={option.id} className="flex flex-col items-center border p-4 rounded-lg">
+                                        <img src={option.imageUrl} alt={option.name} className="w-16 h-16 mb-2" />
+                                        <h3 className="font-bold text-lg">{option.name}</h3>
+                                        <ul className="text-left">
+                                            {formatStats(option).map((stat, index) => (
+                                                <li key={index}>{stat}</li>
+                                            ))}
+                                        </ul>
+                                        <button
+                                            className="bg-green-500 text-white py-2 px-4 rounded mt-2"
+                                            onClick={() => levelUp(option.id)}
+                                        >
+                                            Choisir
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
                     )}
                     <nav className="menu flex justify-center">
                         <input type="checkbox" href="#" className="menu-open" name="menu-open" onChange={toggleMenu} id="menu-open" checked={isMenuOpen} />
