@@ -6,5 +6,11 @@
       "pages/api/*": {
         "maxDuration": 300
       }
+    },
+  "crons": [
+    {
+      "path": "/api/schedule-regen",
+      "schedule": "*/5 * * * *"
     }
+  ]
 }
