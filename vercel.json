@@ -14,7 +14,7 @@
     },
     {
       "path": "/api/cron/delete-expired-messages",
-      "schedule": "*/5 * * * *"
+      "schedule": "0 0 * * *"
     }
   ]
 }
