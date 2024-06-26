@@ -275,8 +275,8 @@ export default async function handler(req, res) {
                     xpWin += opponent.level + 1;
                     isPlayerDied = new Date(new Date().getTime() + player.level * 60 * 60 * 1000); // Date actuelle + 1 heure par niveau
                 }
-                xpPlayer += player.level + 1;
-                xpWin += player.level + 1;
+                xpPlayer += 2;
+                xpWin += 2;
                 let critMessage = [];
                 if (hpFinal <= 0) {
                     critMessage = skill.warSkills.stat === 'str' ? [
@@ -338,8 +338,8 @@ export default async function handler(req, res) {
                     xpWin += opponent.level + 1;
                     isPlayerDied = new Date(new Date().getTime() + player.level * 60 * 60 * 1000); // Date actuelle + 1 heure par niveau
                 }
-                xpPlayer += player.level + 1;
-                xpWin += player.level + 1;
+                xpPlayer += 2;
+                xpWin += 2;
 
                 let damageMessage = [];
                 

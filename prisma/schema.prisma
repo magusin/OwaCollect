@@ -213,6 +213,7 @@ model warPlayers {
   defPierce       Int               @default(1)
   levelChoices    Json?
   warMessages     warMessages[]
+  warPlayerItems  warPlayerItems[]
   warPlayerSkills warPlayerSkills[]
   pets            pets              @relation(fields: [petId], references: [userId], onDelete: Cascade, map: "war_ibfk_1")
   map             map?              @relation(fields: [mapId], references: [id], onDelete: Cascade, map: "warPlayers_ibfk_2")
@@ -233,39 +234,41 @@ model warPlayerSkills {
 }
 
 model warSkills {
-  id              Int               @id @default(autoincrement())
-  name            String            @db.VarChar(255)
-  hit             Int
-  description     String            @db.VarChar(255)
-  dmgMin          Int
-  dmgMax          Int
-  type            String            @db.VarChar(55)
-  cost            Int
-  dist            Int
-  divider         Int
-  stat            String?           @db.VarChar(55)
-  img             String?           @db.VarChar(255)
-  crit            Int?
-  dmgType         String?           @db.VarChar(255)
-  upStr           Int               @default(0)
-  upIntel         Int               @default(0)
-  upHit           Int               @default(0)
-  upCrit          Int               @default(0)
-  upHp            Int               @default(0)
-  upRegen         Int               @default(0)
-  upAcu           Int               @default(0)
-  upDex           Int               @default(0)
-  upDefPStand     Int               @default(0)
-  upDefMStand     Int               @default(0)
-  upDefStrike     Int               @default(0)
-  upDefFire       Int               @default(0)
-  upDefSlash      Int               @default(0)
-  upDefLightning  Int               @default(0)
-  upDefPierce     Int               @default(0)
-  upDefHoly       Int               @default(0)
-  upDefP          Int               @default(0)
-  upDefM          Int               @default(0)
-  warPlayerSkills warPlayerSkills[]
+  id               Int                @id @default(autoincrement())
+  name             String             @db.VarChar(255)
+  hit              Int
+  description      String             @db.VarChar(255)
+  dmgMin           Int
+  dmgMax           Int
+  type             String             @db.VarChar(55)
+  cost             Int
+  dist             Int
+  divider          Int
+  stat             String?            @db.VarChar(55)
+  img              String?            @db.VarChar(255)
+  crit             Int?
+  dmgType          String?            @db.VarChar(255)
+  upStr            Int                @default(0)
+  upIntel          Int                @default(0)
+  upHit            Int                @default(0)
+  upCrit           Int                @default(0)
+  upHp             Int                @default(0)
+  upRegen          Int                @default(0)
+  upAcu            Int                @default(0)
+  upDex            Int                @default(0)
+  upDefPStand      Int                @default(0)
+  upDefMStand      Int                @default(0)
+  upDefStrike      Int                @default(0)
+  upDefFire        Int                @default(0)
+  upDefSlash       Int                @default(0)
+  upDefLightning   Int                @default(0)
+  upDefPierce      Int                @default(0)
+  upDefHoly        Int                @default(0)
+  upDefP           Int                @default(0)
+  upDefM           Int                @default(0)
+  warMonsterLoots  warMonsterLoots[]
+  warMonsterSkills warMonsterSkills[]
+  warPlayerSkills  warPlayerSkills[]
 }
 
 model warMessages {
@@ -291,4 +294,95 @@ model warLevelChoices {
   acu      Int    @default(0)
   defP     Int    @default(0)
   defM     Int    @default(0)
+}
+
+model monsters {
+  id               Int                @id @default(autoincrement())
+  name             String             @db.VarChar(55)
+  imageUrl         String             @db.VarChar(255)
+  level            Int
+  hit              Int                @default(0)
+  crit             Int                @default(5)
+  hpMin            Int
+  hpMax            Int
+  strMin           Int
+  strMax           Int
+  intelMin         Int
+  intelMax         Int
+  dexMin           Int
+  dexMax           Int
+  defPMin          Int
+  defPMax          Int
+  defMMin          Int
+  defMMax          Int
+  acuMin           Int
+  acuMax           Int
+  defMStandMin     Int
+  defMStandMax     Int
+  defPStandMin     Int
+  defPStandMax     Int
+  defFireMin       Int
+  defFireMax       Int
+  defStrikeMin     Int
+  defStrikeMax     Int
+  defLightningMin  Int
+  defLightningMax  Int
+  defSlashMin      Int
+  defSlashMax      Int
+  defHolyMin       Int
+  defHolyMax       Int
+  defPierceMin     Int
+  defPierceMax     Int
+  lootCount        Int                @default(2)
+  warMonsterLoots  warMonsterLoots[]
+  warMonsterSkills warMonsterSkills[]
+}
+
+model warItems {
+  id              Int               @id @default(autoincrement())
+  name            String            @db.VarChar(55)
+  imageUrl        String            @db.VarChar(255)
+  pa              Int?
+  hp              Int?
+  card            Boolean           @default(false)
+  warMonsterLoots warMonsterLoots[]
+  warPlayerItems  warPlayerItems[]
+}
+
+model warMonsterLoots {
+  id        Int        @id @default(autoincrement())
+  monsterId Int
+  itemId    Int?
+  skillId   Int?
+  count     Int?
+  value     Int
+  warItems  warItems?  @relation(fields: [itemId], references: [id], onDelete: Cascade, map: "warMonsterLoots_ibfk_1")
+  monsters  monsters   @relation(fields: [monsterId], references: [id], onDelete: Cascade, map: "warMonsterLoots_ibfk_2")
+  warSkills warSkills? @relation(fields: [skillId], references: [id], onDelete: Cascade, map: "warMonsterLoots_ibfk_3")
+
+  @@index([itemId], map: "itemId")
+  @@index([monsterId], map: "monsterId")
+  @@index([skillId], map: "skillId")
+}
+
+model warMonsterSkills {
+  id        Int       @id @default(autoincrement())
+  monsterId Int
+  skillId   Int
+  monsters  monsters  @relation(fields: [monsterId], references: [id], onDelete: Cascade, map: "warMonsterSkills_ibfk_1")
+  warSkills warSkills @relation(fields: [skillId], references: [id], onDelete: Cascade, map: "warMonsterSkills_ibfk_2")
+
+  @@index([monsterId], map: "monsterId")
+  @@index([skillId], map: "skillId")
+}
+
+model warPlayerItems {
+  petId      String     @db.VarChar(255)
+  itemId     Int
+  count      Int
+  warItems   warItems   @relation(fields: [itemId], references: [id], onDelete: Cascade, map: "warPlayerItems_ibfk_1")
+  warPlayers warPlayers @relation(fields: [petId], references: [petId], onDelete: Cascade, map: "warPlayerItems_ibfk_2")
+
+  @@unique([petId, itemId], map: "petId")
+  @@index([itemId], map: "itemId")
 }
