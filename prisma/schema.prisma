@@ -175,11 +175,12 @@ model secretsdiscovered {
 }
 
 model map {
-  id         Int          @id @default(autoincrement())
-  position_x Int
-  position_y Int
-  image_url  String       @db.VarChar(255)
-  warPlayers warPlayers[]
+  id          Int           @id @default(autoincrement())
+  position_x  Int
+  position_y  Int
+  image_url   String        @db.VarChar(255)
+  warMonsters warMonsters[]
+  warPlayers  warPlayers[]
 }
 
 model warPlayers {
@@ -336,6 +337,7 @@ model monsters {
   lootCount        Int                @default(2)
   warMonsterLoots  warMonsterLoots[]
   warMonsterSkills warMonsterSkills[]
+  warMonsters      warMonsters[]
 }
 
 model warItems {
@@ -385,4 +387,34 @@ model warPlayerItems {
 
   @@unique([petId, itemId], map: "petId")
   @@index([itemId], map: "itemId")
+}
+
+model warMonsters {
+  id           Int      @id @default(autoincrement())
+  monsterId    Int
+  mapId        Int
+  level        Int
+  hp           Int
+  hpMax        Int
+  str          Int
+  intel        Int
+  dex          Int
+  acu          Int
+  hit          Int
+  defP         Int
+  defM         Int
+  crit         Int
+  defMStand    Int
+  defPStand    Int
+  defFire      Int
+  defStrike    Int
+  defLightning Int
+  defSlash     Int
+  defHoly      Int
+  defPierce    Int
+  monsters     monsters @relation(fields: [monsterId], references: [id], onDelete: Cascade, map: "warMonsters_ibfk_1")
+  map          map      @relation(fields: [mapId], references: [id], onDelete: Cascade, map: "warMonsters_ibfk_2")
+
+  @@index([mapId], map: "mapId")
+  @@index([monsterId], map: "monsterId")
 }
