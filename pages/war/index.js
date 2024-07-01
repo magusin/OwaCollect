@@ -322,7 +322,7 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
             const data = await response.data;
 
             setShowAlert(false);
-            setAlertMessage(`${data.message}`);
+            setAlertMessage(data.message.replace(/\n/g, '<br/>'));
             if (data.type === 'error') {
                 setAlertType('error');
             } else {

@@ -434,6 +434,9 @@ export default async function handler(req, res) {
                         },
                         warMessages: {
                             orderBy: { createdAt: "desc" }
+                        },
+                        warPlayerItems: {
+                            include: { warItems: true }
                         }
                     }
                 });

@@ -63,6 +63,7 @@ export function calculateDamageCrit(attacker, spell, defender) {
 }
 
 export function calculateHit(attacker, spell) {
+    console.log('spell.hit', spell)
     const hitChance = Math.min(95, attacker.hit + spell.hit)
     const randomValue = Math.random() * 100;
     return randomValue <= hitChance; // L'attaque touche si la valeur aléatoire est inférieure à la précision ajustée

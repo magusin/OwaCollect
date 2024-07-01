@@ -47,7 +47,7 @@ async function runMiddleware(req, res, fn) {
 
 async function monsterAttack(player, monster) {
     const skill = monster.monsters.warMonsterSkills[Math.floor(Math.random() * monster.monsters.warMonsterSkills.length)];
-    const hit = calculateHit(monster, skill);
+    const hit = calculateHit(monster, skill.warSkills);
     if (!hit) {
         // tier un message aléatoire
         const missMessages = skill.warSkills.stat === 'str' ? [
@@ -94,20 +94,20 @@ async function monsterAttack(player, monster) {
             hpPlayer = 0;
             isDied = new Date(new Date().getTime() + player.level * 60 * 60 * 1000);
             critMessages = skill.warSkills.stat === 'str' ? [
-                `${monster.monsters.name} vous a tué avec un coup critique de ${damage} dommages avec ${skill.name}`,
-                `Vous avez subi un coup critique de ${damage} points de dégats de ${monster.monsters.name} avec ${skill.name} qui vous a terrassé`,
-                `Le coup critique ${skill.name} de ${monster.monsters.name} vous a tué en infligeant ${damage} points de dégats`] : [
-                `${monster.monsters.name} vous a abattu avec le sort critique ${skill.name} de ${damage} points de dégats`,
-                `Vous avez péri avec le sort critique ${skill.name} de ${damage} points de dégats de ${monster.monsters.name}`,
-                `Le sort critique ${skill.name} de ${monster.monsters.name} vous a tué infligeant ${damage} points de dégats`]
+                `${monster.monsters.name} vous a tué avec un coup critique de ${damage} dommages avec ${skill.warSkills.name}`,
+                `Vous avez subi un coup critique de ${damage} points de dégats de ${monster.monsters.name} avec ${skill.warSkills.name} qui vous a terrassé`,
+                `Le coup critique ${skill.warSkills.name} de ${monster.monsters.name} vous a tué en infligeant ${damage} points de dégats`] : [
+                `${monster.monsters.name} vous a abattu avec le sort critique ${skill.warSkills.name} de ${damage} points de dégats`,
+                `Vous avez péri avec le sort critique ${skill.warSkills.name} de ${damage} points de dégats de ${monster.monsters.name}`,
+                `Le sort critique ${skill.warSkills.name} de ${monster.monsters.name} vous a tué infligeant ${damage} points de dégats`]
         } else {
             critMessages = skill.warSkills.stat === 'str' ? [
-                `${monster.monsters.name} vous a infligé un coup critique de ${damage} dommages avec ${skill.name}`,
-                `Vous avez subi un coup critique de ${damage} points de dégats de ${monster.monsters.name} avec ${skill.name}`,
-                `Le coup critique ${skill.name} de ${monster.monsters.name} vous a infligé ${damage} points de dégats`] : [
-                `${monster.monsters.name} vous a touché avec le sort critique ${skill.name} de ${damage} points de dégats`,
-                `Vous avez subi le sort critique ${skill.name} de ${damage} points de dégats de ${monster.monsters.name}`,
-                `Le sort critique ${skill.name} de ${monster.monsters.name} vous a infligé ${damage} points de dégats`]
+                `${monster.monsters.name} vous a infligé un coup critique de ${damage} dommages avec ${skill.warSkills.name}`,
+                `Vous avez subi un coup critique de ${damage} points de dégats de ${monster.monsters.name} avec ${skill.warSkills.name}`,
+                `Le coup critique ${skill.warSkills.name} de ${monster.monsters.name} vous a infligé ${damage} points de dégats`] : [
+                `${monster.monsters.name} vous a touché avec le sort critique ${skill.warSkills.name} de ${damage} points de dégats`,
+                `Vous avez subi le sort critique ${skill.warSkills.name} de ${damage} points de dégats de ${monster.monsters.name}`,
+                `Le sort critique ${skill.warSkills.name} de ${monster.monsters.name} vous a infligé ${damage} points de dégats`]
         }
         const monsterMessage = critMessages[Math.floor(Math.random() * critMessages.length)];
         await addMessages(player.petId, monsterMessage);
@@ -120,20 +120,20 @@ async function monsterAttack(player, monster) {
             hpPlayer = 0;
             isDied = new Date(new Date().getTime() + player.level * 60 * 60 * 1000);
             damageMessages = skill.warSkills.stat === 'str' ? [
-                `${monster.monsters.name} vous a tué avec ${damage} dommages avec ${skill.name}`,
-                `Vous avez subi un coup de ${damage} points de dégats de ${monster.monsters.name} avec ${skill.name} qui vous a terrassé`,
-                `Le coup ${skill.name} de ${monster.monsters.name} vous a tué en infligeant ${damage} points de dégats`] : [
-                `${monster.monsters.name} vous a abattu avec le sort ${skill.name} de ${damage} points de dégats`,
-                `Vous avez péri avec le sort ${skill.name} de ${damage} points de dégats de ${monster.monsters.name}`,
-                `Le sort ${skill.name} de ${monster.monsters.name} vous a tué infligeant ${damage} points de dégats`]
+                `${monster.monsters.name} vous a tué avec ${damage} dommages avec ${skill.warSkills.name}`,
+                `Vous avez subi un coup de ${damage} points de dégats de ${monster.monsters.name} avec ${skill.warSkills.name} qui vous a terrassé`,
+                `Le coup ${skill.warSkills.name} de ${monster.monsters.name} vous a tué en infligeant ${damage} points de dégats`] : [
+                `${monster.monsters.name} vous a abattu avec le sort ${skill.warSkills.name} de ${damage} points de dégats`,
+                `Vous avez péri avec le sort ${skill.warSkills.name} de ${damage} points de dégats de ${monster.monsters.name}`,
+                `Le sort ${skill.warSkills.name} de ${monster.monsters.name} vous a tué infligeant ${damage} points de dégats`]
         }
         damageMessages = skill.warSkills.stat === 'str' ? [
-            `${monster.monsters.name} vous a infligé ${damage} dommages avec ${skill.name}`,
-            `Vous avez subi un coup de ${damage} points de dégats de ${monster.monsters.name} avec ${skill.name}`,
-            `Le coup ${skill.name} de ${monster.monsters.name} vous a infligé ${damage} points de dégats`] : [
-            `${monster.monsters.name} vous a touché avec le sort ${skill.name} de ${damage} points de dégats`,
-            `Vous avez subi le sort ${skill.name} de ${damage} points de dégats de ${monster.monsters.name}`,
-            `Le sort ${skill.name} de ${monster.monsters.name} vous a infligé ${damage} points de dégats`]
+            `${monster.monsters.name} vous a infligé ${damage} dommages avec ${skill.warSkills.name}`,
+            `Vous avez subi un coup de ${damage} points de dégats de ${monster.monsters.name} avec ${skill.warSkills.name}`,
+            `Le coup ${skill.warSkills.name} de ${monster.monsters.name} vous a infligé ${damage} points de dégats`] : [
+            `${monster.monsters.name} vous a touché avec le sort ${skill.warSkills.name} de ${damage} points de dégats`,
+            `Vous avez subi le sort ${skill.warSkills.name} de ${damage} points de dégats de ${monster.monsters.name}`,
+            `Le sort ${skill.warSkills.name} de ${monster.monsters.name} vous a infligé ${damage} points de dégats`]
         const monsterMessage = damageMessages[Math.floor(Math.random() * damageMessages.length)];
         addMessages(player.petId, monsterMessage);
         message += monsterMessage;
@@ -537,9 +537,9 @@ export default async function handler(req, res) {
                 // Générer un message avec loot
                 const lootMessage = lootsWon.map(loot => {
                     if (loot.skillId) {
-                        return `Vous avez obtenu le sort ${loot.name}`;
+                        return `Vous avez obtenu le sort ${loot.warSkills.name}`;
                     } else if (loot.itemId) {
-                        return `Vous avez obtenu ${loot.count} ${loot.name}`;
+                        return `Vous avez obtenu ${loot.count} ${loot.warItems.name}`;
                     }
                 }).join('\n');
                 addMessages(decoded.id, lootMessage);
