@@ -155,8 +155,6 @@ export default async function handler(req, res) {
                     }
                 });
 
-                console.log("updatedUser", updatedUser);
-
                 return res.status(200).json({ message: 'Niveau mis à jour', user: updatedUser });
             default:
                 return res.status(405).json({ message: 'Méthode non autorisée' });

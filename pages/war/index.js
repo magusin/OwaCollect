@@ -34,6 +34,10 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
     const [selectedTileY, setSelectedTileY] = useState(null);
     // Déclaration de l'état pour stocker les informations du joueur sélectionné
     const [selectedPlayer, setSelectedPlayer] = useState(null);
+    // Déclaration de l'état pour stocker les informations du monstre sélectionné
+    const [selectedMonster, setSelectedMonster] = useState(null);
+    // Déclaration de l'état pour stocker les monstres de la tuile sélectionnée
+    const [selectedTileMonsters, setSelectedTileMonsters] = useState(null);
     // loading state
     const [loading, setLoading] = useState(false);
     // state for active and passive skills
@@ -132,15 +136,33 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
 
     // Fonction pour gérer le clic sur un joueur de la liste
     const handleClickPlayer = (player) => {
-        // setSelectedTilePlayers(null)
         // Mettre à jour l'état avec les informations du joueur sélectionné
         setSelectedPlayer(player);
         // Ouvrir la modal
         setIsModalOpen(true);
     };
 
+    // Fonction pour gérer le clic sur un monstre de la liste
+    const handleClickMonster = (monster) => {
+        // Mettre à jour l'état avec les informations du monstre sélectionné
+        setSelectedMonster(monster);
+        // Ouvrir la modal
+        setIsModalOpen(true);
+    };
+
     const handleSelectFightSpell = (spell) => {
-        attackPlayer(selectedPlayer.petId, spell.skillId);
+        if (selectedPlayer) {
+            attackPlayer(selectedPlayer.petId, spell.skillId);
+        } else if (selectedMonster) {
+            attackMonster(selectedMonster.id, spell.skillId);
+        } else {
+            setAlertMessage('Veuillez sélectionner un joueur ou un monstre pour attaquer');
+            setAlertType('error');
+            setShowAlert(true);
+            setTimeout(() => {
+                setShowAlert(false);
+            }, 5000);
+        }
     }
 
     const handleClickFight = () => {
@@ -186,9 +208,10 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
     // Gestionnaire d'événements pour le clic sur une tuile
     const handleClickTile = (tile) => {
         setIsModalOpen(false);
-        // Filtrer les joueurs présents sur la tuile cliquée
+        // Filtrer les joueurs et les monstres présents sur la tuile cliquée
         const playersOnTile = tile.warPlayers || [];
         setSelectedTilePlayers(playersOnTile);
+        setSelectedTileMonsters(tile.warMonsters || [])
 
         // Stocker les coordonnées de la tuile sélectionnée
         setSelectedTileX(tile.position_x);
@@ -201,12 +224,17 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
     const closeModal = () => {
         // setIsModalOpen(false);
         setSelectedTilePlayers(null);
+        setSelectedTileMonsters(null);
     };
 
     // Fonction pour fermer la fenêtre modale de joueur
     const closeModalPlayer = () => {
-        // setIsModalOpen(false);
         setSelectedPlayer(null);
+    };
+
+    // Fonction pour fermer la fenêtre modale de monstre
+    const closeModalMonster = () => {
+        setSelectedMonster(null);
     };
 
     // Fonction pour fermer la fenêtre modale de message
@@ -303,7 +331,7 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
             setShowAlert(true);
             setTimeout(() => {
                 setShowAlert(false);
-            }, 5000);
+            }, 7000);
             setPlayer(data.updatedPlayer);
             setTiles(data.tiles);
             setCoordinates(data.allCoordinates);
@@ -323,6 +351,44 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
         }
     }
 
+    // Fonction pour attaquer un monstre
+    const attackMonster = async (monsterId, spellId) => {
+        setLoading(true);
+        try {
+            const response = await axios.post(`/api/war/player/fightMonster`, {
+                monsterId, spellId
+            }, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${session.customJwt}`,
+                }
+            });
+            const data = await response.data;
+            console.log('data', data);
+            setShowAlert(false);
+            setAlertMessage(`${data.message}`);
+            if (data.type === 'error') {
+                setAlertType('error');
+            } else {
+                setAlertType('success');
+            }
+            setShowAlert(true);
+            setTimeout(() => {
+                setShowAlert(false);
+            }, 7000);
+        } catch (error) {
+            setShowAlert(false);
+            setAlertMessage(`${error.response.data.message}`);
+            setAlertType('error');
+            setShowAlert(true);
+            setTimeout(() => {
+                setShowAlert(false);
+            }, 5000);
+        } finally {
+            setLoading(false);
+        }
+    }
+
     // Fonction pour level up choice
     const levelUpChoice = async () => {
         setLoading(true);
@@ -334,7 +400,7 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                 }
             });
             const data = await response.data;
-           
+
             setShowAlert(false);
             setPoints(data.totalPoints);
             setAlertMessage('Vous avez level Up, choisissez une amélioration');
@@ -554,27 +620,36 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                                                 />
                                             </div>
                                         </div>
-                                    ) : (
-                                        alivePlayer && (
-                                            <div className="absolute inset-0 flex items-center justify-center">
-                                                <div style={{ width: 'auto', height: 'auto', maxWidth: '80%', maxHeight: '80%' }}>
-                                                    <Image
-                                                        src={alivePlayer.imageUrl}
-                                                        alt={alivePlayer.name}
-                                                        className="rounded-full"
-                                                        layout="fill"
-                                                    />
-                                                </div>
+                                    ) : alivePlayer ? (
+                                        <div className="absolute inset-0 flex items-center justify-center">
+                                            <div style={{ width: 'auto', height: 'auto', maxWidth: '80%', maxHeight: '80%' }}>
+                                                <Image
+                                                    src={alivePlayer.imageUrl}
+                                                    alt={alivePlayer.name}
+                                                    className="rounded-full"
+                                                    layout="fill"
+                                                />
                                             </div>
-                                        )
-                                    )}
+                                        </div>
+                                    ) : tile.warMonsters && tile.warMonsters.length > 0 ? (
+                                        <div className="absolute inset-0 flex items-center justify-center">
+                                            <div className="relative w-3/4 h-3/4">
+                                                <Image
+                                                    src={tile.warMonsters[0].monsters.imageUrl}
+                                                    alt={tile.warMonsters[0].monsters.name}
+                                                    layout="fill"
+                                                    className="rounded-lg"
+                                                />
+                                            </div>
+                                        </div>
+                                    ) : null}
                                 </div>
                             );
                         })}
 
                     </div>
 
-                    {isModalOpen && selectedTilePlayers && selectedPlayer === null && (
+                    {isModalOpen && selectedTilePlayers && selectedPlayer === null && selectedMonster === null && (
                         <div className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center bg-black bg-opacity-50 text-black z-10">
                             <div className="bg-white p-4 rounded-lg relative w-3/4 h-3/4 max-h-3/4 overflow-auto">
                                 <h2 className="text-lg font-bold mb-4 text-center">X {selectedTileX}, Y {selectedTileY}</h2>
@@ -601,6 +676,24 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                                         );
                                     })}
                                 </ul>
+                                <h3 className="text-lg mb-2 text-center">{selectedTileMonsters.length > 0 ? "Monstres" : "Aucun monstre"}</h3>
+                                <ul className="flex flex-col">
+                                    {selectedTileMonsters.map((monsterTile, index) => (
+                                        <li key={index}
+                                            className="flex items-center p-2 border-b cursor-pointer"
+                                            onClick={() => handleClickMonster(monsterTile)}
+                                        >
+                                            {/* Image du monstre */}
+                                            <img
+                                                src={monsterTile.monsters.imageUrl}
+                                                alt={monsterTile.monsters.name}
+                                                className="w-20 h-20 rounded-full mr-2"
+                                            />
+                                            {/* Nom du monstre */}
+                                            {monsterTile.monsters.name}
+                                        </li>
+                                    ))}
+                                </ul>
                                 {/* Bouton pour fermer la fenêtre modale */}
                                 <div className="flex justify-center absolute bottom-4 left-1/2 transform -translate-x-1/2">
                                     <button onClick={closeModal} className="bg-red-500 text-white py-2 px-4 rounded">Fermer</button>
@@ -608,7 +701,7 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                             </div>
                         </div>
                     )}
-                    {isModalOpen && selectedPlayer && isModalFight === false && (
+                    {isModalOpen && selectedPlayer && !isModalFight && (
                         <div className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center bg-black bg-opacity-50 text-black z-10">
                             <div className="bg-white p-4 rounded-lg relative w-3/4 h-3/4 max-h-3/4 overflow-auto">
 
@@ -626,7 +719,6 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
 
                                 ) : (
                                     <>
-
                                         <div className="mt-4">
                                             <div className="flex flex-col sm:flex-row justify-center">
                                                 <div className="flex-1 text-center mb-2 sm:mb-0 sm:mr-4">
@@ -637,7 +729,6 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                                                             className="bg-red-600 h-2.5 rounded-full"
                                                             style={{ width: `${(selectedPlayer.hp / selectedPlayer.hpMax) * 100}%` }}>
                                                         </div>
-
                                                     </div>
                                                 </div>
                                                 <div className="flex-1 text-center">
@@ -834,6 +925,74 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                             </div>
                         </div>
                     )}
+                    {isModalOpen && selectedMonster && !isModalFight && (
+                        <div className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center bg-black bg-opacity-50 text-black z-10">
+                            <div className="bg-white p-4 rounded-lg relative w-3/4 h-3/4 max-h-3/4 overflow-auto">
+                                <h2 className="text-lg font-bold mb-4 text-center">{selectedMonster.monsters.name}</h2>
+
+
+                                <img
+                                    src={selectedMonster.monsters.imageUrl}
+                                    alt={selectedMonster.monsters.name}
+                                    className="lg:w-32 lg:h-32 md:w-24 md:h-24 h-16 w-16 mx-auto mb-2"
+                                />
+
+                                <div className="flex flex-col items-center mt-4">
+                                    <p className="font-bold">Niveau {selectedMonster.level}</p>
+                                    <p>Vie: {selectedMonster.hp}/{selectedMonster.hpMax}</p>
+                                    <div className="relative h-2.5 rounded-full bg-gray-300 w-3/4">
+                                        <div
+                                            className="bg-red-600 h-2.5 rounded-full"
+                                            style={{ width: `${(selectedMonster.hp / selectedMonster.hpMax) * 100}%` }}>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="mt-4">
+                                    <div className="flex flex-col sm:flex-row justify-center">
+                                        <div className="flex-1 text-center mb-2 sm:mb-0 sm:mr-4 relative group">
+                                            <p className="font-bold">Force</p>
+                                            <p>{selectedMonster.str}</p>
+                                            <div className="absolute left-1/2 transform -translate-x-1/2 -top-8 hidden group-hover:block bg-gray-700 text-white text-xs rounded py-1 px-2">
+                                                Influe sur les dégats physiques
+                                            </div>
+                                        </div>
+                                        <div className="flex-1 text-center relative group">
+                                            <p className="font-bold">Intelligence</p>
+                                            <p>{selectedMonster.intel}</p>
+                                            <div className="absolute left-1/2 transform -translate-x-1/2 -top-8 hidden group-hover:block bg-gray-700 text-white text-xs rounded py-1 px-2">
+                                                Influe sur les dégats magiques
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="mt-4">
+                                    <div className="flex flex-col sm:flex-row justify-center">
+                                        <div className="flex-1 text-center mb-2 sm:mb-0 sm:mr-4 relative group">
+                                            <p className="font-bold">Dextérité</p>
+                                            <p>{selectedMonster.dex}</p>
+                                            <div className="absolute left-1/2 transform -translate-x-1/2 -top-8 hidden group-hover:block bg-gray-700 text-white text-xs rounded py-1 px-2">
+                                                Permet d&apos;esquiver les attaques physiques
+                                            </div>
+                                        </div>
+                                        <div className="flex-1 text-center relative group">
+                                            <p className="font-bold">Acuité</p>
+                                            <p>{selectedMonster.acu}</p>
+                                            <div className="absolute left-1/2 transform -translate-x-1/2 -top-8 hidden group-hover:block bg-gray-700 text-white text-xs rounded py-1 px-2">
+                                                Permet de bloquer les attaques magiques
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {/* Bouton pour fermer le menu */}
+                                <div className="relative w-full mt-12">
+                                    <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2">
+                                        <button className="bg-green-500 text-white py-2 px-4 rounded mr-4" onClick={handleClickFight}>Attaquer</button>
+                                        <button onClick={closeModalMonster} className="bg-red-500 text-white py-2 px-4 rounded">Fermer</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
                     {isMenuMoveOpen && (
                         <div className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center bg-black bg-opacity-50 text-black z-10">
                             <div className="bg-white p-4 rounded-lg relative w-3/4 h-3/4 max-h-3/4 overflow-auto flex flex-col justify-between">
@@ -886,7 +1045,7 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                     {isModalFight && (
                         <div className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center bg-black bg-opacity-50 text-black z-10">
                             <div className="bg-white p-4 rounded-lg relative w-3/4 h-3/4 max-h-3/4 overflow-auto">
-                                <h2 className="text-lg font-bold text-center mb-4">Sélectionner un Sort/Compétence pour attaquer {selectedPlayer.name}</h2>
+                                <h2 className="text-lg font-bold text-center mb-4">Sélectionner un Sort/Compétence pour attaquer {selectedPlayer ? selectedPlayer.name : selectedMonster.name}</h2>
                                 <ul className="flex flex-col">
                                     {playerSkill.filter(skill => skill.warSkills.type === 'actif').map((skill, index) => (
                                         <li key={index}
@@ -1068,29 +1227,29 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                     )}
                     {playerLevelChoices.length > 0 && !player.isDied && (
                         <div className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center bg-black bg-opacity-50 text-black z-10">
-                        <div className="bg-white p-4 rounded-lg relative w-3/4 h-3/4 max-h-3/4 overflow-auto">
-                            <h2 className="text-2xl font-bold mb-8 text-center">Choisissez votre amélioration</h2>
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                {playerLevelChoices.map((option) => (
-                                    <div key={option.id} className="flex flex-col items-center border p-4 rounded-lg">
-                                        <img src={option.imageUrl} alt={option.name} className="w-16 h-16 mb-2" />
-                                        <h3 className="font-bold text-lg">{option.name}</h3>
-                                        <ul className="text-left">
-                                            {formatStats(option).map((stat, index) => (
-                                                <li key={index}>{stat}</li>
-                                            ))}
-                                        </ul>
-                                        <button
-                                            className="bg-green-500 text-white py-2 px-4 rounded mt-2"
-                                            onClick={() => levelUp(option.id)}
-                                        >
-                                            Choisir
-                                        </button>
-                                    </div>
-                                ))}
+                            <div className="bg-white p-4 rounded-lg relative w-3/4 h-3/4 max-h-3/4 overflow-auto">
+                                <h2 className="text-2xl font-bold mb-8 text-center">Choisissez votre amélioration</h2>
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    {playerLevelChoices.map((option) => (
+                                        <div key={option.id} className="flex flex-col items-center border p-4 rounded-lg">
+                                            <img src={option.imageUrl} alt={option.name} className="w-16 h-16 mb-2" />
+                                            <h3 className="font-bold text-lg">{option.name}</h3>
+                                            <ul className="text-left">
+                                                {formatStats(option).map((stat, index) => (
+                                                    <li key={index}>{stat}</li>
+                                                ))}
+                                            </ul>
+                                            <button
+                                                className="bg-green-500 text-white py-2 px-4 rounded mt-2"
+                                                onClick={() => levelUp(option.id)}
+                                            >
+                                                Choisir
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
                         </div>
-                    </div>
                     )}
                     <nav className="menu flex justify-center">
                         <input type="checkbox" href="#" className="menu-open" name="menu-open" onChange={toggleMenu} id="menu-open" checked={isMenuOpen} />

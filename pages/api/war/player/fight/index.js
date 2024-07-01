@@ -173,7 +173,7 @@ export default async function handler(req, res) {
                     `Votre tentative de lancer de sort sur ${opponent.name} a échoué`
                 ]
                 const randomMissMessage = missMessages[Math.floor(Math.random() * missMessages.length)];
-                addMessages(decoded.id, randomMissMessage);
+                await addMessages(decoded.id, randomMissMessage);
                 const opponentMissMessage = skill.warSkills.stat === 'str' ? [
                     `${player.name} a manqué son attaque sur vous`,
                     `Le coup de ${player.name} vous a raté`,
@@ -182,14 +182,16 @@ export default async function handler(req, res) {
                     `Le sort de ${player.name} vous a manqué`,
                     `Le sort vous ciblant de ${player.name} a échoué`]
                 const randomOpponentMissMessage = opponentMissMessage[Math.floor(Math.random() * opponentMissMessage.length)];
-                addMessages(opponentId, randomOpponentMissMessage);
+                await addMessages(opponentId, randomOpponentMissMessage);
                 // Mettre à jour le joueur
                 const updatedPlayer = await prisma.warPlayers.update({
                     where: {
                         petId: decoded.id
                     },
                     data: {
-                        pa: player.pa - skill.warSkills.cost
+                        pa: {
+                            decrement: skill.warSkills.cost
+                        }
                     },
                     include: {
                         map: true,
@@ -198,6 +200,9 @@ export default async function handler(req, res) {
                         },
                         warMessages: {
                             orderBy: { createdAt: "desc" }
+                        },
+                        warPlayerItems: {
+                            include: { warItems: true }
                         }
                     }
                 });
@@ -222,7 +227,7 @@ export default async function handler(req, res) {
                     `Votre sort a été bloqué par ${opponent.name}`
                 ]
                 const randomEvadeMessage = evadeMessages[Math.floor(Math.random() * evadeMessages.length)];
-                addMessages(decoded.id, randomEvadeMessage);
+                await addMessages(decoded.id, randomEvadeMessage);
                 const opponentEvadeMessage = skill.warSkills.stat === 'str' ? [
                     `Vous avez esquivé l'attaque de ${player.name}`,
                     `Le coup de ${player.name} a été évité`,
@@ -231,14 +236,16 @@ export default async function handler(req, res) {
                     `Le sort de ${player.name} a été stoppé`,
                     `Le sort de ${player.name} a été bloqué`]
                 const randomOpponentEvadeMessage = opponentEvadeMessage[Math.floor(Math.random() * opponentEvadeMessage.length)];
-                addMessages(opponentId, randomOpponentEvadeMessage);
+                await addMessages(opponentId, randomOpponentEvadeMessage);
                 // Mettre à jour le joueur
                 const updatedPlayer = await prisma.warPlayers.update({
                     where: {
                         petId: decoded.id
                     },
                     data: {
-                        pa: player.pa - skill.warSkills.cost
+                        pa: {
+                            decrement: skill.warSkills.cost
+                        }
                     },
                     include: {
                         map: true,
@@ -247,6 +254,9 @@ export default async function handler(req, res) {
                         },
                         warMessages: {
                             orderBy: { createdAt: "desc" }
+                        },
+                        warPlayerItems: {
+                            include: { warItems: true }
                         }
                     }
                 });
@@ -265,6 +275,7 @@ export default async function handler(req, res) {
             let hpReal = opponent.hp;
             let isPlayerDied = null;
             let xpWin = 0;
+            let message = '';
 
             if (crit) {
                 damage = calculateDamageCrit(playerFinalStats, skill.warSkills, opponentFinalStats);
@@ -300,7 +311,7 @@ export default async function handler(req, res) {
                 ]
             }
                 const randomCritMessage = critMessage[Math.floor(Math.random() * critMessage.length)];
-                addMessages(decoded.id, randomCritMessage);
+                await addMessages(decoded.id, randomCritMessage);
 
                 let opponentCritMessage = [];
 
@@ -326,7 +337,7 @@ export default async function handler(req, res) {
                 ]
             }
                 const randomOpponentCritMessage = opponentCritMessage[Math.floor(Math.random() * opponentCritMessage.length)];
-                addMessages(opponentId, randomOpponentCritMessage);
+                await addMessages(opponentId, randomOpponentCritMessage);
 
 
             } else {
@@ -365,7 +376,7 @@ export default async function handler(req, res) {
                 ]
             }
                 const randomDamageMessage = damageMessage[Math.floor(Math.random() * damageMessage.length)];
-                addMessages(decoded.id, randomDamageMessage);
+                await addMessages(decoded.id, randomDamageMessage);
 
                 let opponentDamageMessage = [];
 
@@ -391,7 +402,7 @@ export default async function handler(req, res) {
                 ]
             }
                 const randomOpponentDamageMessage = opponentDamageMessage[Math.floor(Math.random() * opponentDamageMessage.length)];
-                addMessages(opponentId, randomOpponentDamageMessage);
+                await addMessages(opponentId, randomOpponentDamageMessage);
 
                 // Mettre à jour les joueurs
                 const updatedOpponent = await prisma.warPlayers.update({
@@ -399,7 +410,9 @@ export default async function handler(req, res) {
                         petId: opponentId
                     },
                     data: {
-                        hp: hpReal - damage,
+                        hp: {
+                            decrement: damage
+                        },
                         isDied: isPlayerDied
                     }
                 });
@@ -410,7 +423,9 @@ export default async function handler(req, res) {
                     },
                     data: {
                         xp: xpPlayer,
-                        pa: player.pa - skill.warSkills.cost
+                        pa: {
+                            decrement: skill.warSkills.cost
+                        }
                     },
                     include: {
                         map: true,

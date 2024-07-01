@@ -128,7 +128,8 @@ export const calculatePassiveSpellsStats = (selectedSkills) => {
 export const finalStats = (player, passiveSpellsStats) => {
     player = {
         ...player,
-        hp: player.hp + passiveSpellsStats.upHp,    
+        hp: player.hp + passiveSpellsStats.upHp, 
+        hpMax: player.hpMax + passiveSpellsStats.upHp,   
         str: player.str + passiveSpellsStats.upStr,
         intel: player.intel + passiveSpellsStats.upIntel,
         dex: player.dex + passiveSpellsStats.upDex,
@@ -180,6 +181,25 @@ export async function getTilesandCoordinates(playerPosition) {
                     mapId: true,
                     level: true,
                     isDied: true
+                }
+            },
+            warMonsters: { 
+                select: {
+                    id: true,
+                    mapId: true,
+                    level: true,
+                    hp: true,
+                    hpMax: true,
+                    str: true,
+                    intel: true,
+                    dex: true,
+                    acu: true,
+                    monsters: {
+                        select: {
+                            name: true,
+                            imageUrl: true
+                        }
+                    }
                 }
             }
         }
