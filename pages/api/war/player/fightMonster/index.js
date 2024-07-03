@@ -47,9 +47,10 @@ async function runMiddleware(req, res, fn) {
 
 async function monsterAttack(player, monster) {
     const skill = monster.monsters.warMonsterSkills[Math.floor(Math.random() * monster.monsters.warMonsterSkills.length)];
+    console.log('skill', skill)
     const hit = calculateHit(monster, skill.warSkills);
     if (!hit) {
-        // tier un message aléatoire
+        // tirer un message aléatoire
         const missMessages = skill.warSkills.stat === 'str' ? [
             `${monster.monsters.name} a manqué son attaque sur vous`,
             `Le coup de ${monster.monsters.name} vous a raté`,
@@ -64,6 +65,7 @@ async function monsterAttack(player, monster) {
     }
 
     const evade = calculateEvade(player, skill.warSkills.stat);
+    console.log('MonsterEvade')
 
     if (evade) {
         // Choisir un message parmis une liste de messages aléatoires
@@ -80,7 +82,7 @@ async function monsterAttack(player, monster) {
     }
 
     const crit = Math.random() * 100 <= monster.crit;
-
+    console.log('MonsterCrit')
     let hpPlayer = player.hp;
     let damage = 0;
     let isDied = null;
@@ -113,6 +115,7 @@ async function monsterAttack(player, monster) {
         await addMessages(player.petId, monsterMessage);
         message += monsterMessage;
     } else {
+        console.log('MonsterDamage')
         let damageMessages = [];
         damage = calculateDamage(monster, skill.warSkills, player);
         hpPlayer = player.hp - damage;
@@ -262,7 +265,7 @@ export default async function handler(req, res) {
             // Si le joueur loupe son attaque/sort
             if (!hit) {
                 // Choisir un message parmis une liste de messages aléatoires
-
+                console.log('Miss')
                 const missMessages = skill.warSkills.stat === 'str' ? [
                     `Vous avez manqué votre attaque sur ${opponent.monsters.name}`,
                     `Votre coup sur ${opponent.monsters.name} a raté`,
@@ -317,7 +320,7 @@ export default async function handler(req, res) {
             }
 
             const evade = calculateEvade(opponent, skill.warSkills.stat);
-
+            console.log('Evade')
             if (evade) {
                 // Choisir un message parmis une liste de messages aléatoires
                 const evadeMessages = skill.warSkills.stat === 'str' ? [
@@ -380,6 +383,7 @@ export default async function handler(req, res) {
             let message = '';
 
             if (crit) {
+                console.log('Crit')
                 let critMessage = [];
                 damage = calculateDamageCrit(playerFinalStats, skill.warSkills, opponent);
                 xpPlayer += 2;
@@ -413,6 +417,7 @@ export default async function handler(req, res) {
                 await addMessages(decoded.id, randomCritMessage);
                 message += randomCritMessage;
             } else {
+                console.log('Damage')
                 damage = calculateDamage(playerFinalStats, skill.warSkills, opponent);
                 hpMonster -= damage;
                 xpPlayer += 2;
@@ -448,6 +453,7 @@ export default async function handler(req, res) {
                 const randomDamageMessage = damageMessage[Math.floor(Math.random() * damageMessage.length)];
                 await addMessages(decoded.id, randomDamageMessage);
                 message += randomDamageMessage;
+                console.log('DamageMessage', randomDamageMessage)
             }
 
             if (isMonsterDied) {
@@ -467,7 +473,6 @@ export default async function handler(req, res) {
 
                 // Recalculer la valeur totale des loots après filtrage
                 let totalLootsValue = filteredLoots.reduce((acc, loot) => acc + loot.value, 0);
-                console.log('totalLootsValue', totalLootsValue)
 
                 for (let i = 0; i < lootCount; i++) {
                     const random = Math.floor(Math.random() * totalLootsValue);
@@ -537,6 +542,7 @@ export default async function handler(req, res) {
                 // Générer un message avec loot
                 const lootMessage = lootsWon.map(loot => {
                     if (loot.skillId) {
+                        console.log('loot', loot)
                         return `Vous avez obtenu le sort ${loot.warSkills.name}`;
                     } else if (loot.itemId) {
                         return `Vous avez obtenu ${loot.count} ${loot.warItems.name}`;

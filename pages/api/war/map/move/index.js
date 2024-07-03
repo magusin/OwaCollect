@@ -81,6 +81,10 @@ export default async function handler(req, res) {
                     return res.status(404).json({ message: 'Utilisateur non trouvé' });
                 }
 
+                if (user.pa < 3) {
+                    return res.status(400).json({ message: 'Pas assez de PA pour se déplacer' });
+                }
+
                 let playerX = user.map.position_x
                 let playerY = user.map.position_y
 
@@ -123,7 +127,8 @@ export default async function handler(req, res) {
                         }
                     },
                     data: {
-                        mapId: mapDestination.id
+                        mapId: mapDestination.id,
+                        pa: { decrement: 3 }
                     }
                 });
 

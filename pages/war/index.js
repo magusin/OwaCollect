@@ -366,7 +366,7 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
             const data = await response.data;
             console.log('data', data);
             setShowAlert(false);
-            setAlertMessage(`${data.message}`);
+            setAlertMessage(data.message.replace(/\n/g, '<br/>'));
             if (data.type === 'error') {
                 setAlertType('error');
             } else {
@@ -376,6 +376,10 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
             setTimeout(() => {
                 setShowAlert(false);
             }, 7000);
+            setPlayer(data.updatedPlayer);
+            setTiles(data.tiles);
+            setCoordinates(data.allCoordinates);
+            setMessages(data.updatedPlayer.warMessages);
         } catch (error) {
             setShowAlert(false);
             setAlertMessage(`${error.response.data.message}`);
