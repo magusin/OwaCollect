@@ -58,6 +58,7 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
 
     const passiveSpellsStats = calculatePassiveSpellsStats(selectedPassiveSkills);
 
+    console.log('selectedMonster', selectedMonster);
     useEffect(() => {
 
         localStorage.setItem('points', points);
@@ -322,20 +323,20 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
             const data = await response.data;
 
             setShowAlert(false);
-            setAlertMessage(data.message.replace(/\n/g, '<br/>'));
+            setAlertMessage(data.message);
             if (data.type === 'error') {
                 setAlertType('error');
             } else {
                 setAlertType('success');
             }
-            setShowAlert(true);
-            setTimeout(() => {
-                setShowAlert(false);
-            }, 7000);
             setPlayer(data.updatedPlayer);
             setTiles(data.tiles);
             setCoordinates(data.allCoordinates);
             setMessages(data.updatedPlayer.warMessages);
+            setShowAlert(true);
+            setTimeout(() => {
+                setShowAlert(false);
+            }, 7000);
         } catch (error) {
             setShowAlert(false);
             setAlertMessage(`${error.response.data.message}`);
@@ -366,20 +367,29 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
             const data = await response.data;
             console.log('data', data);
             setShowAlert(false);
-            setAlertMessage(data.message.replace(/\n/g, '<br/>'));
+            setAlertMessage(data.message);
             if (data.type === 'error') {
                 setAlertType('error');
             } else {
                 setAlertType('success');
             }
-            setShowAlert(true);
-            setTimeout(() => {
-                setShowAlert(false);
-            }, 7000);
             setPlayer(data.updatedPlayer);
             setTiles(data.tiles);
             setCoordinates(data.allCoordinates);
             setMessages(data.updatedPlayer.warMessages);
+            if (data.monster === null) {
+                setSelectedMonster(null);
+                setIsModalFight(false);
+                setSelectedFightSpell(null);
+            } else if (data.monster) {
+                setSelectedMonster(data.monster);
+            }
+            setSelectedTileMonsters(data.tile.warMonsters || [])
+            setSelectedTilePlayers(data.tile.warPlayers || []);
+            setShowAlert(true);
+            setTimeout(() => {
+                setShowAlert(false);
+            }, 7000);
         } catch (error) {
             setShowAlert(false);
             setAlertMessage(`${error.response.data.message}`);
@@ -453,7 +463,6 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
             setAlertMessage(`${error.response.data.message}`);
             setAlertType('error');
             setShowAlert(true);
-            console.error(error);
         } finally {
             setLoading(false);
         }
@@ -1000,7 +1009,10 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                     {isMenuMoveOpen && (
                         <div className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center bg-black bg-opacity-50 text-black z-10">
                             <div className="bg-white p-4 rounded-lg relative w-3/4 h-3/4 max-h-3/4 overflow-auto flex flex-col justify-between">
-                                <h2 className="text-2xl font-bold mb-8 text-center">Déplacer le joueur</h2>
+                                <div className="text-center mb-8">
+                                <h2 className="text-2xl font-bold">Déplacer le joueur</h2>
+                                <span>(Coute 3 PA)</span>
+                                </div>
                                 <div className="flex flex-col items-center space-y-4 mb-8">
                                     {availableDirections.up && (
                                         <button
@@ -1074,6 +1086,9 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                                                 </span>
                                                 <span className="ml-2 md:ml-4">
                                                     Portée {skill.warSkills.dist}
+                                                </span>
+                                                <span className="ml-2 md:ml-4 text-gray-500">
+                                                    Touché {skill.warSkills.hit + updatedPlayerStats.hit} %
                                                 </span>
                                             </div>
                                             {hoveredSkill === skill && (

@@ -4,7 +4,7 @@ import jwt from 'jsonwebtoken';
 import { getToken } from "next-auth/jwt";
 import { calculateDistance, calculatePassiveSpellsStats, finalStats, calculateHit, calculateEvade, calculateDamage, calculateDamageCrit, getTilesandCoordinates } from '../../fight';
 
-// Initialiser le midleware Cors
+// Initialiser le middleware Cors
 const allowedOrigins = [process.env.NEXTAUTH_URL]
 const corsOptions = {
     methods: ['POST', 'HEAD'],
@@ -47,10 +47,8 @@ async function runMiddleware(req, res, fn) {
 
 async function monsterAttack(player, monster) {
     const skill = monster.monsters.warMonsterSkills[Math.floor(Math.random() * monster.monsters.warMonsterSkills.length)];
-    console.log('skill', skill)
     const hit = calculateHit(monster, skill.warSkills);
     if (!hit) {
-        // tirer un message aléatoire
         const missMessages = skill.warSkills.stat === 'str' ? [
             `${monster.monsters.name} a manqué son attaque sur vous`,
             `Le coup de ${monster.monsters.name} vous a raté`,
@@ -60,15 +58,13 @@ async function monsterAttack(player, monster) {
             `Le sort de ${monster.monsters.name} vous a raté`,
             `Le sort de ${monster.monsters.name} envers vous a échoué`]
         const monsterMessage = missMessages[Math.floor(Math.random() * missMessages.length)];
-        addMessages(player.petId, monsterMessage);
+        await addMessages(player.petId, monsterMessage);
         return { message: monsterMessage, damage: 0, isDied: null };
     }
 
     const evade = calculateEvade(player, skill.warSkills.stat);
-    console.log('MonsterEvade')
 
     if (evade) {
-        // Choisir un message parmis une liste de messages aléatoires
         const evadeMessages = skill.warSkills.stat === 'str' ? [
             `Vous avez esquivé l'attaque de ${monster.monsters.name}`,
             `Le coup de ${monster.monsters.name} a été évité`,
@@ -82,7 +78,6 @@ async function monsterAttack(player, monster) {
     }
 
     const crit = Math.random() * 100 <= monster.crit;
-    console.log('MonsterCrit')
     let hpPlayer = player.hp;
     let damage = 0;
     let isDied = null;
@@ -113,9 +108,8 @@ async function monsterAttack(player, monster) {
         }
         const monsterMessage = critMessages[Math.floor(Math.random() * critMessages.length)];
         await addMessages(player.petId, monsterMessage);
-        message += monsterMessage;
+        message += `${monsterMessage}\n`;
     } else {
-        console.log('MonsterDamage')
         let damageMessages = [];
         damage = calculateDamage(monster, skill.warSkills, player);
         hpPlayer = player.hp - damage;
@@ -129,19 +123,20 @@ async function monsterAttack(player, monster) {
                 `${monster.monsters.name} vous a abattu avec le sort ${skill.warSkills.name} de ${damage} points de dégats`,
                 `Vous avez péri avec le sort ${skill.warSkills.name} de ${damage} points de dégats de ${monster.monsters.name}`,
                 `Le sort ${skill.warSkills.name} de ${monster.monsters.name} vous a tué infligeant ${damage} points de dégats`]
+        } else {
+            damageMessages = skill.warSkills.stat === 'str' ? [
+                `${monster.monsters.name} vous a infligé ${damage} dommages avec ${skill.warSkills.name}`,
+                `Vous avez subi un coup de ${damage} points de dégats de ${monster.monsters.name} avec ${skill.warSkills.name}`,
+                `Le coup ${skill.warSkills.name} de ${monster.monsters.name} vous a infligé ${damage} points de dégats`] : [
+                `${monster.monsters.name} vous a touché avec le sort ${skill.warSkills.name} de ${damage} points de dégats`,
+                `Vous avez subi le sort ${skill.warSkills.name} de ${damage} points de dégats de ${monster.monsters.name}`,
+                `Le sort ${skill.warSkills.name} de ${monster.monsters.name} vous a infligé ${damage} points de dégats`]
         }
-        damageMessages = skill.warSkills.stat === 'str' ? [
-            `${monster.monsters.name} vous a infligé ${damage} dommages avec ${skill.warSkills.name}`,
-            `Vous avez subi un coup de ${damage} points de dégats de ${monster.monsters.name} avec ${skill.warSkills.name}`,
-            `Le coup ${skill.warSkills.name} de ${monster.monsters.name} vous a infligé ${damage} points de dégats`] : [
-            `${monster.monsters.name} vous a touché avec le sort ${skill.warSkills.name} de ${damage} points de dégats`,
-            `Vous avez subi le sort ${skill.warSkills.name} de ${damage} points de dégats de ${monster.monsters.name}`,
-            `Le sort ${skill.warSkills.name} de ${monster.monsters.name} vous a infligé ${damage} points de dégats`]
         const monsterMessage = damageMessages[Math.floor(Math.random() * damageMessages.length)];
-        addMessages(player.petId, monsterMessage);
-        message += monsterMessage;
+        await addMessages(player.petId, monsterMessage);
+        message += `${monsterMessage}\n`;
     }
-    return { message: message, damage: damage, isDied: isDied };
+    return { message: message.trim(), damage: damage, isDied: isDied };
 }
 
 // Fonction pour ajouter une notification
@@ -249,9 +244,7 @@ export default async function handler(req, res) {
             }
 
             const playerPassifSkillsStats = calculatePassiveSpellsStats(player.warPlayerSkills.filter(skill => skill.warSkills.type === 'passif' && skill.isSelected === true) || []);
-            // const opponentPassifSkillsStats = calculatePassiveSpellsStats(opponent.warPlayerSkills.filter(skill => skill.warSkills.type === 'passif' && skill.isSelected === true) || []);
             const playerFinalStats = finalStats(player, playerPassifSkillsStats);
-            // const opponentFinalStats = finalStats(opponent, opponentPassifSkillsStats);
 
             if (playerFinalStats.hp <= 0) {
                 return res.status(400).json({ message: 'Vous êtes mort' });
@@ -262,10 +255,7 @@ export default async function handler(req, res) {
             }
 
             const hit = calculateHit(playerFinalStats, skill.warSkills);
-            // Si le joueur loupe son attaque/sort
             if (!hit) {
-                // Choisir un message parmis une liste de messages aléatoires
-                console.log('Miss')
                 const missMessages = skill.warSkills.stat === 'str' ? [
                     `Vous avez manqué votre attaque sur ${opponent.monsters.name}`,
                     `Votre coup sur ${opponent.monsters.name} a raté`,
@@ -282,8 +272,6 @@ export default async function handler(req, res) {
 
                 const monsterResponse = await monsterAttack(playerFinalStats, opponent);
 
-
-                // Mettre à jour le joueur
                 const updatedPlayer = await prisma.warPlayers.update({
                     where: {
                         petId: decoded.id
@@ -313,16 +301,13 @@ export default async function handler(req, res) {
                     }
                 });
 
-                // Mettre à jour les tuiles et coordonnées
                 const { tiles, allCoordinates } = await getTilesandCoordinates(updatedPlayer.map);
 
-                return res.status(200).json({ message: randomMissMessage + `\n${monsterResponse.message}`, updatedPlayer, tiles, allCoordinates, type: 'error' });
+                return res.status(200).json({ message: `${randomMissMessage}\n${monsterResponse.message}`, updatedPlayer, tiles, allCoordinates, type: 'error' });
             }
 
             const evade = calculateEvade(opponent, skill.warSkills.stat);
-            console.log('Evade')
             if (evade) {
-                // Choisir un message parmis une liste de messages aléatoires
                 const evadeMessages = skill.warSkills.stat === 'str' ? [
                     `${opponent.monsters.name} a esquivé votre attaque`,
                     `L'attaque a été esquivée par ${opponent.monsters.name}`,
@@ -337,7 +322,6 @@ export default async function handler(req, res) {
 
                 const monsterResponse = await monsterAttack(playerFinalStats, opponent);
 
-                // Mettre à jour le joueur
                 const updatedPlayer = await prisma.warPlayers.update({
                     where: {
                         petId: decoded.id
@@ -367,10 +351,9 @@ export default async function handler(req, res) {
                     }
                 });
 
-                // Mettre à jour les tuiles et coordonnées
                 const { tiles, allCoordinates } = await getTilesandCoordinates(updatedPlayer.map);
 
-                return res.status(200).json({ message: randomEvadeMessage + `\n${monsterResponse.message}`, updatedPlayer, tiles, allCoordinates, type: 'error' });
+                return res.status(200).json({ message: `${randomEvadeMessage}\n${monsterResponse.message}`, updatedPlayer, tiles, allCoordinates, type: 'error' });
             }
 
             const crit = Math.random() * 100 <= playerFinalStats.crit;
@@ -383,7 +366,6 @@ export default async function handler(req, res) {
             let message = '';
 
             if (crit) {
-                console.log('Crit')
                 let critMessage = [];
                 damage = calculateDamageCrit(playerFinalStats, skill.warSkills, opponent);
                 xpPlayer += 2;
@@ -415,9 +397,8 @@ export default async function handler(req, res) {
                 }
                 const randomCritMessage = critMessage[Math.floor(Math.random() * critMessage.length)];
                 await addMessages(decoded.id, randomCritMessage);
-                message += randomCritMessage;
+                message += `${randomCritMessage}\n`;
             } else {
-                console.log('Damage')
                 damage = calculateDamage(playerFinalStats, skill.warSkills, opponent);
                 hpMonster -= damage;
                 xpPlayer += 2;
@@ -452,40 +433,31 @@ export default async function handler(req, res) {
 
                 const randomDamageMessage = damageMessage[Math.floor(Math.random() * damageMessage.length)];
                 await addMessages(decoded.id, randomDamageMessage);
-                message += randomDamageMessage;
-                console.log('DamageMessage', randomDamageMessage)
+                message += `${randomDamageMessage}\n`;
             }
 
             if (isMonsterDied) {
-                // Ajouter les loots
                 const loots = opponent.monsters.warMonsterLoots;
                 const lootCount = opponent.monsters.lootCount;
 
-                // Tirer les loots
                 const lootsWon = [];
                 const playerSpells = player.warPlayerSkills.map(skill => skill.skillId);
                 const playerItems = player.warPlayerItems.map(item => ({
                     itemId: item.itemId,
                     count: item.count
                 }));
-                // Exclure les sorts déjà possédés par le joueur des loots disponibles
+
                 const filteredLoots = loots.filter(loot => !loot.skillId || !playerSpells.includes(loot.skillId));
 
-                // Recalculer la valeur totale des loots après filtrage
                 let totalLootsValue = filteredLoots.reduce((acc, loot) => acc + loot.value, 0);
 
                 for (let i = 0; i < lootCount; i++) {
                     const random = Math.floor(Math.random() * totalLootsValue);
                     let count = 0;
-                    for (let j = 0; j < loots.length; j++) {
-                        count += loots[j].value;
+                    for (let j = 0; j < filteredLoots.length; j++) {
+                        count += filteredLoots[j].value;
                         if (random < count) {
-                            const loot = loots[j];
-
-                            if (loot.skillId && playerSpells.includes(loot.skillId)) {
-                                // Le joueur possède déjà ce sort, on l'exclut
-                                continue;
-                            }
+                            const loot = filteredLoots[j];
 
                             const existingLootIndex = lootsWon.findIndex(
                                 (existingLoot) => existingLoot.itemId === loot.itemId && existingLoot.skillId === loot.skillId
@@ -501,10 +473,8 @@ export default async function handler(req, res) {
                     }
                 }
 
-                // Ajouter les loots au joueur
                 for (const loot of lootsWon) {
                     if (loot.skillId) {
-                        // Ajouter le sort au joueur
                         await prisma.warPlayerSkills.create({
                             data: {
                                 petId: player.petId,
@@ -514,7 +484,6 @@ export default async function handler(req, res) {
                     } else if (loot.itemId) {
                         const existingPlayerItem = playerItems.find(item => item.itemId === loot.itemId);
                         if (existingPlayerItem) {
-                            // Incrémenter le count de l'objet existant
                             await prisma.warPlayerItems.update({
                                 where: {
                                     petId_itemId: {
@@ -527,7 +496,6 @@ export default async function handler(req, res) {
                                 }
                             });
                         } else {
-                            // Ajouter le nouvel objet au joueur
                             await prisma.warPlayerItems.create({
                                 data: {
                                     petId: player.petId,
@@ -539,25 +507,22 @@ export default async function handler(req, res) {
                     }
                 }
 
-                // Générer un message avec loot
                 const lootMessage = lootsWon.map(loot => {
                     if (loot.skillId) {
-                        console.log('loot', loot)
                         return `Vous avez obtenu le sort ${loot.warSkills.name}`;
                     } else if (loot.itemId) {
                         return `Vous avez obtenu ${loot.count} ${loot.warItems.name}`;
                     }
                 }).join('\n');
-                addMessages(decoded.id, lootMessage);
+                await addMessages(decoded.id, lootMessage);
                 message += `\n${lootMessage}`;
 
-                // Supprimer le monstre
                 await prisma.warMonsters.delete({
                     where: {
                         id: monsterId
                     }
                 });
-                // Mettre à jour le joueur
+
                 const updatedPlayer = await prisma.warPlayers.update({
                     where: {
                         petId: decoded.id
@@ -586,12 +551,12 @@ export default async function handler(req, res) {
                     }
                 });
 
-                return res.status(200).json({ message: message, updatedPlayer, type: 'success' });
+                const { tiles, allCoordinates } = await getTilesandCoordinates(updatedPlayer.map);
+
+                return res.status(200).json({ message: message, updatedPlayer, tiles, allCoordinates, type: 'success', monster: null });
             } else {
-                // Tour du monstre
                 const monsterResponse = await monsterAttack(playerFinalStats, opponent);
 
-                // Mettre à jour le joueur
                 const updatedPlayer = await prisma.warPlayers.update({
                     where: {
                         petId: decoded.id
@@ -624,8 +589,7 @@ export default async function handler(req, res) {
                     }
                 });
 
-                // Mettre à jour le monstre
-                await prisma.warMonsters.update({
+                const updatedMonster = await prisma.warMonsters.update({
                     where: {
                         id: monsterId
                     },
@@ -633,13 +597,21 @@ export default async function handler(req, res) {
                         hp: {
                             decrement: damage
                         },
+                    },
+                    include: {
+                        map: true,
+                        monsters: {
+                            include: {
+                                warMonsterSkills: { include: { warSkills: true } },
+                                warMonsterLoots: { include: { warItems: true } }
+                            }
+                        }
                     }
                 });
 
-                // Mettre à jour les tuiles et coordonnées
                 const { tiles, allCoordinates } = await getTilesandCoordinates(updatedPlayer.map);
 
-                return res.status(200).json({ message: message + `\n${monsterResponse.message}`, updatedPlayer, tiles, allCoordinates, type: 'success' });
+                return res.status(200).json({ message: `${message}\n${monsterResponse.message}`, updatedPlayer, tiles, allCoordinates, type: 'success', monster: updatedMonster });
             }
         } else {
             return res.status(405).json({ message: 'Méthode non autorisée' });
