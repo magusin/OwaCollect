@@ -29,6 +29,7 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
     const [isModalSpell, setIsModalSpell] = useState(false);
     const [isModalFight, setIsModalFight] = useState(false);
     const [isModalMessage, setIsModalMessage] = useState(false);
+    const [isModalItems, setIsModalItems] = useState(false);
     // Stocker les coordonnées de la tuile sélectionnée
     const [selectedTileX, setSelectedTileX] = useState(null);
     const [selectedTileY, setSelectedTileY] = useState(null);
@@ -45,6 +46,7 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
     const [passiveOpen, setPassiveOpen] = useState(false);
     // Tooltip state
     const [hoveredSkill, setHoveredSkill] = useState(null);
+    const [hoveredItem, setHoveredItem] = useState(null);
     // Déclaration de l'état du spell sélectionné pour l'attaque
     const [selectedFightSpell, setSelectedFightSpell] = useState(null);
     // Stocker les skills sélectionnés
@@ -58,7 +60,6 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
 
     const passiveSpellsStats = calculatePassiveSpellsStats(selectedPassiveSkills);
 
-    console.log('selectedMonster', selectedMonster);
     useEffect(() => {
 
         localStorage.setItem('points', points);
@@ -174,6 +175,10 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
         setIsModalSpell(true);
     }
 
+    const handleClickItems = () => {
+        setIsModalItems(true);
+    }
+
     const handleClickMessage = () => {
         setIsModalMessage(true);
     }
@@ -185,6 +190,15 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
     const handleMouseLeave = () => {
         setHoveredSkill(null);
     };
+
+    const handleMouseEnterItem = (item) => {
+        setHoveredItem(item);
+    };
+
+    const handleMouseLeaveItem = () => {
+        setHoveredItem(null);
+    }
+
     // Fonction pour sauvegarder les compétences passives sélectionnées
     const saveSelectedPassiveSkills = async () => {
         setLoading(true);
@@ -258,6 +272,10 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
     const closeModalFight = () => {
         setIsModalFight(false);
         setSelectedFightSpell(null);
+    }
+
+    const closeItemsModal = () => {
+        setIsModalItems(false);
     }
 
     // Gestionnaire d'événements pour le clic sur une tuile
@@ -365,7 +383,6 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                 }
             });
             const data = await response.data;
-            console.log('data', data);
             setShowAlert(false);
             setAlertMessage(data.message);
             if (data.type === 'error') {
@@ -451,13 +468,13 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
             setShowAlert(false);
             setAlertMessage(`${data.message}`);
             setAlertType('success');
+            setPlayer(data.user);
+            setSelectedPlayer(data.user)
+            setPlayerLevelChoices([]);
             setShowAlert(true);
             setTimeout(() => {
                 setShowAlert(false);
-            }
-                , 5000);
-            setPlayer(data.user);
-            setPlayerLevelChoices([]);
+            }, 7000);
         } catch (error) {
             setShowAlert(false);
             setAlertMessage(`${error.response.data.message}`);
@@ -558,6 +575,7 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
         const updatedPlayerStats = {
             ...player,
             hp: player.hp + passiveSpellsStats.upHp,
+            hpMax: player.hpMax + passiveSpellsStats.upHp,
             str: player.str + passiveSpellsStats.upStr,
             intel: player.intel + passiveSpellsStats.upIntel,
             dex: player.dex + passiveSpellsStats.upDex,
@@ -736,11 +754,11 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                                             <div className="flex flex-col sm:flex-row justify-center">
                                                 <div className="flex-1 text-center mb-2 sm:mb-0 sm:mr-4">
                                                     <p className="font-bold">Vie</p>
-                                                    <p>{selectedPlayer.hp}/{selectedPlayer.hpMax}</p>
+                                                    <p>{updatedPlayerStats.hp}/{updatedPlayerStats.hpMax}</p>
                                                     <div className="relative h-2.5 rounded-full bg-gray-300">
                                                         <div
                                                             className="bg-red-600 h-2.5 rounded-full"
-                                                            style={{ width: `${(selectedPlayer.hp / selectedPlayer.hpMax) * 100}%` }}>
+                                                            style={{ width: `${(updatedPlayerStats.hp / updatedPlayerStats.hpMax) * 100}%` }}>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -1010,8 +1028,8 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                         <div className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center bg-black bg-opacity-50 text-black z-10">
                             <div className="bg-white p-4 rounded-lg relative w-3/4 h-3/4 max-h-3/4 overflow-auto flex flex-col justify-between">
                                 <div className="text-center mb-8">
-                                <h2 className="text-2xl font-bold">Déplacer le joueur</h2>
-                                <span>(Coute 3 PA)</span>
+                                    <h2 className="text-2xl font-bold">Déplacer le joueur</h2>
+                                    <span>(Coute 3 PA)</span>
                                 </div>
                                 <div className="flex flex-col items-center space-y-4 mb-8">
                                     {availableDirections.up && (
@@ -1182,8 +1200,27 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                                                             className={`mt-2 group relative cursor-pointer p-2 ${selectedPassiveSkills.includes(skill) ? 'bg-gray-300' : ''}`}
                                                             onClick={() => togglePassiveSkill(skill)}
                                                         >
-                                                            <span className="font-bold">{skill.warSkills.name}</span>: ({skill.warSkills.cost} PA) <span className="text-red-800">{calculateDmg(player, skill.warSkills.stat, skill.warSkills.dmgMin, skill.warSkills.divider)} - {calculateDmg(player, skill.warSkills.stat, skill.warSkills.dmgMax, skill.warSkills.divider)}</span>
-
+                                                            <span className="font-bold">{skill.warSkills.name}</span>
+                                                            <span className="mx-2">
+                                                                {skill.warSkills.upStr > 0 && <span>+{skill.warSkills.upStr} Force </span>}
+                                                                {skill.warSkills.upIntel > 0 && <span>+{skill.warSkills.upIntel} Intelligence </span>}
+                                                                {skill.warSkills.upDex > 0 && <span>+{skill.warSkills.upDex} Dextérité </span>}
+                                                                {skill.warSkills.upAcu > 0 && <span>+{skill.warSkills.upAcu} Acuité </span>}
+                                                                {skill.warSkills.upHp > 0 && <span>+{skill.warSkills.upHp} Vie</span>}
+                                                                {skill.warSkills.upCrit > 0 && <span>+{skill.warSkills.upCrit} % Chance de critique </span>}
+                                                                {skill.warSkills.upDefP > 0 && <span>+{skill.warSkills.upDefP} Défense physique </span>}
+                                                                {skill.warSkills.upDefM > 0 && <span>+{skill.warSkills.upDefM} Défense magique </span>}
+                                                                {skill.warSkills.upDefPStand > 0 && <span>+{skill.warSkills.upDefPStand} Défense standard </span>}
+                                                                {skill.warSkills.upDefMStand > 0 && <span>+{skill.warSkills.upDefMStand} Résistance standard </span>}
+                                                                {skill.warSkills.upDefPierce > 0 && <span>+{skill.warSkills.upDefPierce} Défense perçante </span>}
+                                                                {skill.warSkills.upDefFire > 0 && <span>+{skill.warSkills.upDefFire} Résistance feu </span>}
+                                                                {skill.warSkills.upDefSlash > 0 && <span>+{skill.warSkills.upDefSlash} Défense tranchante </span>}
+                                                                {skill.warSkills.upDefLightning > 0 && <span>Résistance foudre: {skill.warSkills.upDefLightning}</span>}
+                                                                {skill.warSkills.upDefStrike > 0 && <span>+{skill.warSkills.upDefStrike} Défense percutante </span>}
+                                                                {skill.warSkills.upDefHoly > 0 && <span>+{skill.warSkills.upDefHoly} Résistance sacrée </span>}
+                                                                {skill.warSkills.upHit > 0 && <span>+{skill.warSkills.upHit} % Chance de toucher </span>}
+                                                                {skill.warSkills.upRegen > 0 && <span>+{skill.warSkills.upRegen} Régénération </span>}
+                                                            </span>
                                                         </li>
                                                     ))}
                                             </ul>
@@ -1223,6 +1260,44 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                                     <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2">
                                         <button onClick={closeModalMessage} className="bg-red-500 text-white py-2 px-4 rounded text-xl">Fermer</button>
                                     </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                    {isModalItems && (
+                        <div className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center bg-black bg-opacity-50 text-black z-10">
+                            <div className="bg-white p-4 rounded-lg relative w-3/4 h-3/4 max-h-3/4 overflow-auto">
+                                <h2 className="text-lg font-bold mb-4 text-center">Items du joueur</h2>
+                                <ul className="flex flex-col w-full">
+                                    {player.warPlayerItems.length > 0 ? (
+                                        player.warPlayerItems.map((item, index) => (
+                                            <li key={index} className="flex items-center p-2 border-b relative cursor-pointer"
+                                                    onMouseEnter={() => handleMouseEnterItem(item)}
+                                                    onMouseLeave={handleMouseLeaveItem}
+                                            >
+                                                <img
+                                                    src={item.warItems.imageUrl}
+                                                    alt={item.warItems.name}
+                                                    className="w-12 h-12 mr-2"
+                                                // onClick={() => handleClickItem(item)}
+                                                />
+                                                <div>
+                                                    <span className="font-bold">{item.warItems.name}</span>
+                                                    <span> - Quantité : {item.count}</span>
+                                                </div>
+                                                {hoveredItem === item && (
+                                                    <div className="absolute left-1/2 transform -translate-x-1/2 -top-8 p-2 bg-gray-700 text-white rounded shadow-lg w-48">
+                                                        {item.warItems.description}
+                                                    </div>
+                                                )}
+                                            </li>
+                                        ))
+                                    ) : (
+                                        <li className="text-center">Aucun item</li>
+                                    )}
+                                </ul>
+                                <div className="flex justify-center absolute bottom-4 left-1/2 transform -translate-x-1/2">
+                                    <button onClick={closeItemsModal} className="bg-red-500 text-white py-2 px-4 rounded">Fermer</button>
                                 </div>
                             </div>
                         </div>
@@ -1280,7 +1355,7 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
 
                         <button className="menu-item flex items-center justify-center"> </button>
                         <button className="menu-item flex items-center justify-center"> <img src="images/run.webp" className="rounded-full h-5/6" alt="Icon 2" onClick={() => handleClickMove()} /> </button>
-                        <button className="menu-item flex items-center justify-center"> <img src="images/inventory.webp" className="rounded-full h-5/6" alt="Icon 3" /> </button>
+                        <button className="menu-item flex items-center justify-center"> <img src="images/inventory.webp" className="rounded-full h-5/6" alt="Icon 3" onClick={() => handleClickItems()} /> </button>
                         <button className="menu-item flex items-center justify-center"> <img src="images/player.webp" className="rounded-full h-5/6" alt="Icon 4" onClick={() => handleClickPlayer(player)} /> </button>
                         <button className="menu-item flex items-center justify-center"> <img src="images/spell.webp" className="rounded-full h-5/6" alt="Icon 5" onClick={() => handleClickSpell()} /> </button>
                         <button className="menu-item flex items-center justify-center"> <img src="images/notification.webp" className="rounded-full h-5/6" alt="Icon 5" onClick={() => handleClickMessage()} /> </button>
