@@ -30,6 +30,9 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
     const [isModalFight, setIsModalFight] = useState(false);
     const [isModalMessage, setIsModalMessage] = useState(false);
     const [isModalItems, setIsModalItems] = useState(false);
+    // Déclaration de l'état pour stocker l'item sélectionné   
+    const [selectedItem, setSelectedItem] = useState(null);
+    console.log('selectedItem', selectedItem);
     // Stocker les coordonnées de la tuile sélectionnée
     const [selectedTileX, setSelectedTileX] = useState(null);
     const [selectedTileY, setSelectedTileY] = useState(null);
@@ -57,6 +60,7 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
     const [alertType, setAlertType] = useState(null);
     // Router
     const router = useRouter();
+    const [quantity, setQuantity] = useState(1);
 
     const passiveSpellsStats = calculatePassiveSpellsStats(selectedPassiveSkills);
 
@@ -91,6 +95,8 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
     const [playerLevelChoices, setPlayerLevelChoices] = useState(player?.levelChoices || []);
     // État pour stocker les compétences du joueur
     const [playerSkill, setPlayerSkill] = useState(player?.warPlayerSkills);
+    // Etat pour stocker item joueur
+    const [playerItem, setPlayerItem] = useState(player?.warPlayerItems);
     // Temps restant avant la résurrection du joueur
     const [timeRemaining, setTimeRemaining] = useState(0);
 
@@ -166,6 +172,13 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
             }, 5000);
         }
     }
+
+    const handleClickItem = (item) => {
+        console.log('item', item)
+        setSelectedItem(item);
+        setQuantity(1);
+        setIsModalItems(true);
+    };
 
     const handleClickFight = () => {
         setIsModalFight(true);
@@ -275,7 +288,12 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
     }
 
     const closeItemsModal = () => {
+        setSelectedItem(null);
         setIsModalItems(false);
+    }
+
+    const closeItems = () => {
+        setSelectedItem(null)
     }
 
     // Gestionnaire d'événements pour le clic sur une tuile
@@ -403,6 +421,7 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
             }
             setSelectedTileMonsters(data.tile.warMonsters || [])
             setSelectedTilePlayers(data.tile.warPlayers || []);
+            setPlayerItem(data.updatedPlayer.warPlayerItems);
             setShowAlert(true);
             setTimeout(() => {
                 setShowAlert(false);
@@ -512,6 +531,44 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
             setAlertMessage(`${error.response.data.message}`);
             setAlertType('error');
             setShowAlert(true);
+        } finally {
+            setLoading(false);
+        }
+    };
+    // Call pour utiliser un item
+    const useItem = async () => {
+        setLoading(true);
+        try {
+            const response = await axios.post(`/api/war/player/item`, {
+                itemId: selectedItem.warItems.id,
+                count: quantity,
+            }, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${session.customJwt}`,
+                }
+            });
+            const data = await response.data;
+            if (data.pointsWin) {
+                setPoints(points + data.pointsWin);
+            }
+            setAlertMessage(data.message);
+            setAlertType('success');
+            setShowAlert(true);
+            setTimeout(() => {
+                setShowAlert(false);
+            }, 5000);
+            setPlayer(data.updatedUser);
+            setPlayerItem(data.updatedUser.warPlayerItems);
+            setSelectedItem(null);
+        } catch (error) {
+            console.log('error', error)
+            setAlertMessage(`${error.message}`);
+            setAlertType('error');
+            setShowAlert(true);
+            setTimeout(() => {
+                setShowAlert(false);
+            }, 5000);
         } finally {
             setLoading(false);
         }
@@ -984,14 +1041,14 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                                             <p className="font-bold">Force</p>
                                             <p>{selectedMonster.str}</p>
                                             <div className="absolute left-1/2 transform -translate-x-1/2 -top-8 hidden group-hover:block bg-gray-700 text-white text-xs rounded py-1 px-2">
-                                                Influe sur les dégats physiques
+                                                Influe sur les dégâts physiques
                                             </div>
                                         </div>
                                         <div className="flex-1 text-center relative group">
                                             <p className="font-bold">Intelligence</p>
                                             <p>{selectedMonster.intel}</p>
                                             <div className="absolute left-1/2 transform -translate-x-1/2 -top-8 hidden group-hover:block bg-gray-700 text-white text-xs rounded py-1 px-2">
-                                                Influe sur les dégats magiques
+                                                Influe sur les dégâts magiques
                                             </div>
                                         </div>
                                     </div>
@@ -1002,7 +1059,7 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                                             <p className="font-bold">Dextérité</p>
                                             <p>{selectedMonster.dex}</p>
                                             <div className="absolute left-1/2 transform -translate-x-1/2 -top-8 hidden group-hover:block bg-gray-700 text-white text-xs rounded py-1 px-2">
-                                                Permet d&apos;esquiver les attaques physiques
+                                                Permet d'esquiver les attaques physiques
                                             </div>
                                         </div>
                                         <div className="flex-1 text-center relative group">
@@ -1191,7 +1248,7 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
 
                                         {passiveOpen && (
                                             <ul className="flex flex-col w-full">
-                                                <span className="text-center">(Vous pouvez sélectionner jusqu&apos;à 5 sorts passif)</span>
+                                                <span className="text-center">(Vous pouvez sélectionner jusqu'à 5 sorts passifs)</span>
                                                 {playerSkill
                                                     .filter(skill => skill.warSkills.type === 'passif')
                                                     .map((skill, index) => (
@@ -1215,7 +1272,7 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                                                                 {skill.warSkills.upDefPierce > 0 && <span>+{skill.warSkills.upDefPierce} Défense perçante </span>}
                                                                 {skill.warSkills.upDefFire > 0 && <span>+{skill.warSkills.upDefFire} Résistance feu </span>}
                                                                 {skill.warSkills.upDefSlash > 0 && <span>+{skill.warSkills.upDefSlash} Défense tranchante </span>}
-                                                                {skill.warSkills.upDefLightning > 0 && <span>Résistance foudre: {skill.warSkills.upDefLightning}</span>}
+                                                                {skill.warSkills.upDefLightning > 0 && <span>+{skill.warSkills.upDefLightning} Résistance foudre </span>}
                                                                 {skill.warSkills.upDefStrike > 0 && <span>+{skill.warSkills.upDefStrike} Défense percutante </span>}
                                                                 {skill.warSkills.upDefHoly > 0 && <span>+{skill.warSkills.upDefHoly} Résistance sacrée </span>}
                                                                 {skill.warSkills.upHit > 0 && <span>+{skill.warSkills.upHit} % Chance de toucher </span>}
@@ -1264,22 +1321,24 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                             </div>
                         </div>
                     )}
-                    {isModalItems && (
+                    {isModalItems && selectedItem === null && (
                         <div className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center bg-black bg-opacity-50 text-black z-10">
                             <div className="bg-white p-4 rounded-lg relative w-3/4 h-3/4 max-h-3/4 overflow-auto">
                                 <h2 className="text-lg font-bold mb-4 text-center">Items du joueur</h2>
                                 <ul className="flex flex-col w-full">
-                                    {player.warPlayerItems.length > 0 ? (
-                                        player.warPlayerItems.map((item, index) => (
-                                            <li key={index} className="flex items-center p-2 border-b relative cursor-pointer"
-                                                    onMouseEnter={() => handleMouseEnterItem(item)}
-                                                    onMouseLeave={handleMouseLeaveItem}
+                                    {playerItem.length > 0 ? (
+                                        playerItem.map((item, index) => (
+                                            <li
+                                                key={index}
+                                                className="flex items-center p-2 border-b relative cursor-pointer"
+                                                onMouseEnter={() => handleMouseEnterItem(item)}
+                                                onMouseLeave={handleMouseLeaveItem}
+                                                onClick={() => handleClickItem(item)}
                                             >
                                                 <img
                                                     src={item.warItems.imageUrl}
                                                     alt={item.warItems.name}
                                                     className="w-12 h-12 mr-2"
-                                                // onClick={() => handleClickItem(item)}
                                                 />
                                                 <div>
                                                     <span className="font-bold">{item.warItems.name}</span>
@@ -1298,6 +1357,56 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                                 </ul>
                                 <div className="flex justify-center absolute bottom-4 left-1/2 transform -translate-x-1/2">
                                     <button onClick={closeItemsModal} className="bg-red-500 text-white py-2 px-4 rounded">Fermer</button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                    {isModalItems && selectedItem && (
+                        <div className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center bg-black bg-opacity-50 text-black z-10">
+                            <div className="bg-white p-4 rounded-lg relative w-3/4 h-3/4 max-h-3/4 overflow-auto">
+                                <h2 className="text-lg font-bold mb-4 text-center">{selectedItem.warItems.name}</h2>
+                                <img
+                                    src={selectedItem.warItems.imageUrl}
+                                    alt={selectedItem.warItems.name}
+                                    className="w-32 h-32 mx-auto mb-4"
+                                />
+                                <div className="flex flex-col items-center">
+                                    <span className="font-bold">Description:</span>
+                                    <p>{selectedItem.warItems.description}</p>
+                                </div>
+                                <div className="flex flex-col items-center mt-4">
+                                    {selectedItem.warItems.id != 1 ? (
+                                        <>
+                                            <input
+                                                type="number"
+                                                value={quantity}
+                                                onChange={(e) => setQuantity(Math.max(1, Math.min(parseInt(e.target.value, 10), selectedItem.warItems.id === 12 ? selectedItem.count : Math.min(selectedItem.count, 10))))}
+                                                min={1}
+                                                max={selectedItem.warItems.id === 12 ? selectedItem.count : Math.min(selectedItem.count, 10)}
+                                                className="w-20 p-2 border rounded text-center"
+                                            />
+                                            {selectedItem.warItems.pa && (
+                                                <>
+                                                <span className="mt-4">Vos Points d'Action : {updatedPlayerStats.pa}/{updatedPlayerStats.paMax}</span>
+                                                <span className="text-center">Vous regagnez : {selectedItem.warItems.pa * quantity} PA</span>
+                                                </>
+                                            )}
+                                            {selectedItem.warItems.hp && (
+                                                <>
+                                                <span className="mt-4">Votre vie : {updatedPlayerStats.hp}/{updatedPlayerStats.hpMax}</span>
+                                                <span className="text-center">Vous regagnez : {selectedItem.warItems.hp * quantity} PV</span>
+                                                </>
+                                            )}
+                                        </>
+                                    ) : (
+                                        <span>Quantité : {selectedItem.count}</span>
+                                    )}
+                                </div>
+                                <div className="flex justify-center absolute bottom-4 left-1/2 transform -translate-x-1/2">
+                                    {selectedItem.warItems.id != 1 && (
+                                        <button onClick={useItem} className="bg-green-500 text-white py-2 px-4 rounded mr-4">Utiliser</button>
+                                    )}
+                                    <button onClick={closeItems} className="bg-red-500 text-white py-2 px-4 rounded">Retour</button>
                                 </div>
                             </div>
                         </div>
@@ -1393,12 +1502,8 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
     }
 }
 
-
-
 export async function getServerSideProps(context) {
-    const session = await getSession(
-        context
-    );
+    const session = await getSession(context);
 
     if (!session) {
         return {

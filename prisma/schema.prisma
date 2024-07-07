@@ -348,6 +348,7 @@ model warItems {
   pa              Int?
   hp              Int?
   card            Boolean           @default(false)
+  point           Int?
   warMonsterLoots warMonsterLoots[]
   warPlayerItems  warPlayerItems[]
 }
