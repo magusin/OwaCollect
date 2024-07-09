@@ -1163,7 +1163,10 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                                                     Portée {skill.warSkills.dist}
                                                 </span>
                                                 <span className="ml-2 md:ml-4 text-gray-500">
-                                                    Touché {skill.warSkills.hit + updatedPlayerStats.hit} %
+                                                    Touché {Math.min(skill.warSkills.hit + updatedPlayerStats.hit, 95)} %
+                                                </span>
+                                                <span className="ml-2">
+                                                    Type de dégats: {skill.warSkills.dmgType}
                                                 </span>
                                             </div>
                                             {hoveredSkill === skill && (
@@ -1225,6 +1228,9 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                                                                 <span className="ml-2 md:ml-4">
                                                                     Portée {skill.warSkills.dist}
                                                                 </span>
+                                                                <span className="ml-2">
+                                                    Type de dégats: {skill.warSkills.dmgType}
+                                                </span>
                                                             </div>
                                                             {hoveredSkill === skill && (
                                                                 <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 p-2 bg-gray-700 text-white text-xs rounded w-max max-w-xs md:max-w-md lg:max-w-lg">
