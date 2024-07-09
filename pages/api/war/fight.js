@@ -180,7 +180,8 @@ export async function getTilesandCoordinates(playerPosition) {
                     imageUrl: true,
                     mapId: true,
                     level: true,
-                    isDied: true
+                    isDied: true,
+                    map: true
                 }
             },
             warMonsters: { 
@@ -194,6 +195,7 @@ export async function getTilesandCoordinates(playerPosition) {
                     intel: true,
                     dex: true,
                     acu: true,
+                    map: true,
                     monsters: {
                         select: {
                             name: true,

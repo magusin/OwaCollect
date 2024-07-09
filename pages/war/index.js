@@ -10,9 +10,11 @@ import Head from 'next/head';
 import Script from 'next/script';
 import calculateDmg from "../../utils/calculateDmg";
 import calculateDef from "../../utils/calculateDef";
+import calculateDistance from "@/utils/calculateDistance";
 import calculatePassiveSpellsStats from "../../utils/calculatePassiveSpellsStats";
 import xpToNextLevel from "../../utils/xpToNextLevel";
 import { useRouter } from "next/router";
+
 
 export default function War({ errorServer, war, initialPlayer, totalPoints }) {
     const [error, setError] = React.useState(errorServer || null);
@@ -32,7 +34,6 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
     const [isModalItems, setIsModalItems] = useState(false);
     // Déclaration de l'état pour stocker l'item sélectionné   
     const [selectedItem, setSelectedItem] = useState(null);
-    console.log('selectedItem', selectedItem);
     // Stocker les coordonnées de la tuile sélectionnée
     const [selectedTileX, setSelectedTileX] = useState(null);
     const [selectedTileY, setSelectedTileY] = useState(null);
@@ -63,6 +64,9 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
     const [quantity, setQuantity] = useState(1);
 
     const passiveSpellsStats = calculatePassiveSpellsStats(selectedPassiveSkills);
+
+    console.log('selectedPlayer', selectedPlayer);
+    console.log('selectedMonster', selectedMonster);
 
     useEffect(() => {
 
@@ -650,7 +654,7 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
             defPierce: player.defPierce + passiveSpellsStats.upDefPierce,
             defHoly: player.defHoly + passiveSpellsStats.upDefHoly
         };
-        // Fonction pour calculer la distance entre le joueur et un adversaire
+        // Fonction pour calculer le temps de réapparition du joueur
         const formatTime = (ms) => {
             const totalSeconds = Math.floor(ms / 1000);
             const hours = Math.floor(totalSeconds / 3600);
@@ -1139,10 +1143,15 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                                 <h2 className="text-lg font-bold text-center mb-4">Sélectionner un Sort/Compétence pour attaquer {selectedPlayer ? selectedPlayer.name : selectedMonster.name}</h2>
                                 <ul className="flex flex-col">
                                     {playerSkill.filter(skill => skill.warSkills.type === 'actif').map((skill, index) => (
-                                        <li key={index}
-                                            className={`flex items-center cursor-pointer p-2 border-b ${selectedFightSpell === skill ? 'bg-gray-200' : ''}`}
-                                            onClick={() => setSelectedFightSpell(skill)}
-                                        >
+                                        <li
+                                        key={index}
+                                        className={`flex items-center p-2 border-b ${selectedFightSpell === skill ? 'bg-blue-200' : ''} ${skill.warSkills.dist < calculateDistance(player.map, selectedPlayer?.map || selectedMonster?.map) ? 'bg-gray-700 cursor-not-allowed' : 'cursor-pointer'}`}
+                                        onClick={() => {
+                                          if (skill.warSkills.dist >= calculateDistance(player.map, selectedPlayer?.map || selectedMonster?.map)) {
+                                            setSelectedFightSpell(skill);
+                                          }
+                                        }}
+                                      >
                                             <div className="flex items-center">
                                                 <div className="relative w-20 h-20 mr-2">
                                                     <Image
