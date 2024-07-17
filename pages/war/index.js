@@ -112,7 +112,7 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
     const [timeRemaining, setTimeRemaining] = useState(0);
 
     useEffect(() => {
-        if (player.isDied != null) {
+        if (player?.isDied != null) {
             const remaining = calculateTimeRemaining(player.isDied);
             setTimeRemaining(remaining);
 
@@ -139,14 +139,14 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
 
     useEffect(() => {
         // Créer une liste de tuiles en incluant les tuiles vides
-        const tilesWithEmpty = coordinates.map(({ position_x, position_y }) => {
+        const tilesWithEmpty = coordinates?.map(({ position_x, position_y }) => {
             const key = `${position_x},${position_y}`;
             const matchingTile = tiles.find(tile => tile.position_x === position_x && tile.position_y === position_y);
             return matchingTile || { position_x, position_y, image_url: "", alt: "" };
         });
 
         // Trier les tuiles en fonction de leur position X et Y croissantes
-        const sortedTiles = tilesWithEmpty.sort((a, b) => {
+        const sortedTiles = tilesWithEmpty?.sort((a, b) => {
             if (a.position_y !== b.position_y) {
                 return b.position_y - a.position_y;
             }
@@ -1406,42 +1406,42 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                                     </ul>
                                 )}
                                 {activeTab === 'trophies' && (
-    <div className="flex overflow-x-auto space-x-4 relative group">
-        {playerTrophy.length > 0 ? (
-            playerTrophy.map((trophy, index) => (
-                <div key={index} className="flex flex-col items-center p-2 border ">
-                    <span className="font-bold mb-2 text-center">{trophy.warTrophies.name}</span>
-                    <img
-                        src={trophy.warTrophies.imageUrl}
-                        alt={trophy.warTrophies.name}
-                        className="w-20 h-20 mb-2"
-                    />
-                    <div className="absolute left-1/2 transform -translate-x-1/2 -top-0 hidden group-hover:block bg-gray-700 text-white text-xs rounded py-1 px-2 z-50 w-max max-w-xs md:max-w-md lg:max-w-lg">
-                        {trophy.warTrophies.hp > 0 && <p>HP: {trophy.warTrophies.hp}</p>}
-                        {trophy.warTrophies.intel > 0 && <p>Intelligence: {trophy.warTrophies.intel}</p>}
-                        {trophy.warTrophies.str > 0 && <p>Force: {trophy.warTrophies.str}</p>}
-                        {trophy.warTrophies.dex > 0 && <p>Dextérité: {trophy.warTrophies.dex}</p>}
-                        {trophy.warTrophies.acu > 0 && <p>Acuité: {trophy.warTrophies.acu}</p>}
-                        {trophy.warTrophies.crit > 0 && <p>Crit: {trophy.warTrophies.crit}</p>}
-                        {trophy.warTrophies.hit > 0 && <p>Hit: {trophy.warTrophies.hit}</p>}
-                        {trophy.warTrophies.defP > 0 && <p>Toute défense Physique: {trophy.warTrophies.defP}</p>}
-                        {trophy.warTrophies.defM > 0 && <p>Toute défense Magique: {trophy.warTrophies.defM}</p>}
-                        {trophy.warTrophies.defPStand > 0 && <p>Défense Standard Physique: {trophy.warTrophies.defPStand}</p>}
-                        {trophy.warTrophies.defMStand > 0 && <p>Défense Standard Magique: {trophy.warTrophies.defMStand}</p>}
-                        {trophy.warTrophies.defFire > 0 && <p>Résistance Feu: {trophy.warTrophies.defFire}</p>}
-                        {trophy.warTrophies.defStrike > 0 && <p>Défense Percutante: {trophy.warTrophies.defStrike}</p>}
-                        {trophy.warTrophies.defLightning > 0 && <p>Résistance Foudre: {trophy.warTrophies.defLightning}</p>}
-                        {trophy.warTrophies.defSlash > 0 && <p>Défense Tranchante: {trophy.warTrophies.defSlash}</p>}
-                        {trophy.warTrophies.defHoly > 0 && <p>Résistance Sacrée: {trophy.warTrophies.defHoly}</p>}
-                        {trophy.warTrophies.defPierce > 0 && <p>Défense Perçante: {trophy.warTrophies.defPierce}</p>}
-                    </div>
-                </div>
-            ))
-        ) : (
-            <li className="text-center">Vous ne possédez pas de trophées</li>
-        )}
-    </div>
-)}
+                                    <div className="flex overflow-x-auto space-x-4 relative group">
+                                        {playerTrophy.length > 0 ? (
+                                            playerTrophy.map((trophy, index) => (
+                                                <div key={index} className="flex flex-col items-center p-2 border ">
+                                                    <span className="font-bold mb-2 text-center">{trophy.warTrophies.name}</span>
+                                                    <img
+                                                        src={trophy.warTrophies.imageUrl}
+                                                        alt={trophy.warTrophies.name}
+                                                        className="w-20 h-20 mb-2"
+                                                    />
+                                                    <div className="absolute left-1/2 transform -translate-x-1/2 -top-0 hidden group-hover:block bg-gray-700 text-white text-xs rounded py-1 px-2 z-50 w-max max-w-xs md:max-w-md lg:max-w-lg">
+                                                        {trophy.warTrophies.hp > 0 && <p>HP: {trophy.warTrophies.hp}</p>}
+                                                        {trophy.warTrophies.intel > 0 && <p>Intelligence: {trophy.warTrophies.intel}</p>}
+                                                        {trophy.warTrophies.str > 0 && <p>Force: {trophy.warTrophies.str}</p>}
+                                                        {trophy.warTrophies.dex > 0 && <p>Dextérité: {trophy.warTrophies.dex}</p>}
+                                                        {trophy.warTrophies.acu > 0 && <p>Acuité: {trophy.warTrophies.acu}</p>}
+                                                        {trophy.warTrophies.crit > 0 && <p>Crit: {trophy.warTrophies.crit}</p>}
+                                                        {trophy.warTrophies.hit > 0 && <p>Hit: {trophy.warTrophies.hit}</p>}
+                                                        {trophy.warTrophies.defP > 0 && <p>Toute défense Physique: {trophy.warTrophies.defP}</p>}
+                                                        {trophy.warTrophies.defM > 0 && <p>Toute défense Magique: {trophy.warTrophies.defM}</p>}
+                                                        {trophy.warTrophies.defPStand > 0 && <p>Défense Standard Physique: {trophy.warTrophies.defPStand}</p>}
+                                                        {trophy.warTrophies.defMStand > 0 && <p>Défense Standard Magique: {trophy.warTrophies.defMStand}</p>}
+                                                        {trophy.warTrophies.defFire > 0 && <p>Résistance Feu: {trophy.warTrophies.defFire}</p>}
+                                                        {trophy.warTrophies.defStrike > 0 && <p>Défense Percutante: {trophy.warTrophies.defStrike}</p>}
+                                                        {trophy.warTrophies.defLightning > 0 && <p>Résistance Foudre: {trophy.warTrophies.defLightning}</p>}
+                                                        {trophy.warTrophies.defSlash > 0 && <p>Défense Tranchante: {trophy.warTrophies.defSlash}</p>}
+                                                        {trophy.warTrophies.defHoly > 0 && <p>Résistance Sacrée: {trophy.warTrophies.defHoly}</p>}
+                                                        {trophy.warTrophies.defPierce > 0 && <p>Défense Perçante: {trophy.warTrophies.defPierce}</p>}
+                                                    </div>
+                                                </div>
+                                            ))
+                                        ) : (
+                                            <li className="text-center">Vous ne possédez pas de trophées</li>
+                                        )}
+                                    </div>
+                                )}
                                 <div className="flex justify-center absolute bottom-4 left-1/2 transform -translate-x-1/2">
                                     <button onClick={closeItemsModal} className="bg-red-500 text-white py-2 px-4 rounded">Fermer</button>
                                 </div>
