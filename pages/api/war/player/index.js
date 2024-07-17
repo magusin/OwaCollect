@@ -76,6 +76,9 @@ export default async function handler(req, res) {
                     },
                     warPlayerItems: {
                         include: { warItems: true }
+                    },
+                    warPlayerTrophies: {
+                        include: { warTrophies: true }
                     }
                 }
             });
@@ -115,6 +118,9 @@ export default async function handler(req, res) {
                         },
                         warPlayerItems: {
                             include: { warItems: true }
+                        },
+                        warPlayerTrophies: {
+                            include: { warTrophies: true }
                         }
                     }
                 });

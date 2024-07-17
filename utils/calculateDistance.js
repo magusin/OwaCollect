@@ -1,5 +1,4 @@
 const calculateDistance = (player, opponent) => {
-    console.log(player, opponent);
     return Math.abs(player.position_x - opponent.position_x) + Math.abs(player.position_y - opponent.position_y);
 }
 

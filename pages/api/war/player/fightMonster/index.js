@@ -517,43 +517,143 @@ export default async function handler(req, res) {
                 await addMessages(decoded.id, lootMessage);
                 message += `\n${lootMessage}`;
 
-                await prisma.warMonsters.delete({
-                    where: {
-                        id: monsterId
-                    }
-                });
+                const monsterType = opponent.monsters.type;
+                const monsterTypeKill = monsterType + 'Kills';
+                const killCount = player[monsterTypeKill] + 1;
+                console.log('killCount', killCount)
+                console.log('monsterType', monsterType)
+                console.log('monsterTypeKill', monsterTypeKill)
 
-                const updatedPlayer = await prisma.warPlayers.update({
-                    where: {
-                        petId: decoded.id
-                    },
-                    data: {
-                        xp: {
-                            increment: xpWin
-                        },
-                        pa: {
-                            decrement: skill.warSkills.cost
+                const trophyMilestones = [1, 10, 25, 50, 100];
+
+                if (trophyMilestones.includes(killCount)) {
+                    console.log('here')
+                    const trophyMessage = `Vous avez tué ${killCount} de type ${monsterType} et débloqué un nouveau trophée`;
+                    await addMessages(decoded.id, trophyMessage);
+
+                    const trophy = await prisma.warTrophies.findFirst({
+                        where: { 
+                            milestone: killCount, 
+                            monsterType: monsterType 
                         }
-                    },
-                    include: {
-                        map: true,
-                        warPlayerSkills: {
-                            include: { warSkills: true }
+                    });
+
+                    console.log('trophy', trophy)
+
+                    // Ajouter le nouveau trophée
+                    await prisma.warPlayerTrophies.create({
+                        data: {
+                            petId: player.petId,
+                            trophyId: trophy.id
+                        }
+                    });
+
+                    message += `\n${trophyMessage}`;
+
+                    await prisma.warMonsters.delete({
+                        where: {
+                            id: monsterId
+                        }
+                    });
+
+                    const updatedPlayer = await prisma.warPlayers.update({
+                        where: {
+                            petId: decoded.id
                         },
-                        warMessages: {
-                            orderBy: { createdAt: "desc" }
+                        data: {
+                            xp: { increment: xpWin },
+                            pa: { decrement: skill.warSkills.cost },
+                            hpMax: { increment: trophy.hp },
+                            hp: { increment: trophy.hp },
+                            intel: { increment: trophy.intel },
+                            str: { increment: trophy.str },
+                            dex: { increment: trophy.dex },
+                            acu: { increment: trophy.acu },
+                            hit: { increment: trophy.hit },
+                            crit: { increment: trophy.crit },
+                            defM: { increment: trophy.defM },
+                            defP: { increment: trophy.defP },
+                            defMStand: { increment: trophy.defMStand },
+                            defPStand: { increment: trophy.defPStand },
+                            defFire: { increment: trophy.defFire },
+                            defStrike: { increment: trophy.defStrike },
+                            defLightning: { increment: trophy.defLightning },
+                            defSlash: { increment: trophy.defSlash },
+                            defHoly: { increment: trophy.defHoly },
+                            defPierce: { increment: trophy.defPierce },
+                            [monsterTypeKill]: killCount
                         },
-                        warPlayerItems: {
-                            include: {
-                                warItems: true
+                        include: {
+                            map: true,
+                            warPlayerSkills: {
+                                include: { warSkills: true }
+                            },
+                            warMessages: {
+                                orderBy: { createdAt: "desc" }
+                            },
+                            warPlayerItems: {
+                                include: {
+                                    warItems: true
+                                }
+                            },
+                            warPlayerTrophies: {
+                                include: {
+                                    warTrophies: true
+                                }
                             }
                         }
-                    }
-                });
+                    });
 
-                const { tiles, allCoordinates } = await getTilesandCoordinates(updatedPlayer.map);
+                    const { tiles, allCoordinates } = await getTilesandCoordinates(updatedPlayer.map);
 
-                return res.status(200).json({ message: message, updatedPlayer, tiles, allCoordinates, type: 'success', monster: null });
+                    return res.status(200).json({ message: message, updatedPlayer, tiles, allCoordinates, type: 'success', monster: null });
+                } else {
+
+
+                    await prisma.warMonsters.delete({
+                        where: {
+                            id: monsterId
+                        }
+                    });
+
+                    const updatedPlayer = await prisma.warPlayers.update({
+                        where: {
+                            petId: decoded.id
+                        },
+                        data: {
+                            xp: {
+                                increment: xpWin
+                            },
+                            pa: {
+                                decrement: skill.warSkills.cost
+                            },
+                            [monsterTypeKill]: killCount
+                        },
+                        include: {
+                            map: true,
+                            warPlayerSkills: {
+                                include: { warSkills: true }
+                            },
+                            warMessages: {
+                                orderBy: { createdAt: "desc" }
+                            },
+                            warPlayerItems: {
+                                include: {
+                                    warItems: true
+                                }
+                            },
+                            warPlayerTrophies: {
+                                include: {
+                                    warTrophies: true
+                                }
+                            }
+                        }
+                    });
+
+                    const { tiles, allCoordinates } = await getTilesandCoordinates(updatedPlayer.map);
+
+                    return res.status(200).json({ message: message, updatedPlayer, tiles, allCoordinates, type: 'success', monster: null });
+                }
             } else {
                 const monsterResponse = await monsterAttack(playerFinalStats, opponent);
 
@@ -600,12 +700,7 @@ export default async function handler(req, res) {
                     },
                     include: {
                         map: true,
-                        monsters: {
-                            include: {
-                                warMonsterSkills: { include: { warSkills: true } },
-                                warMonsterLoots: { include: { warItems: true } }
-                            }
-                        }
+                        monsters: true
                     }
                 });
 

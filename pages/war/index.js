@@ -37,6 +37,7 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
     // Stocker les coordonnées de la tuile sélectionnée
     const [selectedTileX, setSelectedTileX] = useState(null);
     const [selectedTileY, setSelectedTileY] = useState(null);
+    const [selectedTileId, setSelectedTileId] = useState(null);
     // Déclaration de l'état pour stocker les informations du joueur sélectionné
     const [selectedPlayer, setSelectedPlayer] = useState(null);
     // Déclaration de l'état pour stocker les informations du monstre sélectionné
@@ -62,11 +63,14 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
     // Router
     const router = useRouter();
     const [quantity, setQuantity] = useState(1);
+    // Sous menu items
+    const [activeTab, setActiveTab] = useState('items');
 
     const passiveSpellsStats = calculatePassiveSpellsStats(selectedPassiveSkills);
 
-    console.log('selectedPlayer', selectedPlayer);
-    console.log('selectedMonster', selectedMonster);
+    const handleTabChange = (tab) => {
+        setActiveTab(tab);
+    };
 
     useEffect(() => {
 
@@ -93,6 +97,7 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
     const [messages, setMessages] = useState(player?.warMessages || []);
     const [coordinates, setCoordinates] = useState(war?.allCoordinates);
     const [tiles, setTiles] = useState(war?.tiles);
+    const [sortedTiles, setSortedTiles] = useState([]);
     const positionPlayer = player?.map.id;
     const positionPlayerX = player?.map.position_x;
     const positionPlayerY = player?.map.position_y;
@@ -101,6 +106,8 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
     const [playerSkill, setPlayerSkill] = useState(player?.warPlayerSkills);
     // Etat pour stocker item joueur
     const [playerItem, setPlayerItem] = useState(player?.warPlayerItems);
+    // Etat pour stocker trophees joueur
+    const [playerTrophy, setPlayerTrophy] = useState(player?.warPlayerTrophies);
     // Temps restant avant la résurrection du joueur
     const [timeRemaining, setTimeRemaining] = useState(0);
 
@@ -129,6 +136,25 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
             .map(skill => skill);
         setSelectedPassiveSkills(initiallySelected);
     }, [playerSkill]);
+
+    useEffect(() => {
+        // Créer une liste de tuiles en incluant les tuiles vides
+        const tilesWithEmpty = coordinates.map(({ position_x, position_y }) => {
+            const key = `${position_x},${position_y}`;
+            const matchingTile = tiles.find(tile => tile.position_x === position_x && tile.position_y === position_y);
+            return matchingTile || { position_x, position_y, image_url: "", alt: "" };
+        });
+
+        // Trier les tuiles en fonction de leur position X et Y croissantes
+        const sortedTiles = tilesWithEmpty.sort((a, b) => {
+            if (a.position_y !== b.position_y) {
+                return b.position_y - a.position_y;
+            }
+            return a.position_x - b.position_x;
+        });
+
+        setSortedTiles(sortedTiles);
+    }, [coordinates, tiles]);
 
     // Fonction pour gérer le clic sur un sort passif
     const togglePassiveSkill = (skill) => {
@@ -178,7 +204,6 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
     }
 
     const handleClickItem = (item) => {
-        console.log('item', item)
         setSelectedItem(item);
         setQuantity(1);
         setIsModalItems(true);
@@ -248,6 +273,7 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
         // Stocker les coordonnées de la tuile sélectionnée
         setSelectedTileX(tile.position_x);
         setSelectedTileY(tile.position_y);
+        setSelectedTileId(tile.id);
 
         setIsModalOpen(true);
     };
@@ -405,6 +431,7 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                 }
             });
             const data = await response.data;
+            console.log('data', data)
             setShowAlert(false);
             setAlertMessage(data.message);
             if (data.type === 'error') {
@@ -416,21 +443,27 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
             setTiles(data.tiles);
             setCoordinates(data.allCoordinates);
             setMessages(data.updatedPlayer.warMessages);
+            const updatedTiles = data.tiles.find(tile => tile.id === selectedTileId);
+            const updatedMonstersOnTile = updatedTiles.warMonsters || [];
+            const updatedPlayersOnTile = updatedTiles.warPlayers || [];
             if (data.monster === null) {
                 setSelectedMonster(null);
                 setIsModalFight(false);
                 setSelectedFightSpell(null);
+                setPlayerTrophy(data.updatedPlayer.warPlayerTrophies);
             } else if (data.monster) {
                 setSelectedMonster(data.monster);
             }
-            setSelectedTileMonsters(data.tile.warMonsters || [])
-            setSelectedTilePlayers(data.tile.warPlayers || []);
+            setSelectedTileMonsters(updatedMonstersOnTile);
+            setSelectedTilePlayers(updatedPlayersOnTile);
+
             setPlayerItem(data.updatedPlayer.warPlayerItems);
             setShowAlert(true);
             setTimeout(() => {
                 setShowAlert(false);
             }, 7000);
         } catch (error) {
+            console.log('error', error)
             setShowAlert(false);
             setAlertMessage(`${error.response.data.message}`);
             setAlertType('error');
@@ -617,20 +650,6 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
     }
 
     if (session) {
-        // Créer une liste de tuiles en incluant les tuiles vides
-        const tilesWithEmpty = coordinates.map(({ position_x, position_y }) => {
-            const key = `${position_x},${position_y}`;
-            const matchingTile = tiles.find(tile => tile.position_x === position_x && tile.position_y === position_y);
-            return matchingTile || { position_x, position_y, image_url: "", alt: "" };
-        });
-
-        // Trier les tuiles en fonction de leur position X et Y croissantes
-        const sortedTiles = tilesWithEmpty.sort((a, b) => {
-            if (a.position_y !== b.position_y) {
-                return b.position_y - a.position_y;
-            }
-            return a.position_x - b.position_x;
-        });
 
         // Fonction pour calculer les statistiques totales du joueur
         const updatedPlayerStats = {
@@ -1144,14 +1163,14 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                                 <ul className="flex flex-col">
                                     {playerSkill.filter(skill => skill.warSkills.type === 'actif').map((skill, index) => (
                                         <li
-                                        key={index}
-                                        className={`flex items-center p-2 border-b ${selectedFightSpell === skill ? 'bg-blue-200' : ''} ${skill.warSkills.dist < calculateDistance(player.map, selectedPlayer?.map || selectedMonster?.map) ? 'bg-gray-700 cursor-not-allowed' : 'cursor-pointer'}`}
-                                        onClick={() => {
-                                          if (skill.warSkills.dist >= calculateDistance(player.map, selectedPlayer?.map || selectedMonster?.map)) {
-                                            setSelectedFightSpell(skill);
-                                          }
-                                        }}
-                                      >
+                                            key={index}
+                                            className={`flex items-center p-2 border-b ${selectedFightSpell === skill ? 'bg-blue-200' : ''} ${skill.warSkills.dist < calculateDistance(player.map, selectedPlayer?.map || selectedMonster?.map) ? 'bg-gray-700 cursor-not-allowed' : 'cursor-pointer'}`}
+                                            onClick={() => {
+                                                if (skill.warSkills.dist >= calculateDistance(player.map, selectedPlayer?.map || selectedMonster?.map)) {
+                                                    setSelectedFightSpell(skill);
+                                                }
+                                            }}
+                                        >
                                             <div className="flex items-center">
                                                 <div className="relative w-20 h-20 mr-2">
                                                     <Image
@@ -1238,8 +1257,8 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                                                                     Portée {skill.warSkills.dist}
                                                                 </span>
                                                                 <span className="ml-2">
-                                                    Type de dégats: {skill.warSkills.dmgType}
-                                                </span>
+                                                                    Type de dégats: {skill.warSkills.dmgType}
+                                                                </span>
                                                             </div>
                                                             {hoveredSkill === skill && (
                                                                 <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 p-2 bg-gray-700 text-white text-xs rounded w-max max-w-xs md:max-w-md lg:max-w-lg">
@@ -1339,37 +1358,90 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                     {isModalItems && selectedItem === null && (
                         <div className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center bg-black bg-opacity-50 text-black z-10">
                             <div className="bg-white p-4 rounded-lg relative w-3/4 h-3/4 max-h-3/4 overflow-auto">
-                                <h2 className="text-lg font-bold mb-4 text-center">Items du joueur</h2>
-                                <ul className="flex flex-col w-full">
-                                    {playerItem.length > 0 ? (
-                                        playerItem.map((item, index) => (
-                                            <li
-                                                key={index}
-                                                className="flex items-center p-2 border-b relative cursor-pointer"
-                                                onMouseEnter={() => handleMouseEnterItem(item)}
-                                                onMouseLeave={handleMouseLeaveItem}
-                                                onClick={() => handleClickItem(item)}
-                                            >
-                                                <img
-                                                    src={item.warItems.imageUrl}
-                                                    alt={item.warItems.name}
-                                                    className="w-12 h-12 mr-2"
-                                                />
-                                                <div>
-                                                    <span className="font-bold">{item.warItems.name}</span>
-                                                    <span> - Quantité : {item.count}</span>
-                                                </div>
-                                                {hoveredItem === item && (
-                                                    <div className="absolute left-1/2 transform -translate-x-1/2 -top-8 p-2 bg-gray-700 text-white rounded shadow-lg w-48">
-                                                        {item.warItems.description}
+                                <h2 className="text-lg font-bold mb-4 text-center">Inventaire du joueur</h2>
+                                <div className="flex justify-around mb-4">
+                                    <button
+                                        className={`py-2 px-4 ${activeTab === 'items' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+                                        onClick={() => handleTabChange('items')}
+                                    >
+                                        Items
+                                    </button>
+                                    <button
+                                        className={`py-2 px-4 ${activeTab === 'trophies' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+                                        onClick={() => handleTabChange('trophies')}
+                                    >
+                                        Trophées
+                                    </button>
+                                </div>
+                                {activeTab === 'items' && (
+                                    <ul className="flex flex-col w-full">
+                                        {playerItem.length > 0 ? (
+                                            playerItem.map((item, index) => (
+                                                <li
+                                                    key={index}
+                                                    className="flex items-center p-2 border-b relative cursor-pointer"
+                                                    onMouseEnter={() => handleMouseEnterItem(item)}
+                                                    onMouseLeave={handleMouseLeaveItem}
+                                                    onClick={() => handleClickItem(item)}
+                                                >
+                                                    <img
+                                                        src={item.warItems.imageUrl}
+                                                        alt={item.warItems.name}
+                                                        className="w-12 h-12 mr-2"
+                                                    />
+                                                    <div>
+                                                        <span className="font-bold">{item.warItems.name}</span>
+                                                        <span> - Quantité : {item.count}</span>
                                                     </div>
-                                                )}
-                                            </li>
-                                        ))
-                                    ) : (
-                                        <li className="text-center">Aucun item</li>
-                                    )}
-                                </ul>
+                                                    {hoveredItem === item && (
+                                                        <div className="absolute left-1/2 transform -translate-x-1/2 -top-8 p-2 bg-gray-700 text-white rounded shadow-lg w-48">
+                                                            {item.warItems.description}
+                                                        </div>
+                                                    )}
+                                                </li>
+                                            ))
+                                        ) : (
+                                            <li className="text-center">Vous ne possédez pas d'item</li>
+                                        )}
+                                    </ul>
+                                )}
+                                {activeTab === 'trophies' && (
+    <div className="flex overflow-x-auto space-x-4 relative group">
+        {playerTrophy.length > 0 ? (
+            playerTrophy.map((trophy, index) => (
+                <div key={index} className="flex flex-col items-center p-2 border ">
+                    <span className="font-bold mb-2 text-center">{trophy.warTrophies.name}</span>
+                    <img
+                        src={trophy.warTrophies.imageUrl}
+                        alt={trophy.warTrophies.name}
+                        className="w-20 h-20 mb-2"
+                    />
+                    <div className="absolute left-1/2 transform -translate-x-1/2 -top-0 hidden group-hover:block bg-gray-700 text-white text-xs rounded py-1 px-2 z-50 w-max max-w-xs md:max-w-md lg:max-w-lg">
+                        {trophy.warTrophies.hp > 0 && <p>HP: {trophy.warTrophies.hp}</p>}
+                        {trophy.warTrophies.intel > 0 && <p>Intelligence: {trophy.warTrophies.intel}</p>}
+                        {trophy.warTrophies.str > 0 && <p>Force: {trophy.warTrophies.str}</p>}
+                        {trophy.warTrophies.dex > 0 && <p>Dextérité: {trophy.warTrophies.dex}</p>}
+                        {trophy.warTrophies.acu > 0 && <p>Acuité: {trophy.warTrophies.acu}</p>}
+                        {trophy.warTrophies.crit > 0 && <p>Crit: {trophy.warTrophies.crit}</p>}
+                        {trophy.warTrophies.hit > 0 && <p>Hit: {trophy.warTrophies.hit}</p>}
+                        {trophy.warTrophies.defP > 0 && <p>Toute défense Physique: {trophy.warTrophies.defP}</p>}
+                        {trophy.warTrophies.defM > 0 && <p>Toute défense Magique: {trophy.warTrophies.defM}</p>}
+                        {trophy.warTrophies.defPStand > 0 && <p>Défense Standard Physique: {trophy.warTrophies.defPStand}</p>}
+                        {trophy.warTrophies.defMStand > 0 && <p>Défense Standard Magique: {trophy.warTrophies.defMStand}</p>}
+                        {trophy.warTrophies.defFire > 0 && <p>Résistance Feu: {trophy.warTrophies.defFire}</p>}
+                        {trophy.warTrophies.defStrike > 0 && <p>Défense Percutante: {trophy.warTrophies.defStrike}</p>}
+                        {trophy.warTrophies.defLightning > 0 && <p>Résistance Foudre: {trophy.warTrophies.defLightning}</p>}
+                        {trophy.warTrophies.defSlash > 0 && <p>Défense Tranchante: {trophy.warTrophies.defSlash}</p>}
+                        {trophy.warTrophies.defHoly > 0 && <p>Résistance Sacrée: {trophy.warTrophies.defHoly}</p>}
+                        {trophy.warTrophies.defPierce > 0 && <p>Défense Perçante: {trophy.warTrophies.defPierce}</p>}
+                    </div>
+                </div>
+            ))
+        ) : (
+            <li className="text-center">Vous ne possédez pas de trophées</li>
+        )}
+    </div>
+)}
                                 <div className="flex justify-center absolute bottom-4 left-1/2 transform -translate-x-1/2">
                                     <button onClick={closeItemsModal} className="bg-red-500 text-white py-2 px-4 rounded">Fermer</button>
                                 </div>
@@ -1402,14 +1474,14 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                                             />
                                             {selectedItem.warItems.pa && (
                                                 <>
-                                                <span className="mt-4">Vos Points d'Action : {updatedPlayerStats.pa}/{updatedPlayerStats.paMax}</span>
-                                                <span className="text-center">Vous regagnez : {selectedItem.warItems.pa * quantity} PA</span>
+                                                    <span className="mt-4">Vos Points d'Action : {updatedPlayerStats.pa}/{updatedPlayerStats.paMax}</span>
+                                                    <span className="text-center">Vous regagnez : {selectedItem.warItems.pa * quantity} PA</span>
                                                 </>
                                             )}
                                             {selectedItem.warItems.hp && (
                                                 <>
-                                                <span className="mt-4">Votre vie : {updatedPlayerStats.hp}/{updatedPlayerStats.hpMax}</span>
-                                                <span className="text-center">Vous regagnez : {selectedItem.warItems.hp * quantity} PV</span>
+                                                    <span className="mt-4">Votre vie : {updatedPlayerStats.hp}/{updatedPlayerStats.hpMax}</span>
+                                                    <span className="text-center">Vous regagnez : {selectedItem.warItems.hp * quantity} PV</span>
                                                 </>
                                             )}
                                         </>
