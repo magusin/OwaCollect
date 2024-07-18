@@ -65,6 +65,8 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
     const [quantity, setQuantity] = useState(1);
     // Sous menu items
     const [activeTab, setActiveTab] = useState('items');
+    // type pour filter skills
+    const [selectedType, setSelectedType] = useState('');
 
     const passiveSpellsStats = calculatePassiveSpellsStats(selectedPassiveSkills);
 
@@ -156,6 +158,23 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
         setSortedTiles(sortedTiles);
     }, [coordinates, tiles]);
 
+    // filtre des spells et leur trad pour les inputs
+    const typeMap = {
+        Pierce: 'Perçant',
+        Slash: 'Tranchant',
+        Strike: 'Percutant',
+        Pstandard: 'Physique Standard',
+        Fire: 'Feu',
+        Holy: 'Sacré',
+        Lightning: 'Foudre',
+        Mstandard: 'Magie Standard'
+    };
+
+    const filteredSpells = playerSkill.filter(skill =>
+        skill.warSkills.type === 'actif' &&
+        (selectedType === '' || skill.warSkills.dmgType === selectedType)
+    );
+
     // Fonction pour gérer le clic sur un sort passif
     const togglePassiveSkill = (skill) => {
         if (selectedPassiveSkills.includes(skill)) {
@@ -202,6 +221,10 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
             }, 5000);
         }
     }
+    // Fonction pour gérer le clic sur un checkbox filter sort passif
+    const handleCheckboxChange = (type) => {
+        setSelectedType((prevType) => (prevType === type ? '' : type));
+    };
 
     const handleClickItem = (item) => {
         setSelectedItem(item);
@@ -1160,8 +1183,20 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                         <div className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center bg-black bg-opacity-50 text-black z-10">
                             <div className="bg-white p-4 rounded-lg relative w-3/4 h-3/4 max-h-3/4 overflow-auto">
                                 <h2 className="text-lg font-bold text-center mb-4">Sélectionner un Sort/Compétence pour attaquer {selectedPlayer ? selectedPlayer.name : selectedMonster.name}</h2>
+                                {/* Checkboxes for filtering */}
+                                <div className="flex justify-center mb-4">
+                                    {Object.entries(typeMap).map(([type, translation], index) => (
+                                        <label key={index} className="mr-4">
+                                            <input
+                                                type="checkbox"
+                                                checked={selectedType === type}
+                                                onChange={() => handleCheckboxChange(type)}
+                                            /> {translation}
+                                        </label>
+                                    ))}
+                                </div>
                                 <ul className="flex flex-col">
-                                    {playerSkill.filter(skill => skill.warSkills.type === 'actif').map((skill, index) => (
+                                    {filteredSpells.map((skill, index) => (
                                         <li
                                             key={index}
                                             className={`flex items-center p-2 border-b ${selectedFightSpell === skill ? 'bg-blue-200' : ''} ${skill.warSkills.dist < calculateDistance(player.map, selectedPlayer?.map || selectedMonster?.map) ? 'bg-gray-700 cursor-not-allowed' : 'cursor-pointer'}`}
@@ -1194,7 +1229,7 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                                                     Touché {Math.min(skill.warSkills.hit + updatedPlayerStats.hit, 95)} %
                                                 </span>
                                                 <span className="ml-2">
-                                                    Type de dégats: {skill.warSkills.dmgType}
+                                                    Type de dégâts: {typeMap[skill.warSkills.dmgType]}
                                                 </span>
                                             </div>
                                             {hoveredSkill === skill && (
@@ -1384,11 +1419,15 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                                                     onMouseLeave={handleMouseLeaveItem}
                                                     onClick={() => handleClickItem(item)}
                                                 >
-                                                    <img
-                                                        src={item.warItems.imageUrl}
-                                                        alt={item.warItems.name}
-                                                        className="w-12 h-12 mr-2"
-                                                    />
+                                                    <div className="relative w-12 h-12 mr-2">
+                                                        <Image
+                                                            src={item.warItems.imageUrl}
+                                                            alt={item.warItems.name}
+                                                            layout="fill"
+                                                            objectFit="contain"
+                                                            priority={true}
+                                                        />
+                                                    </div>
                                                     <div>
                                                         <span className="font-bold">{item.warItems.name}</span>
                                                         <span> - Quantité : {item.count}</span>

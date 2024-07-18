@@ -104,7 +104,6 @@ export default async function handler(req, res) {
             }
 
             if (item.warItems.card) {
-                console.log('here card')
                 let rarety = '';
                 if (item.warItems.id === 9) {
                     rarety = 'Commune';
