@@ -799,11 +799,15 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                                                 onClick={playerTile.petId !== player.petId ? () => handleClickPlayer(playerTile) : null}
                                             >
                                                 {/* Image du joueur */}
-                                                <img
+                                                <div className="relative w-20 h-20 mr-2">
+                                                <Image
                                                     src={playerTile.imageUrl}
                                                     alt={playerTile.name}
-                                                    className="w-20 h-20 rounded-full mr-2"
+                                                    className="rounded-full"
+                                                    layout="fill"
+                                                    priority={true}
                                                 />
+                                                </div>
                                                 {/* Nom du joueur */}
                                                 {playerTile.name}
                                             </li>
@@ -818,11 +822,15 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                                             onClick={() => handleClickMonster(monsterTile)}
                                         >
                                             {/* Image du monstre */}
-                                            <img
+                                            <div className="relative w-20 h-20 mr-2">
+                                            <Image
                                                 src={monsterTile.monsters.imageUrl}
                                                 alt={monsterTile.monsters.name}
                                                 className="w-20 h-20 rounded-full mr-2"
+                                                layout="fill"
+                                                priority={true}
                                             />
+                                            </div>
                                             {/* Nom du monstre */}
                                             {monsterTile.monsters.name}
                                         </li>
@@ -840,11 +848,15 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                             <div className="bg-white p-4 rounded-lg relative w-3/4 h-3/4 max-h-3/4 overflow-auto">
 
                                 {/* Image du joueur */}
-                                <img
+                                <div className="relative lg:w-32 lg:h-32 md:w-24 md:h-24 h-16 w-16 mx-auto mb-2">
+                                <Image
                                     src={selectedPlayer.imageUrl}
                                     alt={selectedPlayer.name}
-                                    className="lg:w-32 lg:h-32 md:w-24 md:h-24 h-16 w-16 rounded-full mx-auto mb-2"
+                                    layout="fill"
+                                    className="rounded-full"
+                                    priority={true}
                                 />
+                                </div>
                                 {/* Nom du joueur */}
                                 <h2 className="text-xl font-bold text-center mb-2">{selectedPlayer.name}</h2>
                                 {/* Stats du joueur */}
@@ -914,7 +926,7 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                                                     <p className="font-bold">Dextérité</p>
                                                     <p>{updatedPlayerStats.dex}</p>
                                                     <div className="absolute left-1/2 transform -translate-x-1/2 -top-8 hidden group-hover:block bg-gray-700 text-white text-xs rounded py-1 px-2">
-                                                        Permet d&apos;esquiver les attaques physiques
+                                                        Permet d'esquiver les attaques physiques
                                                     </div>
                                                 </div>
                                                 <div className="flex-1 text-center relative group">
@@ -936,7 +948,7 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                                                     <p className="font-bold">Chance de Toucher</p>
                                                     <p>+{updatedPlayerStats.hit} %</p>
                                                     <div className="absolute left-1/2 transform -translate-x-1/2 -top-8 hidden group-hover:block bg-gray-700 text-white text-xs rounded py-1 px-2">
-                                                        S&apos;additionne aux chance de toucher de chaque sort (max 95%)
+                                                        S'additionne aux chance de toucher de chaque sort (max 95%)
                                                     </div>
                                                 </div>
                                             </div>
@@ -944,7 +956,7 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                                         <div className="mt-4">
                                             <div className="flex flex-col sm:flex-row justify-center">
                                                 <div className="flex-1 text-center mb-2 sm:mb-0 sm:mr-4 relative group">
-                                                    <p className="font-bold">Points d&apos;Action</p>
+                                                    <p className="font-bold">Points d'Action</p>
                                                     <p>{updatedPlayerStats.pa}</p>
                                                     <div className="absolute left-1/2 transform -translate-x-1/2 -top-8 hidden group-hover:block bg-gray-700 text-white text-xs rounded py-1 px-2">
                                                         Récupération de 4 PA par heure (max {updatedPlayerStats.paMax})
