@@ -24,7 +24,7 @@ export default async function handler(req, res) {
             const passiveStats = calculatePassiveSpellsStats(passiveSkills);
 
             const newHp = Math.min(player.hp + player.regen + passiveStats.upRegen, player.hpMax);
-            const newPa = Math.min(player.pa + 4, player.paMax);
+            const newPa = Math.min(player.pa + 2, player.paMax);
 
             await prisma.warPlayers.update({
                 where: {

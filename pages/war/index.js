@@ -443,10 +443,10 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
             setAlertMessage(`${error.response.data.message}`);
             setAlertType('error');
             setShowAlert(true);
-            // setTimeout(() => {
-            //     setShowAlert(false);
-            //     router.reload();
-            // }, 5000);
+            setTimeout(() => {
+                setShowAlert(false);
+                router.reload();
+            }, 5000);
 
         } finally {
             setLoading(false);
@@ -971,7 +971,7 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                                                     <p className="font-bold">Points d'Action</p>
                                                     <p>{updatedPlayerStats.pa}</p>
                                                     <div className="absolute left-1/2 transform -translate-x-1/2 -top-8 hidden group-hover:block bg-gray-700 text-white text-xs rounded py-1 px-2">
-                                                        Récupération de 4 PA par heure (max {updatedPlayerStats.paMax})
+                                                        Récupération de 2 PA par heure (max {updatedPlayerStats.paMax})
                                                     </div>
                                                 </div>
                                                 <div className="flex-1 text-center relative group">
