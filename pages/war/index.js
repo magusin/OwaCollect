@@ -386,7 +386,7 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
             setIsMenuMoveOpen(false);
             setIsMenuOpen(true);
         } catch (error) {
-            setAlertMessage(`${error.response.data.error}`);
+            setAlertMessage(`${error.response.data.error || error.response.data.message}`);
             setAlertType('error');
             setShowAlert(true);
             setTimeout(() => {
@@ -440,7 +440,7 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
             }, 7000);
         } catch (error) {
             setShowAlert(false);
-            setAlertMessage(`${error.response.data.error}`);
+            setAlertMessage(`${error.response.data.error || error.response.data.message}`);
             console.log('error', error)
             setAlertType('error');
             setShowAlert(true);
@@ -501,13 +501,13 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
         } catch (error) {
             console.log('error', error)
             setShowAlert(false);
-            setAlertMessage(`${error.response.data.error}`);
+            setAlertMessage(`${error.response.data.message || error.response.data.error}`);
             setAlertType('error');
             setShowAlert(true);
-            setTimeout(() => {
-                setShowAlert(false);
-                router.reload();
-            }, 5000);
+            // setTimeout(() => {
+            //     setShowAlert(false);
+            //     router.reload();
+            // }, 5000);
         } finally {
             setLoading(false);
         }

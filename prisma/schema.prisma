@@ -215,7 +215,7 @@ model warPlayers {
   levelChoices      Json?
   AnimalKills       Int                 @default(0)
   PlanteKills       Int                 @default(0)
-  Humano_deKills    Int                 @default(0) @map("HumanoïdeKills")
+  HumanoideKills    Int                 @default(0)
   JoueurKills       Int                 @default(0)
   MortvivantKills   Int                 @default(0)
   warMessages       warMessages[]

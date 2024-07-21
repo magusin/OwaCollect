@@ -234,13 +234,13 @@ export default async function handler(req, res) {
             }
 
             if (player.pa < skill.warSkills.cost) {
-                return res.status(400).json({ message: 'Pas assez de PA pour lancer le sort' });
+                return res.status(200).json({ message: 'Pas assez de PA pour lancer le sort', type: 'error' });
             }
 
             const distance = calculateDistance(player.map, opponent.map);
 
             if (distance > skill.warSkills.dist) {
-                return res.status(400).json({ message: 'Cible hors de portée' });
+                return res.status(200).json({ message: 'Cible hors de portée', type: 'error' });
             }
 
             const playerPassifSkillsStats = calculatePassiveSpellsStats(player.warPlayerSkills.filter(skill => skill.warSkills.type === 'passif' && skill.isSelected === true) || []);
