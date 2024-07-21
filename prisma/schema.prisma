@@ -217,7 +217,7 @@ model warPlayers {
   PlanteKills       Int                 @default(0)
   Humano_deKills    Int                 @default(0) @map("HumanoïdeKills")
   JoueurKills       Int                 @default(0)
-  Mort_vivantKills  Int                 @default(0) @map("Mort-vivantKills")
+  MortvivantKills   Int                 @default(0)
   warMessages       warMessages[]
   warPlayerItems    warPlayerItems[]
   warPlayerSkills   warPlayerSkills[]

@@ -207,7 +207,7 @@ export default async function handler(req, res) {
                     monsters: {
                         include: {
                             warMonsterSkills: { include: { warSkills: true } },
-                            warMonsterLoots: { include: { warItems: true } }
+                            warMonsterLoots: { include: { warItems: true, warSkills: true } }
                         }
                     }
                 }
@@ -447,10 +447,11 @@ export default async function handler(req, res) {
                     count: item.count
                 }));
 
+                
                 const filteredLoots = loots.filter(loot => !loot.skillId || !playerSpells.includes(loot.skillId));
-
+                
                 let totalLootsValue = filteredLoots.reduce((acc, loot) => acc + loot.value, 0);
-
+                
                 for (let i = 0; i < lootCount; i++) {
                     const random = Math.floor(Math.random() * totalLootsValue);
                     let count = 0;
@@ -473,8 +474,11 @@ export default async function handler(req, res) {
                     }
                 }
 
+                console.log('lootsWon', lootsWon);
+
                 for (const loot of lootsWon) {
                     if (loot.skillId) {
+                        console.log('loot.skillId', loot.skillId);
                         await prisma.warPlayerSkills.create({
                             data: {
                                 petId: player.petId,
@@ -514,12 +518,16 @@ export default async function handler(req, res) {
                         return `Vous avez obtenu ${loot.count} ${loot.warItems.name}`;
                     }
                 }).join('\n');
+                console.log('lootMessage', lootMessage);
                 await addMessages(decoded.id, lootMessage);
                 message += `\n${lootMessage}`;
 
                 const monsterType = opponent.monsters.type;
                 const monsterTypeKill = monsterType + 'Kills';
                 const killCount = player[monsterTypeKill] + 1;
+                console.log('killCount', killCount);
+                console.log('monsterTypeKill', monsterTypeKill);
+                console.log('monsterType', monsterType);
 
                 const trophyMilestones = [1, 10, 25, 50, 100];
 
@@ -533,6 +541,8 @@ export default async function handler(req, res) {
                             monsterType: monsterType 
                         }
                     });
+
+                    console.log('trophy', trophy);
 
                     // Ajouter le nouveau trophée
                     await prisma.warPlayerTrophies.create({

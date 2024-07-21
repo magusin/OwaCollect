@@ -170,7 +170,7 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
         Mstandard: 'Magie Standard'
     };
 
-    const filteredSpells = playerSkill.filter(skill =>
+    const filteredSpells = playerSkill?.filter(skill =>
         skill.warSkills.type === 'actif' &&
         (selectedType === '' || skill.warSkills.dmgType === selectedType)
     );
@@ -386,7 +386,7 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
             setIsMenuMoveOpen(false);
             setIsMenuOpen(true);
         } catch (error) {
-            setAlertMessage(`${error.response.data.message}`);
+            setAlertMessage(`${error.response.data.error}`);
             setAlertType('error');
             setShowAlert(true);
             setTimeout(() => {
@@ -440,7 +440,8 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
             }, 7000);
         } catch (error) {
             setShowAlert(false);
-            setAlertMessage(`${error.response.data.message}`);
+            setAlertMessage(`${error.response.data.error}`);
+            console.log('error', error)
             setAlertType('error');
             setShowAlert(true);
             setTimeout(() => {
@@ -486,6 +487,7 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                 setSelectedFightSpell(null);
                 setPlayerTrophy(data.updatedPlayer.warPlayerTrophies);
                 setPlayerItem(data.updatedPlayer.warPlayerItems);
+                setPlayerSkill(data.updatedPlayer.warPlayerSkills);
             } else if (data.monster) {
                 setSelectedMonster(data.monster);
             }
@@ -502,10 +504,10 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
             setAlertMessage(`${error.response.data.message}`);
             setAlertType('error');
             setShowAlert(true);
-            setTimeout(() => {
-                setShowAlert(false);
-                router.reload();
-            }, 5000);
+            // setTimeout(() => {
+            //     setShowAlert(false);
+            //     router.reload();
+            // }, 5000);
         } finally {
             setLoading(false);
         }
@@ -1469,10 +1471,10 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                                     </ul>
                                 )}
                                 {activeTab === 'trophies' && (
-                                    <div className="flex overflow-x-auto space-x-4 relative group">
+                                    <div className="flex overflow-x-auto space-x-4 ">
                                         {playerTrophy.length > 0 ? (
                                             playerTrophy.map((trophy, index) => (
-                                                <div key={index} className="flex flex-col items-center p-2 border ">
+                                                <div key={index} className="flex flex-col items-center p-2 border relative group ">
                                                     <span className="font-bold mb-2 text-center">{trophy.warTrophies.name}</span>
                                                     <img
                                                         src={trophy.warTrophies.imageUrl}

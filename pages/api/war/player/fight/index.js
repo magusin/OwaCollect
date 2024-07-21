@@ -418,57 +418,71 @@ export default async function handler(req, res) {
                 // Voler item au joueur vaincu
                 const lootStealCount = player.level + 1;
                 const itemsToSteal = opponent.warPlayerItems.filter(item => item.count > 1);
+
                 if (itemsToSteal.length > 0) {
                     const stolenItems = [];
-                        for (let i = 0; i < lootStealCount; i++) {
-                            const randomIndex = Math.floor(Math.random() * itemsToSteal.length);
-                            const item = itemsToSteal[randomIndex];
-                            itemsToSteal.splice(randomIndex, 1); // Retirer l'item volé de la liste
+                    const actualLootCount = Math.min(lootStealCount, itemsToSteal.length);
 
-                            const playerItem = player.warPlayerItems.find(i => i.itemId === item.itemId);
-                            if (playerItem) {
-                                await prisma.warPlayerItems.update({
-                                    where: {
-                                        petId_itemId: {
-                                            petId: player.petId,
-                                            itemId: item.itemId
-                                        }
-                                    },
-                                    data: {
-                                        count: {
-                                            increment: 1
-                                        }
-                                    }
-                                });
-                            } else {
-                                await prisma.warPlayerItems.create({
-                                    data: {
-                                        petId: player.petId,
-                                        itemId: item.itemId,
-                                        count: 1
-                                    }
-                                });
+                    for (let i = 0; i < actualLootCount; i++) {
+                        const randomIndex = Math.floor(Math.random() * itemsToSteal.length);
+                        const item = itemsToSteal[randomIndex];
+                        itemsToSteal.splice(randomIndex, 1); // Retirer l'item volé de la liste
+
+                        const playerItem = await prisma.warPlayerItems.findUnique({
+                            where: {
+                                petId_itemId: {
+                                    petId: player.petId,
+                                    itemId: item.itemId
+                                }
                             }
+                        });
 
+                        if (playerItem) {
                             await prisma.warPlayerItems.update({
                                 where: {
                                     petId_itemId: {
-                                        petId: opponent.petId,
+                                        petId: player.petId,
                                         itemId: item.itemId
                                     }
                                 },
                                 data: {
                                     count: {
-                                        decrement: 1
+                                        increment: 1
                                     }
                                 }
                             });
-
-                            stolenItems.push(item);
+                        } else {
+                            await prisma.warPlayerItems.create({
+                                data: {
+                                    petId: player.petId,
+                                    itemId: item.itemId,
+                                    count: 1
+                                }
+                            });
                         }
 
-                        const stolenItemsMessage = stolenItems.map(item => `${player.name} a volé un ${item.warItems.name} à ${opponent.name}`).join('\n');
-                        await addMessages(decoded.id, stolenItemsMessage);
+                        await prisma.warPlayerItems.update({
+                            where: {
+                                petId_itemId: {
+                                    petId: opponent.petId,
+                                    itemId: item.itemId
+                                }
+                            },
+                            data: {
+                                count: {
+                                    decrement: 1
+                                }
+                            }
+                        });
+
+                        stolenItems.push(item);
+                    }
+
+                    const stolenItemsMessage = stolenItems.map(item => `Vous avez volé 1 ${item.warItems.name} à ${opponent.name}`).join('\n');
+                    const opponentStolenItemsMessage = stolenItems.map(item => `1 ${item.warItems.name} a été volé par ${player.name}`).join('\n');
+                    await addMessages(decoded.id, stolenItemsMessage);
+                    await addMessages(opponentId, opponentStolenItemsMessage);
+                    message += `\n${stolenItemsMessage}`;
                 }
 
                 const playerKill = 'JoueurKills';
