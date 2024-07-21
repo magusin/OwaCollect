@@ -474,11 +474,8 @@ export default async function handler(req, res) {
                     }
                 }
 
-                console.log('lootsWon', lootsWon);
-
                 for (const loot of lootsWon) {
                     if (loot.skillId) {
-                        console.log('loot.skillId', loot.skillId);
                         await prisma.warPlayerSkills.create({
                             data: {
                                 petId: player.petId,
@@ -518,16 +515,12 @@ export default async function handler(req, res) {
                         return `Vous avez obtenu ${loot.count} ${loot.warItems.name}`;
                     }
                 }).join('\n');
-                console.log('lootMessage', lootMessage);
                 await addMessages(decoded.id, lootMessage);
                 message += `\n${lootMessage}`;
 
                 const monsterType = opponent.monsters.type;
                 const monsterTypeKill = monsterType + 'Kills';
                 const killCount = player[monsterTypeKill] + 1;
-                console.log('killCount', killCount);
-                console.log('monsterTypeKill', monsterTypeKill);
-                console.log('monsterType', monsterType);
 
                 const trophyMilestones = [1, 10, 25, 50, 100];
 
@@ -541,8 +534,6 @@ export default async function handler(req, res) {
                             monsterType: monsterType 
                         }
                     });
-
-                    console.log('trophy', trophy);
 
                     // Ajouter le nouveau trophée
                     await prisma.warPlayerTrophies.create({

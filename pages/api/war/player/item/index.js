@@ -203,7 +203,6 @@ export default async function handler(req, res) {
                 });
                 return res.status(200).json({ message: `Vous avez obtenu ${count} carte ${rarety}`, updatedUser });
             } else if (item.warItems.point) {
-                console.log('here')
                 const pointsWin = item.warItems.point * count;
 
                 await prisma.pets.update({
