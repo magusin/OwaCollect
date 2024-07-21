@@ -520,14 +520,10 @@ export default async function handler(req, res) {
                 const monsterType = opponent.monsters.type;
                 const monsterTypeKill = monsterType + 'Kills';
                 const killCount = player[monsterTypeKill] + 1;
-                console.log('killCount', killCount)
-                console.log('monsterType', monsterType)
-                console.log('monsterTypeKill', monsterTypeKill)
 
                 const trophyMilestones = [1, 10, 25, 50, 100];
 
                 if (trophyMilestones.includes(killCount)) {
-                    console.log('here')
                     const trophyMessage = `Vous avez tué ${killCount} de type ${monsterType} et débloqué un nouveau trophée`;
                     await addMessages(decoded.id, trophyMessage);
 
@@ -537,8 +533,6 @@ export default async function handler(req, res) {
                             monsterType: monsterType 
                         }
                     });
-
-                    console.log('trophy', trophy)
 
                     // Ajouter le nouveau trophée
                     await prisma.warPlayerTrophies.create({
@@ -608,8 +602,6 @@ export default async function handler(req, res) {
 
                     return res.status(200).json({ message: message, updatedPlayer, tiles, allCoordinates, type: 'success', monster: null });
                 } else {
-
-
                     await prisma.warMonsters.delete({
                         where: {
                             id: monsterId

@@ -109,6 +109,11 @@ export default async function handler(req, res) {
                         include: {
                             warSkills: true
                         }
+                    },
+                    warPlayerItems: {
+                        include: {
+                            warItems: true
+                        }
                     }
                 }
             });
@@ -210,7 +215,7 @@ export default async function handler(req, res) {
                 // Mettre à jour les tuiles et coordonnées
                 const { tiles, allCoordinates } = await getTilesandCoordinates(updatedPlayer.map);
 
-                return res.status(200).json({ message: randomMissMessage, updatedPlayer, tiles, allCoordinates, type: 'error'  });
+                return res.status(200).json({ message: randomMissMessage, updatedPlayer, tiles, allCoordinates, type: 'error', isDied: false });
             }
 
             const evade = calculateEvade(opponentFinalStats, skill.warSkills.stat);
@@ -264,7 +269,7 @@ export default async function handler(req, res) {
                 // Mettre à jour les tuiles et coordonnées
                 const { tiles, allCoordinates } = await getTilesandCoordinates(updatedPlayer.map);
 
-                return res.status(200).json({ message: randomEvadeMessage, updatedPlayer, tiles, allCoordinates, type: 'error' });
+                return res.status(200).json({ message: randomEvadeMessage, updatedPlayer, tiles, allCoordinates, type: 'error', isDied: false });
             }
 
             const crit = Math.random() * 100 <= playerFinalStats.crit;
@@ -282,7 +287,7 @@ export default async function handler(req, res) {
 
                 hpFinal -= damage;
                 if (hpFinal <= 0) {
-                    xpPlayer += opponent.level +1;
+                    xpPlayer += opponent.level + 1;
                     xpWin += opponent.level + 1;
                     isPlayerDied = new Date(new Date().getTime() + player.level * 60 * 60 * 1000); // Date actuelle + 1 heure par niveau
                 }
@@ -300,18 +305,19 @@ export default async function handler(req, res) {
                         `Votre sort critique de ${damage} a été fatal à ${opponent.name}, vous gagnez ${xpWin} XP`
                     ]
                 } else {
-                critMessage = skill.warSkills.stat === 'str' ? [
-                    `Vous avez infligé un coup critique de ${damage} dommages à ${opponent.name}, vous gagnez ${xpWin} XP`,
-                    `Votre coup critique de ${damage} points de dégats a touché ${opponent.name}, vous obtenez ${xpWin} XP`,
-                    `Votre coup critique de ${damage} dommage a été porté à ${opponent.name}, vous gagnez ${xpWin} XP`
-                ] : [
-                    `Vous avez lancé un sort critique de ${damage} points de dégats à ${opponent.name}, vous gagnez ${xpWin} XP`,
-                    `Votre sort critique de ${damage} dommages a touché ${opponent.name}, vous obtenez ${xpWin} XP`,
-                    `Votre sort critique de ${damage} a été lancé sur ${opponent.name}, vous gagnez ${xpWin} XP`
-                ]
-            }
+                    critMessage = skill.warSkills.stat === 'str' ? [
+                        `Vous avez infligé un coup critique de ${damage} dommages à ${opponent.name}, vous gagnez ${xpWin} XP`,
+                        `Votre coup critique de ${damage} points de dégats a touché ${opponent.name}, vous obtenez ${xpWin} XP`,
+                        `Votre coup critique de ${damage} dommage a été porté à ${opponent.name}, vous gagnez ${xpWin} XP`
+                    ] : [
+                        `Vous avez lancé un sort critique de ${damage} points de dégats à ${opponent.name}, vous gagnez ${xpWin} XP`,
+                        `Votre sort critique de ${damage} dommages a touché ${opponent.name}, vous obtenez ${xpWin} XP`,
+                        `Votre sort critique de ${damage} a été lancé sur ${opponent.name}, vous gagnez ${xpWin} XP`
+                    ]
+                }
                 const randomCritMessage = critMessage[Math.floor(Math.random() * critMessage.length)];
                 await addMessages(decoded.id, randomCritMessage);
+                message += randomCritMessage;
 
                 let opponentCritMessage = [];
 
@@ -326,16 +332,16 @@ export default async function handler(req, res) {
                         `Le sort critique de ${player.name} vous a infligé ${damage} points de dégats vous tuant sur le coup`
                     ]
                 } else {
-                opponentCritMessage = skill.warSkills.stat === 'str' ? [
-                    `${player.name} vous a infligé un coup critique de ${damage} points de dégats`,
-                    `Le coup critique de ${player.name} vous a touché de ${damage} points de dégats`,
-                    `Le coup critique de ${player.name} vous a infligé ${damage} points de dégats`
-                ] : [
-                    `${player.name} vous a lancé un sort critique de ${damage} points de dégats`,
-                    `Le sort critique de ${player.name} vous a touché de ${damage} points de dégats`,
-                    `Le sort critique de ${player.name} vous a infligé ${damage} points de dégats`
-                ]
-            }
+                    opponentCritMessage = skill.warSkills.stat === 'str' ? [
+                        `${player.name} vous a infligé un coup critique de ${damage} points de dégats`,
+                        `Le coup critique de ${player.name} vous a touché de ${damage} points de dégats`,
+                        `Le coup critique de ${player.name} vous a infligé ${damage} points de dégats`
+                    ] : [
+                        `${player.name} vous a lancé un sort critique de ${damage} points de dégats`,
+                        `Le sort critique de ${player.name} vous a touché de ${damage} points de dégats`,
+                        `Le sort critique de ${player.name} vous a infligé ${damage} points de dégats`
+                    ]
+                }
                 const randomOpponentCritMessage = opponentCritMessage[Math.floor(Math.random() * opponentCritMessage.length)];
                 await addMessages(opponentId, randomOpponentCritMessage);
 
@@ -353,7 +359,7 @@ export default async function handler(req, res) {
                 xpWin += 2;
 
                 let damageMessage = [];
-                
+
                 if (hpFinal <= 0) {
                     damageMessage = skill.warSkills.stat === 'str' ? [
                         `Vous avez infligé ${damage} dommages à ${opponent.name} qui a succombé à votre attaque, vous gagnez ${xpWin} XP`,
@@ -365,18 +371,19 @@ export default async function handler(req, res) {
                         `Votre sort de ${damage} a été fatal à ${opponent.name}, vous gagnez ${xpWin} XP`
                     ]
                 } else {
-                damageMessage = skill.warSkills.stat === 'str' ? [
-                    `Vous avez infligé ${damage} dommages à ${opponent.name}, vous gagnez ${xpWin} XP`,
-                    `Votre coup de ${damage} points de dégats a touché ${opponent.name}, vous obtenez ${xpWin} XP`,
-                    `Le coup de ${damage} dommages a été porté à ${opponent.name}, vous gagnez ${xpWin} XP`
-                ] : [
-                    `Vous avez lancé un sort de ${damage} points de dégats à ${opponent.name}, vous gagnez ${xpWin} XP`,
-                    `Votre sort de ${damage} dommages a touché ${opponent.name}, vous obtenez ${xpWin} XP`,
-                    `Le sort de ${damage} dommages a été lancé à ${opponent.name}, vous gagnez ${xpWin} XP`
-                ]
-            }
+                    damageMessage = skill.warSkills.stat === 'str' ? [
+                        `Vous avez infligé ${damage} dommages à ${opponent.name}, vous gagnez ${xpWin} XP`,
+                        `Votre coup de ${damage} points de dégats a touché ${opponent.name}, vous obtenez ${xpWin} XP`,
+                        `Le coup de ${damage} dommages a été porté à ${opponent.name}, vous gagnez ${xpWin} XP`
+                    ] : [
+                        `Vous avez lancé un sort de ${damage} points de dégats à ${opponent.name}, vous gagnez ${xpWin} XP`,
+                        `Votre sort de ${damage} dommages a touché ${opponent.name}, vous obtenez ${xpWin} XP`,
+                        `Le sort de ${damage} dommages a été lancé à ${opponent.name}, vous gagnez ${xpWin} XP`
+                    ]
+                }
                 const randomDamageMessage = damageMessage[Math.floor(Math.random() * damageMessage.length)];
                 await addMessages(decoded.id, randomDamageMessage);
+                message += randomDamageMessage;
 
                 let opponentDamageMessage = [];
 
@@ -391,19 +398,211 @@ export default async function handler(req, res) {
                         `Le sort de ${player.name} vous a infligé ${damage} points de dégats vous tuant sur le coup`
                     ]
                 } else {
-                opponentDamageMessage = skill.warSkills.stat === 'str' ? [
-                    `${player.name} vous a infligé ${damage} points de dégats`,
-                    `Le coup de ${player.name} vous a touché de ${damage} points de dégats`,
-                    `Le coup de ${player.name} vous a infligé ${damage} points de dégats`
-                ] : [
-                    `${player.name} vous a lancé un sort de ${damage} points de dégats`,
-                    `Le sort de ${player.name} vous a touché de ${damage} points de dégats`,
-                    `Le sort de ${player.name} vous a infligé ${damage} points de dégats`
-                ]
-            }
+                    opponentDamageMessage = skill.warSkills.stat === 'str' ? [
+                        `${player.name} vous a infligé ${damage} points de dégats`,
+                        `Le coup de ${player.name} vous a touché de ${damage} points de dégats`,
+                        `Le coup de ${player.name} vous a infligé ${damage} points de dégats`
+                    ] : [
+                        `${player.name} vous a lancé un sort de ${damage} points de dégats`,
+                        `Le sort de ${player.name} vous a touché de ${damage} points de dégats`,
+                        `Le sort de ${player.name} vous a infligé ${damage} points de dégats`
+                    ]
+                }
                 const randomOpponentDamageMessage = opponentDamageMessage[Math.floor(Math.random() * opponentDamageMessage.length)];
                 await addMessages(opponentId, randomOpponentDamageMessage);
 
+
+            }
+
+            if (hpFinal <= 0) {
+                // Voler item au joueur vaincu
+                const lootStealCount = player.level + 1;
+                const itemsToSteal = opponent.warPlayerItems.filter(item => item.count > 1);
+                if (itemsToSteal.length > 0) {
+                    const stolenItems = [];
+                        for (let i = 0; i < lootStealCount; i++) {
+                            const randomIndex = Math.floor(Math.random() * itemsToSteal.length);
+                            const item = itemsToSteal[randomIndex];
+                            itemsToSteal.splice(randomIndex, 1); // Retirer l'item volé de la liste
+
+                            const playerItem = player.warPlayerItems.find(i => i.itemId === item.itemId);
+                            if (playerItem) {
+                                await prisma.warPlayerItems.update({
+                                    where: {
+                                        petId_itemId: {
+                                            petId: player.petId,
+                                            itemId: item.itemId
+                                        }
+                                    },
+                                    data: {
+                                        count: {
+                                            increment: 1
+                                        }
+                                    }
+                                });
+                            } else {
+                                await prisma.warPlayerItems.create({
+                                    data: {
+                                        petId: player.petId,
+                                        itemId: item.itemId,
+                                        count: 1
+                                    }
+                                });
+                            }
+
+                            await prisma.warPlayerItems.update({
+                                where: {
+                                    petId_itemId: {
+                                        petId: opponent.petId,
+                                        itemId: item.itemId
+                                    }
+                                },
+                                data: {
+                                    count: {
+                                        decrement: 1
+                                    }
+                                }
+                            });
+
+                            stolenItems.push(item);
+                        }
+
+                        const stolenItemsMessage = stolenItems.map(item => `${player.name} a volé un ${item.warItems.name} à ${opponent.name}`).join('\n');
+                        await addMessages(decoded.id, stolenItemsMessage);
+                }
+
+                const playerKill = 'JoueurKills';
+                const killCount = player[playerKill] + 1;
+
+                const trophyMilestones = [1, 5, 15, 30, 50, 75, 100];
+
+                if (trophyMilestones.includes(killCount)) {
+                    const trophyMessage = `Félicitations ! Vous avez atteint ${killCount} victoires en combat et obtenu un nouveau trophée !`;
+                    await addMessages(decoded.id, trophyMessage);
+                    message += `\n${trophyMessage}`;
+
+                    const trophy = await prisma.warTrophies.findFirst({
+                        where: {
+                            milestone: killCount,
+                            monsterType: 'Joueur'
+                        }
+                    });
+
+                    // Ajouter le nouveau trophée
+                    await prisma.warPlayerTrophies.create({
+                        data: {
+                            petId: player.petId,
+                            trophyId: trophy.id
+                        }
+                    });
+
+                    // mettre à jour l'adverssaire
+                    await prisma.warPlayers.update({
+                        where: {
+                            petId: opponentId
+                        },
+                        data: {
+                            hp: { decrement: damage },
+                            isDied: isPlayerDied
+                        }
+                    });
+
+                    // Mettre à jour le joueur
+                    const updatedPlayer = await prisma.warPlayers.update({
+                        where: {
+                            petId: decoded.id
+                        },
+                        data: {
+                            xp: xpPlayer,
+                            pa: {
+                                decrement: skill.warSkills.cost
+                            },
+                            hpMax: { increment: trophy.hp },
+                            hp: { increment: trophy.hp },
+                            intel: { increment: trophy.intel },
+                            str: { increment: trophy.str },
+                            dex: { increment: trophy.dex },
+                            acu: { increment: trophy.acu },
+                            hit: { increment: trophy.hit },
+                            crit: { increment: trophy.crit },
+                            defM: { increment: trophy.defM },
+                            defP: { increment: trophy.defP },
+                            defMStand: { increment: trophy.defMStand },
+                            defPStand: { increment: trophy.defPStand },
+                            defFire: { increment: trophy.defFire },
+                            defStrike: { increment: trophy.defStrike },
+                            defLightning: { increment: trophy.defLightning },
+                            defSlash: { increment: trophy.defSlash },
+                            defHoly: { increment: trophy.defHoly },
+                            defPierce: { increment: trophy.defPierce },
+                            [playerKill]: killCount
+                        },
+                        include: {
+                            map: true,
+                            warPlayerSkills: {
+                                include: { warSkills: true }
+                            },
+                            warMessages: {
+                                orderBy: { createdAt: "desc" }
+                            },
+                            warPlayerItems: {
+                                include: { warItems: true }
+                            },
+                            warPlayerTrophies: {
+                                include: { warTrophies: true }
+                            }
+                        }
+                    });
+
+                    const { tiles, allCoordinates } = await getTilesandCoordinates(updatedPlayer.map);
+
+                    return res.status(200).json({ message: message, updatedPlayer, tiles, allCoordinates, type: 'success', isDied: true });
+                } else {
+                    // Mettre à jour l'adverssaire
+                    await prisma.warPlayers.update({
+                        where: {
+                            petId: opponentId
+                        },
+                        data: {
+                            hp: { decrement: damage },
+                            isDied: isPlayerDied
+                        }
+                    });
+
+                    // Mettre à jour le joueur
+                    const updatedPlayer = await prisma.warPlayers.update({
+                        where: {
+                            petId: decoded.id
+                        },
+                        data: {
+                            xp: xpPlayer,
+                            pa: {
+                                decrement: skill.warSkills.cost
+                            }
+                        },
+                        include: {
+                            map: true,
+                            warPlayerSkills: {
+                                include: { warSkills: true }
+                            },
+                            warMessages: {
+                                orderBy: { createdAt: "desc" }
+                            },
+                            warPlayerItems: {
+                                include: { warItems: true }
+                            },
+                            warPlayerTrophies: {
+                                include: { warTrophies: true }
+                            }
+                        }
+                    });
+
+                    const { tiles, allCoordinates } = await getTilesandCoordinates(updatedPlayer.map);
+
+                    return res.status(200).json({ message: message, updatedPlayer, tiles, allCoordinates, type: 'success', isDied: true });
+                }
+
+            } else {
                 // Mettre à jour les joueurs
                 const updatedOpponent = await prisma.warPlayers.update({
                     where: {
@@ -437,6 +636,9 @@ export default async function handler(req, res) {
                         },
                         warPlayerItems: {
                             include: { warItems: true }
+                        },
+                        warPlayerTrophies: {
+                            include: { warTrophies: true }
                         }
                     }
                 });
@@ -444,11 +646,8 @@ export default async function handler(req, res) {
                 // Mettre à jour les tuiles et coordonnées
                 const { tiles, allCoordinates } = await getTilesandCoordinates(updatedPlayer.map);
 
-                return res.status(200).json({ message: randomDamageMessage, updatedPlayer, updatedOpponent, tiles, allCoordinates, type: 'success' });
-
+                return res.status(200).json({ message: message, updatedPlayer, updatedOpponent, tiles, allCoordinates, type: 'success', isDied: false });
             }
-
-            return res.status(200).json(player);
         } else {
             return res.status(405).json({ message: 'Méthode non autorisée' });
         }

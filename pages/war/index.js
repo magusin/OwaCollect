@@ -422,6 +422,18 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
             setTiles(data.tiles);
             setCoordinates(data.allCoordinates);
             setMessages(data.updatedPlayer.warMessages);
+            const updatedTiles = data.tiles.find(tile => tile.id === selectedTileId);
+            const updatedMonstersOnTile = updatedTiles.warMonsters || [];
+            const updatedPlayersOnTile = updatedTiles.warPlayers || [];
+            setSelectedTileMonsters(updatedMonstersOnTile);
+            setSelectedTilePlayers(updatedPlayersOnTile);
+            if (data.isDied) {
+                setPlayerTrophy(data.updatedPlayer.warPlayerTrophies);
+                setSelectedPlayer(null);
+                setIsModalFight(false);
+                setSelectedFightSpell(null);
+                setPlayerItem(data.updatedPlayer.warPlayerItems);
+            }
             setShowAlert(true);
             setTimeout(() => {
                 setShowAlert(false);
@@ -431,10 +443,10 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
             setAlertMessage(`${error.response.data.message}`);
             setAlertType('error');
             setShowAlert(true);
-            setTimeout(() => {
-                setShowAlert(false);
-                router.reload();
-            }, 5000);
+            // setTimeout(() => {
+            //     setShowAlert(false);
+            //     router.reload();
+            // }, 5000);
 
         } finally {
             setLoading(false);
@@ -454,7 +466,6 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                 }
             });
             const data = await response.data;
-            console.log('data', data)
             setShowAlert(false);
             setAlertMessage(data.message);
             if (data.type === 'error') {
@@ -474,13 +485,13 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                 setIsModalFight(false);
                 setSelectedFightSpell(null);
                 setPlayerTrophy(data.updatedPlayer.warPlayerTrophies);
+                setPlayerItem(data.updatedPlayer.warPlayerItems);
             } else if (data.monster) {
                 setSelectedMonster(data.monster);
             }
             setSelectedTileMonsters(updatedMonstersOnTile);
             setSelectedTilePlayers(updatedPlayersOnTile);
 
-            setPlayerItem(data.updatedPlayer.warPlayerItems);
             setShowAlert(true);
             setTimeout(() => {
                 setShowAlert(false);
@@ -493,6 +504,7 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
             setShowAlert(true);
             setTimeout(() => {
                 setShowAlert(false);
+                router.reload();
             }, 5000);
         } finally {
             setLoading(false);
