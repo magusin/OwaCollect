@@ -88,7 +88,7 @@ export default async function handler(req, res) {
                     return res.status(400).json({ message: 'Coût invalide' });
                 }
 
-                if (id != 74 && id != 99 && id != 100 && id != 170) {
+                if (id != 74 && id != 99 && id != 100 && id != 230) {
                     return res.status(400).json({ message: 'Id invalide' });
                 }
 
