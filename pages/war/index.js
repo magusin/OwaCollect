@@ -693,6 +693,7 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
             ...player,
             hp: player.hp + passiveSpellsStats.upHp,
             hpMax: player.hpMax + passiveSpellsStats.upHp,
+            hit: player.hit + passiveSpellsStats.upHit,
             str: player.str + passiveSpellsStats.upStr,
             intel: player.intel + passiveSpellsStats.upIntel,
             dex: player.dex + passiveSpellsStats.upDex,
