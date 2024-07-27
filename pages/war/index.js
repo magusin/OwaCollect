@@ -687,7 +687,7 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
     }
 
     if (session) {
-
+        console.log('player', player)
         // Fonction pour calculer les statistiques totales du joueur
         const updatedPlayerStats = {
             ...player,
@@ -710,8 +710,9 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
             defLightning: player.defLightning + passiveSpellsStats.upDefLightning,
             defPierce: player.defPierce + passiveSpellsStats.upDefPierce,
             defHoly: player.defHoly + passiveSpellsStats.upDefHoly
-        };
-        // Fonction pour calculer le temps de réapparition du joueur
+            };
+            console.log('updatedPlayerStats', updatedPlayerStats)
+            // Fonction pour calculer le temps de réapparition du joueur
         const formatTime = (ms) => {
             const totalSeconds = Math.floor(ms / 1000);
             const hours = Math.floor(totalSeconds / 3600);
@@ -815,13 +816,13 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                                             >
                                                 {/* Image du joueur */}
                                                 <div className="relative w-20 h-20 mr-2">
-                                                <Image
-                                                    src={playerTile.imageUrl}
-                                                    alt={playerTile.name}
-                                                    className="rounded-full"
-                                                    layout="fill"
-                                                    priority={true}
-                                                />
+                                                    <Image
+                                                        src={playerTile.imageUrl}
+                                                        alt={playerTile.name}
+                                                        className="rounded-full"
+                                                        layout="fill"
+                                                        priority={true}
+                                                    />
                                                 </div>
                                                 {/* Nom du joueur */}
                                                 {playerTile.name}
@@ -838,13 +839,13 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                                         >
                                             {/* Image du monstre */}
                                             <div className="relative w-20 h-20 mr-2">
-                                            <Image
-                                                src={monsterTile.monsters.imageUrl}
-                                                alt={monsterTile.monsters.name}
-                                                className="w-20 h-20 rounded-full mr-2"
-                                                layout="fill"
-                                                priority={true}
-                                            />
+                                                <Image
+                                                    src={monsterTile.monsters.imageUrl}
+                                                    alt={monsterTile.monsters.name}
+                                                    className="w-20 h-20 rounded-full mr-2"
+                                                    layout="fill"
+                                                    priority={true}
+                                                />
                                             </div>
                                             {/* Nom du monstre */}
                                             {monsterTile.monsters.name}
@@ -864,13 +865,13 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
 
                                 {/* Image du joueur */}
                                 <div className="relative lg:w-32 lg:h-32 md:w-24 md:h-24 h-16 w-16 mx-auto mb-2">
-                                <Image
-                                    src={selectedPlayer.imageUrl}
-                                    alt={selectedPlayer.name}
-                                    layout="fill"
-                                    className="rounded-full"
-                                    priority={true}
-                                />
+                                    <Image
+                                        src={selectedPlayer.imageUrl}
+                                        alt={selectedPlayer.name}
+                                        layout="fill"
+                                        className="rounded-full"
+                                        priority={true}
+                                    />
                                 </div>
                                 {/* Nom du joueur */}
                                 <h2 className="text-xl font-bold text-center mb-2">{selectedPlayer.name}</h2>
@@ -1090,13 +1091,14 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                         <div className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center bg-black bg-opacity-50 text-black z-10">
                             <div className="bg-white p-4 rounded-lg relative w-3/4 h-3/4 max-h-3/4 overflow-auto">
                                 <h2 className="text-lg font-bold mb-4 text-center">{selectedMonster.monsters.name}</h2>
-
-
-                                <img
-                                    src={selectedMonster.monsters.imageUrl}
-                                    alt={selectedMonster.monsters.name}
-                                    className="lg:w-32 lg:h-32 md:w-24 md:h-24 h-16 w-16 mx-auto mb-2"
-                                />
+                                <div className="relative lg:w-32 lg:h-32 md:w-24 md:h-24 h-16 w-16 mx-auto mb-2">
+                                    <Image
+                                        src={selectedMonster.monsters.imageUrl}
+                                        alt={selectedMonster.monsters.name}
+                                        layout="fill"
+                                        priority={true}
+                                    />
+                                </div>
 
                                 <div className="flex flex-col items-center mt-4">
                                     <p className="font-bold">Niveau {selectedMonster.level}</p>
@@ -1209,7 +1211,7 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                     {isModalFight && (
                         <div className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center bg-black bg-opacity-50 text-black z-10">
                             <div className="bg-white p-4 rounded-lg relative w-3/4 h-3/4 max-h-3/4 overflow-auto">
-                                <h2 className="text-lg font-bold text-center mb-4">Sélectionner un Sort/Compétence pour attaquer {selectedPlayer ? selectedPlayer.name : selectedMonster.name}</h2>
+                                <h2 className="text-lg font-bold text-center mb-4">Sélectionner un Sort/Compétence pour attaquer {selectedPlayer ? selectedPlayer.name : selectedMonster.monsters.name}</h2>
                                 {/* Checkboxes for filtering */}
                                 <div className="flex justify-center mb-4">
                                     {Object.entries(typeMap).map(([type, translation], index) => (
@@ -1222,13 +1224,13 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                                         </label>
                                     ))}
                                 </div>
-                                <ul className="flex flex-col">
+                                <ul className="flex flex-col mb-14">
                                     {filteredSpells.map((skill, index) => (
                                         <li
                                             key={index}
-                                            className={`flex items-center p-2 border-b ${selectedFightSpell === skill ? 'bg-blue-200' : ''} ${skill.warSkills.dist < calculateDistance(player.map, selectedPlayer?.map || selectedMonster?.map) ? 'bg-gray-700 cursor-not-allowed' : 'cursor-pointer'}`}
+                                            className={`flex items-center p-2 border-b ${selectedFightSpell === skill ? 'bg-blue-200' : ''} ${skill.warSkills.dist < calculateDistance(player.map, selectedPlayer?.map || selectedMonster?.map) || (updatedPlayerStats.pa < skill.warSkills.cost) ? 'bg-gray-700 cursor-not-allowed' : 'cursor-pointer'}`}
                                             onClick={() => {
-                                                if (skill.warSkills.dist >= calculateDistance(player.map, selectedPlayer?.map || selectedMonster?.map)) {
+                                                if (skill.warSkills.dist >= calculateDistance(player.map, selectedPlayer?.map || selectedMonster?.map) && updatedPlayerStats.pa >= skill.warSkills.cost) {
                                                     setSelectedFightSpell(skill);
                                                 }
                                             }}
@@ -1268,9 +1270,11 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                                     ))}
                                 </ul>
                                 {/* Bouton pour fermer la fenêtre modale */}
-                                <div className="flex justify-center absolute bottom-4 left-1/2 transform -translate-x-1/2">
+                                <div className="relative w-full mt-4">
+                                <div className="flex justify-center absolute bottom-2 left-1/2 transform -translate-x-1/2">
                                     <button disabled={selectedFightSpell === null} onClick={() => handleSelectFightSpell(selectedFightSpell)} className={`bg-green-500 text-white py-2 px-4 rounded mr-4 ${selectedFightSpell === null ? 'bg-stone-500' : ''}`}>Confirmer</button>
                                     <button onClick={closeModalFight} className="bg-red-500 text-white py-2 px-4 rounded">Retour</button>
+                                </div>
                                 </div>
                             </div>
                         </div>
@@ -1279,7 +1283,7 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                         <div className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center bg-black bg-opacity-50 text-black z-10">
                             <div className="bg-white p-4 rounded-lg relative w-3/4 h-3/4 max-h-3/4 overflow-auto flex flex-col justify-between">
                                 <h2 className="text-2xl font-bold mb-8 text-center">Compétences</h2>
-                                <div className="flex flex-col items-center space-y-4 mb-8 w-full">
+                                <div className="flex flex-col items-center space-y-4 mb-14 w-full">
                                     {/* Liste des sorts actifs */}
                                     <div className="w-full">
                                         <button
@@ -1310,16 +1314,19 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                                                                 </div>
                                                                 <span className="font-bold">{skill.warSkills.name} ({skill.warSkills.cost} PA)</span>
                                                                 <span className={`${skill.warSkills.stat === 'str' ? 'text-orange-500' : 'text-green-500'} ml-2 md:ml-4`}>
-                                                                    {calculateDmg(player, skill.warSkills.stat, skill.warSkills.dmgMin, skill.warSkills.divider)} - {calculateDmg(player, skill.warSkills.stat, skill.warSkills.dmgMax, skill.warSkills.divider)} dmg
+                                                                    {calculateDmg(updatedPlayerStats, skill.warSkills.stat, skill.warSkills.dmgMin, skill.warSkills.divider)} - {calculateDmg(updatedPlayerStats, skill.warSkills.stat, skill.warSkills.dmgMax, skill.warSkills.divider)} dmg
                                                                 </span>
                                                                 <span className="ml-2 text-red-500 md:ml-4">
-                                                                    Crit {calculateDmg(player, skill.warSkills.stat, skill.warSkills.crit, skill.warSkills.divider)} dmg
+                                                                    Crit {calculateDmg(updatedPlayerStats, skill.warSkills.stat, skill.warSkills.crit, skill.warSkills.divider)} dmg
                                                                 </span>
                                                                 <span className="ml-2 md:ml-4">
                                                                     Portée {skill.warSkills.dist}
                                                                 </span>
+                                                                <span className="ml-2 md:ml-4 text-gray-500">
+                                                    Touché {Math.min(skill.warSkills.hit + updatedPlayerStats.hit, 95)} %
+                                                </span>
                                                                 <span className="ml-2">
-                                                                    Type de dégats: {skill.warSkills.dmgType}
+                                                                Type de dégâts: {typeMap[skill.warSkills.dmgType]}
                                                                 </span>
                                                             </div>
                                                             {hoveredSkill === skill && (
