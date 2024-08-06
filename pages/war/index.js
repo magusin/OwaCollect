@@ -74,26 +74,6 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
         setActiveTab(tab);
     };
 
-    useEffect(() => {
-
-        localStorage.setItem('points', points);
-
-        if (error === 'Erreur avec votre Token ou il est expiré. Veuillez vous reconnecter.') {
-            setTimeout(() => {
-                localStorage.removeItem('userOC');
-                localStorage.removeItem('points');
-                signOut()
-                router.push('/');
-            }, 3000);
-        }
-
-        if (status === 'unauthenticated') {
-            router.push('/');
-        }
-
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [status, error, router, points]);
-
     // data game
     const [player, setPlayer] = useState(initialPlayer);
     const [messages, setMessages] = useState(player?.warMessages || []);
@@ -112,6 +92,35 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
     const [playerTrophy, setPlayerTrophy] = useState(player?.warPlayerTrophies);
     // Temps restant avant la résurrection du joueur
     const [timeRemaining, setTimeRemaining] = useState(0);
+
+    // Etat pour gérer les filtres sélectionnés
+    const [selectedStats, setSelectedStats] = useState([]);
+
+    useEffect(() => {
+
+        localStorage.setItem('points', points);
+
+        if (error === 'Erreur avec votre Token ou il est expiré. Veuillez vous reconnecter.') {
+            setTimeout(() => {
+                localStorage.removeItem('userOC');
+                localStorage.removeItem('points');
+                signOut()
+                router.push('/');
+            }, 3000);
+        }
+
+        if (status === 'unauthenticated') {
+            router.push('/');
+        }
+
+        const interval = setInterval(() => {
+            fetchWarData();
+        }, 30000);
+
+        return () => clearInterval(interval);
+
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [status, error, router, points]);
 
     useEffect(() => {
         if (player?.isDied != null) {
@@ -174,6 +183,40 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
         skill.warSkills.type === 'actif' &&
         (selectedType === '' || skill.warSkills.dmgType === selectedType)
     );
+
+    const statFilters = [
+        { key: 'upStr', label: 'For' },
+        { key: 'upIntel', label: 'Intel' },
+        { key: 'upDex', label: 'Dext' },
+        { key: 'upAcu', label: 'Acui' },
+        { key: 'upCrit', label: 'Crit' },
+        { key: 'upDefP', label: 'Toute DP' },
+        { key: 'upDefM', label: 'Toute RM' },
+        { key: 'upDefPStand', label: 'D standard' },
+        { key: 'upDefMStand', label: 'R standard' },
+        { key: 'upDefPierce', label: 'D perçante' },
+        { key: 'upDefFire', label: 'R feu' },
+        { key: 'upDefSlash', label: 'D tranchante' },
+        { key: 'upDefLightning', label: 'R foudre' },
+        { key: 'upDefStrike', label: 'D percutante' },
+        { key: 'upDefHoly', label: 'R sacrée' },
+        { key: 'upHit', label: 'Toucher' },
+        { key: 'upRegen', label: 'Régén' },
+    ];
+
+    // Fonction pour gérer les changements de filtre
+    const handleStatFilterChange = (stat) => {
+        setSelectedStats((prev) =>
+            prev.includes(stat) ? prev.filter((s) => s !== stat) : [...prev, stat]
+        );
+    };
+
+    // Filtrer les sorts passifs en fonction des filtres sélectionnés
+    const filteredPassiveSkills = playerSkill?.filter(skill => {
+        if (skill.warSkills.type !== 'passif') return false;
+        if (selectedStats.length === 0) return true;
+        return selectedStats.every(stat => skill.warSkills[stat] > 0);
+    });
 
     // Fonction pour gérer le clic sur un sort passif
     const togglePassiveSkill = (skill) => {
@@ -279,7 +322,13 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
             const updatedPlayerSkills = await response.data;
             setPlayerSkill(updatedPlayerSkills.updatedPlayerSkills)
         } catch (error) {
-            console.error(error);
+            setShowAlert(false);
+            setAlertMessage(`${error.response.data.error || error.response.data.message}`);
+            setAlertType('error');
+            setShowAlert(true);
+            setTimeout(() => {
+                setShowAlert(false);
+            }, 5000);
         } finally {
             setLoading(false);
         }
@@ -366,6 +415,43 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
     const toggleMenu = () => {
         setIsMenuOpen(!isMenuOpen);
     };
+
+    const fetchWarData = async () => {
+        try {
+            const response = await axios.get(`/api/war/player`, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${session.customJwt}`,
+                }
+            });
+            setPlayer(response.data);
+            setMessages(response.data.warMessages);
+            setPlayerSkill(response.data.warPlayerSkills);
+            setPlayerItem(response.data.warPlayerItems);
+            setPlayerTrophy(response.data.warPlayerTrophies);
+            const map = await axios.get(`/api/war/map`, {
+                params: {
+                    limit: 5,
+                    mapId: response.data.mapId
+                },
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${session.customJwt}`,
+                }
+            });
+            setTiles(map.data.tiles);
+            setCoordinates(map.data.allCoordinates);
+        } catch (error) {
+            setShowAlert(false);
+            setAlertMessage(`${error.response.data.error || error.response.data.message}`);
+            setAlertType('error');
+            setShowAlert(true);
+            setTimeout(() => {
+                setShowAlert(false);
+            }, 5000);
+        }
+    };
+
     // Fonction pour déplacer le joueur
     const movePlayer = async (direction) => {
         setLoading(true);
@@ -386,6 +472,7 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
             setIsMenuMoveOpen(false);
             setIsMenuOpen(true);
         } catch (error) {
+            setShowAlert(false);
             setAlertMessage(`${error.response.data.error || error.response.data.message}`);
             setAlertType('error');
             setShowAlert(true);
@@ -441,7 +528,6 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
         } catch (error) {
             setShowAlert(false);
             setAlertMessage(`${error.response.data.error || error.response.data.message}`);
-            console.log('error', error)
             setAlertType('error');
             setShowAlert(true);
             setTimeout(() => {
@@ -499,15 +585,13 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                 setShowAlert(false);
             }, 7000);
         } catch (error) {
-            console.log('error', error)
             setShowAlert(false);
-            setAlertMessage(`${error.response.data.message || error.response.data.error}`);
+            setAlertMessage(`${error.response.data.error || error.response.data.message}`);
             setAlertType('error');
             setShowAlert(true);
-            // setTimeout(() => {
-            //     setShowAlert(false);
-            //     router.reload();
-            // }, 5000);
+            setTimeout(() => {
+                setShowAlert(false);
+            }, 5000);
         } finally {
             setLoading(false);
         }
@@ -539,7 +623,6 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
             setAlertMessage(`${error.response.data.message}`);
             setAlertType('error');
             setShowAlert(true);
-            console.error(error);
         } finally {
             setLoading(false);
         }
@@ -636,7 +719,7 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
             setPlayerItem(data.updatedUser.warPlayerItems);
             setSelectedItem(null);
         } catch (error) {
-            console.log('error', error)
+            setShowAlert(false);
             setAlertMessage(`${error.message}`);
             setAlertType('error');
             setShowAlert(true);
@@ -687,7 +770,6 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
     }
 
     if (session) {
-        console.log('player', player)
         // Fonction pour calculer les statistiques totales du joueur
         const updatedPlayerStats = {
             ...player,
@@ -711,7 +793,7 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
             defPierce: player.defPierce + passiveSpellsStats.upDefPierce,
             defHoly: player.defHoly + passiveSpellsStats.upDefHoly
         };
-        console.log('updatedPlayerStats', updatedPlayerStats)
+
         // Fonction pour calculer le temps de réapparition du joueur
         const formatTime = (ms) => {
             const totalSeconds = Math.floor(ms / 1000);
@@ -1283,123 +1365,138 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                         </div>
                     )}
                     {isModalSpell && (
-                        <div className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center bg-black bg-opacity-50 text-black z-10">
-                            <div className="bg-white p-4 rounded-lg relative w-3/4 h-3/4 max-h-3/4 overflow-auto flex flex-col justify-between">
-                                <h2 className="text-2xl font-bold mb-8 text-center">Compétences</h2>
-                                <div className="flex flex-col items-center space-y-4 mb-14 w-full">
-                                    {/* Liste des sorts actifs */}
-                                    <div className="w-full">
-                                        <button
-                                            className="w-full bg-blue-500 text-white py-2 px-4 rounded text-xl mb-2"
-                                            onClick={() => setActiveOpen(!activeOpen)}
-                                        >
-                                            {activeOpen ? 'Cacher' : 'Afficher'} les sorts actifs
-                                        </button>
-                                        {activeOpen && (
-                                            <ul className="flex flex-col">
-                                                {playerSkill
-                                                    .filter(skill => skill.warSkills.type === 'actif')
-                                                    .map((skill, index) => (
-                                                        <li
-                                                            key={index}
-                                                            className="mt-2 group relative cursor-pointer p-2"
-                                                            onMouseEnter={() => handleMouseEnter(skill)}
-                                                            onMouseLeave={handleMouseLeave}
-                                                        >
-                                                            <div className="flex items-center">
-                                                                <div className="relative w-20 h-20 mr-2">
-                                                                    <Image
-                                                                        src={skill.warSkills.img}
-                                                                        alt={`${skill.warSkills.name} icon`}
-                                                                        layout="fill"
-                                                                        objectFit="contain"
-                                                                    />
-                                                                </div>
-                                                                <span className="font-bold">{skill.warSkills.name} ({skill.warSkills.cost} PA)</span>
-                                                                <span className={`${skill.warSkills.stat === 'str' ? 'text-orange-500' : 'text-green-500'} ml-2 md:ml-4`}>
-                                                                    {calculateDmg(updatedPlayerStats, skill.warSkills.stat, skill.warSkills.dmgMin, skill.warSkills.divider)} - {calculateDmg(updatedPlayerStats, skill.warSkills.stat, skill.warSkills.dmgMax, skill.warSkills.divider)} dmg
-                                                                </span>
-                                                                <span className="ml-2 text-red-500 md:ml-4">
-                                                                    Crit {calculateDmg(updatedPlayerStats, skill.warSkills.stat, skill.warSkills.crit, skill.warSkills.divider)} dmg
-                                                                </span>
-                                                                <span className="ml-2 md:ml-4">
-                                                                    Portée {skill.warSkills.dist}
-                                                                </span>
-                                                                <span className="ml-2 md:ml-4 text-gray-500">
-                                                                    Touché {Math.min(skill.warSkills.hit + updatedPlayerStats.hit, 95)} %
-                                                                </span>
-                                                                <span className="ml-2">
-                                                                    Type de dégâts: {typeMap[skill.warSkills.dmgType]}
-                                                                </span>
-                                                            </div>
-                                                            {hoveredSkill === skill && (
-                                                                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 p-2 bg-gray-700 text-white text-xs rounded w-max max-w-xs md:max-w-md lg:max-w-lg">
-                                                                    {skill.warSkills.description}
-                                                                </div>
-                                                            )}
-                                                        </li>
-                                                    ))}
-                                            </ul>
-                                        )}
-                                    </div>
-
-                                    {/* Liste des sorts passifs */}
-                                    <div className="w-full">
-                                        <button
-                                            className="w-full bg-green-500 text-white py-2 px-4 rounded text-xl mb-2"
-                                            onClick={() => setPassiveOpen(!passiveOpen)}
-                                        >
-                                            {passiveOpen ? 'Cacher' : 'Afficher'} les sorts passifs
-                                        </button>
-
-                                        {passiveOpen && (
-                                            <ul className="flex flex-col w-full">
-                                                <span className="text-center">(Vous pouvez sélectionner jusqu'à 5 sorts passifs)</span>
-                                                {playerSkill
-                                                    .filter(skill => skill.warSkills.type === 'passif')
-                                                    .map((skill, index) => (
-                                                        <li
-                                                            key={index}
-                                                            className={`mt-2 group relative cursor-pointer p-2 ${selectedPassiveSkills.includes(skill) ? 'bg-gray-300' : ''}`}
-                                                            onClick={() => togglePassiveSkill(skill)}
-                                                        >
-                                                            <span className="font-bold">{skill.warSkills.name}</span>
-                                                            <span className="mx-2">
-                                                                {skill.warSkills.upStr > 0 && <span>+{skill.warSkills.upStr} Force </span>}
-                                                                {skill.warSkills.upIntel > 0 && <span>+{skill.warSkills.upIntel} Intelligence </span>}
-                                                                {skill.warSkills.upDex > 0 && <span>+{skill.warSkills.upDex} Dextérité </span>}
-                                                                {skill.warSkills.upAcu > 0 && <span>+{skill.warSkills.upAcu} Acuité </span>}
-                                                                {skill.warSkills.upHp > 0 && <span>+{skill.warSkills.upHp} Vie</span>}
-                                                                {skill.warSkills.upCrit > 0 && <span>+{skill.warSkills.upCrit} % Chance de critique </span>}
-                                                                {skill.warSkills.upDefP > 0 && <span>+{skill.warSkills.upDefP} Défense physique </span>}
-                                                                {skill.warSkills.upDefM > 0 && <span>+{skill.warSkills.upDefM} Défense magique </span>}
-                                                                {skill.warSkills.upDefPStand > 0 && <span>+{skill.warSkills.upDefPStand} Défense standard </span>}
-                                                                {skill.warSkills.upDefMStand > 0 && <span>+{skill.warSkills.upDefMStand} Résistance standard </span>}
-                                                                {skill.warSkills.upDefPierce > 0 && <span>+{skill.warSkills.upDefPierce} Défense perçante </span>}
-                                                                {skill.warSkills.upDefFire > 0 && <span>+{skill.warSkills.upDefFire} Résistance feu </span>}
-                                                                {skill.warSkills.upDefSlash > 0 && <span>+{skill.warSkills.upDefSlash} Défense tranchante </span>}
-                                                                {skill.warSkills.upDefLightning > 0 && <span>+{skill.warSkills.upDefLightning} Résistance foudre </span>}
-                                                                {skill.warSkills.upDefStrike > 0 && <span>+{skill.warSkills.upDefStrike} Défense percutante </span>}
-                                                                {skill.warSkills.upDefHoly > 0 && <span>+{skill.warSkills.upDefHoly} Résistance sacrée </span>}
-                                                                {skill.warSkills.upHit > 0 && <span>+{skill.warSkills.upHit} % Chance de toucher </span>}
-                                                                {skill.warSkills.upRegen > 0 && <span>+{skill.warSkills.upRegen} Régénération </span>}
-                                                            </span>
-                                                        </li>
-                                                    ))}
-                                            </ul>
-                                        )}
-                                    </div>
-                                </div>
-                                {/* Bouton pour fermer le menu */}
-                                <div className="relative w-full mt-4">
-                                    <div className="flex justify-center absolute bottom-2 left-1/2 transform -translate-x-1/2">
-                                        <button onClick={saveSelectedPassiveSkills} className="bg-green-500 text-white py-2 px-4 rounded text-xl mr-4">Sauvegarder</button>
-                                        <button onClick={closeModalSpell} className="bg-red-500 text-white py-2 px-4 rounded text-xl">Fermer</button>
-                                    </div>
-                                </div>
-                            </div>
+            <div className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center bg-black bg-opacity-50 text-black z-10">
+                <div className="bg-white p-4 rounded-lg relative w-3/4 h-3/4 max-h-3/4 overflow-auto flex flex-col justify-between">
+                    <h2 className="text-2xl font-bold mb-8 text-center">Compétences</h2>
+                    <div className="flex flex-col items-center space-y-4 mb-14 w-full">
+                        {/* Liste des sorts actifs */}
+                        <div className="w-full">
+                            <button
+                                className="w-full bg-blue-500 text-white py-2 px-4 rounded text-xl mb-2"
+                                onClick={() => setActiveOpen(!activeOpen)}
+                            >
+                                {activeOpen ? 'Cacher' : 'Afficher'} les sorts actifs
+                            </button>
+                            {activeOpen && (
+                                <ul className="flex flex-col">
+                                    {playerSkill
+                                        .filter(skill => skill.warSkills.type === 'actif')
+                                        .map((skill, index) => (
+                                            <li
+                                                key={index}
+                                                className="mt-2 group relative cursor-pointer p-2"
+                                                onMouseEnter={() => handleMouseEnter(skill)}
+                                                onMouseLeave={handleMouseLeave}
+                                            >
+                                                <div className="flex items-center">
+                                                    <div className="relative w-20 h-20 mr-2">
+                                                        <Image
+                                                            src={skill.warSkills.img}
+                                                            alt={`${skill.warSkills.name} icon`}
+                                                            layout="fill"
+                                                            objectFit="contain"
+                                                        />
+                                                    </div>
+                                                    <span className="font-bold">{skill.warSkills.name} ({skill.warSkills.cost} PA)</span>
+                                                    <span className={`${skill.warSkills.stat === 'str' ? 'text-orange-500' : 'text-green-500'} ml-2 md:ml-4`}>
+                                                        {calculateDmg(updatedPlayerStats, skill.warSkills.stat, skill.warSkills.dmgMin, skill.warSkills.divider)} - {calculateDmg(updatedPlayerStats, skill.warSkills.stat, skill.warSkills.dmgMax, skill.warSkills.divider)} dmg
+                                                    </span>
+                                                    <span className="ml-2 text-red-500 md:ml-4">
+                                                        Crit {calculateDmg(updatedPlayerStats, skill.warSkills.stat, skill.warSkills.crit, skill.warSkills.divider)} dmg
+                                                    </span>
+                                                    <span className="ml-2 md:ml-4">
+                                                        Portée {skill.warSkills.dist}
+                                                    </span>
+                                                    <span className="ml-2 md:ml-4 text-gray-500">
+                                                        Touché {Math.min(skill.warSkills.hit + updatedPlayerStats.hit, 95)} %
+                                                    </span>
+                                                    <span className="ml-2">
+                                                        Type de dégâts: {typeMap[skill.warSkills.dmgType]}
+                                                    </span>
+                                                </div>
+                                                {hoveredSkill === skill && (
+                                                    <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 p-2 bg-gray-700 text-white text-xs rounded w-max max-w-xs md:max-w-md lg:max-w-lg">
+                                                        {skill.warSkills.description}
+                                                    </div>
+                                                )}
+                                            </li>
+                                        ))}
+                                </ul>
+                            )}
                         </div>
-                    )}
+
+                        {/* Liste des sorts passifs */}
+                        <div className="w-full">
+                            <button
+                                className="w-full bg-green-500 text-white py-2 px-4 rounded text-xl mb-2"
+                                onClick={() => setPassiveOpen(!passiveOpen)}
+                            >
+                                {passiveOpen ? 'Cacher' : 'Afficher'} les sorts passifs
+                            </button>
+
+                            {passiveOpen && (
+                                <div className="flex flex-col w-full">
+                                    <span className="text-center">(Vous pouvez sélectionner jusqu'à 5 sorts passifs)</span>
+
+                                    {/* Section de filtres */}
+                                    <div className="flex flex-wrap justify-center mb-4">
+                                        {statFilters.map((filter) => (
+                                            <label key={filter.key} className="mr-4 mb-2">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={selectedStats.includes(filter.key)}
+                                                    onChange={() => handleStatFilterChange(filter.key)}
+                                                /> {filter.label}
+                                            </label>
+                                        ))}
+                                    </div>
+
+                                    {/* Liste des sorts passifs filtrés */}
+                                    <ul className="flex flex-col w-full">
+                                        {filteredPassiveSkills.map((skill, index) => (
+                                            <li
+                                                key={index}
+                                                className={`mt-2 group relative cursor-pointer p-2 ${selectedPassiveSkills.includes(skill) ? 'bg-gray-300' : ''}`}
+                                                onClick={() => togglePassiveSkill(skill)}
+                                            >
+                                                <span className="font-bold">{skill.warSkills.name}</span>
+                                                <span className="mx-2">
+                                                    {skill.warSkills.upStr > 0 && <span>+{skill.warSkills.upStr} Force </span>}
+                                                    {skill.warSkills.upIntel > 0 && <span>+{skill.warSkills.upIntel} Intelligence </span>}
+                                                    {skill.warSkills.upDex > 0 && <span>+{skill.warSkills.upDex} Dextérité </span>}
+                                                    {skill.warSkills.upAcu > 0 && <span>+{skill.warSkills.upAcu} Acuité </span>}
+                                                    {skill.warSkills.upHp > 0 && <span>+{skill.warSkills.upHp} Vie</span>}
+                                                    {skill.warSkills.upCrit > 0 && <span>+{skill.warSkills.upCrit} % Chance de critique </span>}
+                                                    {skill.warSkills.upDefP > 0 && <span>+{skill.warSkills.upDefP} Toute défense physique </span>}
+                                                    {skill.warSkills.upDefM > 0 && <span>+{skill.warSkills.upDefM} Toute résistance magique </span>}
+                                                    {skill.warSkills.upDefPStand > 0 && <span>+{skill.warSkills.upDefPStand} Défense standard </span>}
+                                                    {skill.warSkills.upDefMStand > 0 && <span>+{skill.warSkills.upDefMStand} Résistance standard </span>}
+                                                    {skill.warSkills.upDefPierce > 0 && <span>+{skill.warSkills.upDefPierce} Défense perçante </span>}
+                                                    {skill.warSkills.upDefFire > 0 && <span>+{skill.warSkills.upDefFire} Résistance feu </span>}
+                                                    {skill.warSkills.upDefSlash > 0 && <span>+{skill.warSkills.upDefSlash} Défense tranchante </span>}
+                                                    {skill.warSkills.upDefLightning > 0 && <span>+{skill.warSkills.upDefLightning} Résistance foudre </span>}
+                                                    {skill.warSkills.upDefStrike > 0 && <span>+{skill.warSkills.upDefStrike} Défense percutante </span>}
+                                                    {skill.warSkills.upDefHoly > 0 && <span>+{skill.warSkills.upDefHoly} Résistance sacrée </span>}
+                                                    {skill.warSkills.upHit > 0 && <span>+{skill.warSkills.upHit} % Chance de toucher </span>}
+                                                    {skill.warSkills.upRegen > 0 && <span>+{skill.warSkills.upRegen} Régénération </span>}
+                                                </span>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                    {/* Bouton pour fermer le menu */}
+                    <div className="relative w-full mt-4">
+                        <div className="flex justify-center absolute bottom-2 left-1/2 transform -translate-x-1/2">
+                            <button onClick={saveSelectedPassiveSkills} className="bg-green-500 text-white py-2 px-4 rounded text-xl mr-4">Sauvegarder</button>
+                            <button onClick={closeModalSpell} className="bg-red-500 text-white py-2 px-4 rounded text-xl">Fermer</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        )}
                     {isModalMessage && (
                         <div className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center bg-black bg-opacity-50 text-black z-10">
                             <div className="bg-white p-4 rounded-lg relative w-3/4 h-3/4 max-h-3/4 overflow-auto flex flex-col justify-between">
