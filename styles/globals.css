@@ -312,6 +312,31 @@ body {
     margin-left: -10px;
     margin-top: -1px;
   }
+
+  .menu-open:checked ~ .menu-item:nth-child(4) {
+    transition-duration: 280ms;
+    transform: translate3d(85.9466px, -12.47586px, 0);
+  } 
+  .menu-open:checked ~ .menu-item:nth-child(5) {
+    transition-duration: 380ms;
+    transform: translate3d(60.9466px, 52.47586px, 0);
+  }
+  .menu-open:checked ~ .menu-item:nth-child(6) {
+    transition-duration: 480ms;
+    transform: translate3d(0.08361px, 84.99997px, 0);
+  }
+  .menu-open:checked ~ .menu-item:nth-child(7) {
+    transition-duration: 580ms;
+    transform: translate3d(-60.86291px, 52.62064px, 0);
+  }
+  .menu-open:checked ~ .menu-item:nth-child(8) {
+    transition-duration: 680ms;
+    transform: translate3d(-85.03006px, -12.33095px, 0);
+  } 
+  .menu-open:checked ~ .menu-item:nth-child(9) {
+    transition-duration: 780ms;
+    transform: translate3d(-0.25084px, -104.9997px, 0);
+  }
 }
 
 /* Pour les écrans de 768px à 1023px */

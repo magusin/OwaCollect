@@ -199,7 +199,8 @@ export async function getTilesandCoordinates(playerPosition) {
                     monsters: {
                         select: {
                             name: true,
-                            imageUrl: true
+                            imageUrl: true,
+                            type: true
                         }
                     }
                 }
