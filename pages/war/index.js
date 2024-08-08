@@ -115,7 +115,7 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
 
         const interval = setInterval(() => {
             fetchWarData();
-        }, 30000);
+        }, 600000);
 
         return () => clearInterval(interval);
 
@@ -760,7 +760,7 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
         return (
             <>
                 <div className="flex flex-col h-screen" style={{ marginTop: "80px" }}>
-                    <Header points={points} />
+                    <Header points={points} player={player} />
                     <div className="flex-grow flex justify-center items-center">
                         <span className="text-center"><svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24"><path fill="#1f2937" d="M12,4a8,8,0,0,1,7.89,6.7A1.53,1.53,0,0,0,21.38,12h0a1.5,1.5,0,0,0,1.48-1.75,11,11,0,0,0-21.72,0A1.5,1.5,0,0,0,2.62,12h0a1.53,1.53,0,0,0,1.49-1.3A8,8,0,0,1,12,4Z"><animateTransform attributeName="transform" dur="0.75s" repeatCount="indefinite" type="rotate" values="0 12 12;360 12 12" /></path></svg></span>
                     </div>
@@ -821,7 +821,7 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                 <HeadView />
                 <Script src="https://kit.fontawesome.com/261e37c4a6.js" crossorigin="anonymous"></Script>
                 <div className="flex flex-col h-screen" style={{ marginTop: "80px" }}>
-                    <Header points={points} />
+                    <Header points={points} player={player} />
                     <div className="grid grid-cols-11">
                         {/* Afficher les tuiles autour du joueur dans l'ordre croissant de distance relative au joueur */}
                         {sortedTiles.map((tile, index) => {
@@ -1365,138 +1365,138 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                         </div>
                     )}
                     {isModalSpell && (
-            <div className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center bg-black bg-opacity-50 text-black z-10">
-                <div className="bg-white p-4 rounded-lg relative w-3/4 h-3/4 max-h-3/4 overflow-auto flex flex-col justify-between">
-                    <h2 className="text-2xl font-bold mb-8 text-center">Compétences</h2>
-                    <div className="flex flex-col items-center space-y-4 mb-14 w-full">
-                        {/* Liste des sorts actifs */}
-                        <div className="w-full">
-                            <button
-                                className="w-full bg-blue-500 text-white py-2 px-4 rounded text-xl mb-2"
-                                onClick={() => setActiveOpen(!activeOpen)}
-                            >
-                                {activeOpen ? 'Cacher' : 'Afficher'} les sorts actifs
-                            </button>
-                            {activeOpen && (
-                                <ul className="flex flex-col">
-                                    {playerSkill
-                                        .filter(skill => skill.warSkills.type === 'actif')
-                                        .map((skill, index) => (
-                                            <li
-                                                key={index}
-                                                className="mt-2 group relative cursor-pointer p-2"
-                                                onMouseEnter={() => handleMouseEnter(skill)}
-                                                onMouseLeave={handleMouseLeave}
-                                            >
-                                                <div className="flex items-center">
-                                                    <div className="relative w-20 h-20 mr-2">
-                                                        <Image
-                                                            src={skill.warSkills.img}
-                                                            alt={`${skill.warSkills.name} icon`}
-                                                            layout="fill"
-                                                            objectFit="contain"
-                                                        />
-                                                    </div>
-                                                    <span className="font-bold">{skill.warSkills.name} ({skill.warSkills.cost} PA)</span>
-                                                    <span className={`${skill.warSkills.stat === 'str' ? 'text-orange-500' : 'text-green-500'} ml-2 md:ml-4`}>
-                                                        {calculateDmg(updatedPlayerStats, skill.warSkills.stat, skill.warSkills.dmgMin, skill.warSkills.divider)} - {calculateDmg(updatedPlayerStats, skill.warSkills.stat, skill.warSkills.dmgMax, skill.warSkills.divider)} dmg
-                                                    </span>
-                                                    <span className="ml-2 text-red-500 md:ml-4">
-                                                        Crit {calculateDmg(updatedPlayerStats, skill.warSkills.stat, skill.warSkills.crit, skill.warSkills.divider)} dmg
-                                                    </span>
-                                                    <span className="ml-2 md:ml-4">
-                                                        Portée {skill.warSkills.dist}
-                                                    </span>
-                                                    <span className="ml-2 md:ml-4 text-gray-500">
-                                                        Touché {Math.min(skill.warSkills.hit + updatedPlayerStats.hit, 95)} %
-                                                    </span>
-                                                    <span className="ml-2">
-                                                        Type de dégâts: {typeMap[skill.warSkills.dmgType]}
-                                                    </span>
-                                                </div>
-                                                {hoveredSkill === skill && (
-                                                    <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 p-2 bg-gray-700 text-white text-xs rounded w-max max-w-xs md:max-w-md lg:max-w-lg">
-                                                        {skill.warSkills.description}
-                                                    </div>
-                                                )}
-                                            </li>
-                                        ))}
-                                </ul>
-                            )}
-                        </div>
-
-                        {/* Liste des sorts passifs */}
-                        <div className="w-full">
-                            <button
-                                className="w-full bg-green-500 text-white py-2 px-4 rounded text-xl mb-2"
-                                onClick={() => setPassiveOpen(!passiveOpen)}
-                            >
-                                {passiveOpen ? 'Cacher' : 'Afficher'} les sorts passifs
-                            </button>
-
-                            {passiveOpen && (
-                                <div className="flex flex-col w-full">
-                                    <span className="text-center">(Vous pouvez sélectionner jusqu'à 5 sorts passifs)</span>
-
-                                    {/* Section de filtres */}
-                                    <div className="flex flex-wrap justify-center mb-4">
-                                        {statFilters.map((filter) => (
-                                            <label key={filter.key} className="mr-4 mb-2">
-                                                <input
-                                                    type="checkbox"
-                                                    checked={selectedStats.includes(filter.key)}
-                                                    onChange={() => handleStatFilterChange(filter.key)}
-                                                /> {filter.label}
-                                            </label>
-                                        ))}
+                        <div className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center bg-black bg-opacity-50 text-black z-10">
+                            <div className="bg-white p-4 rounded-lg relative w-3/4 h-3/4 max-h-3/4 overflow-auto flex flex-col justify-between">
+                                <h2 className="text-2xl font-bold mb-8 text-center">Compétences</h2>
+                                <div className="flex flex-col items-center space-y-4 mb-14 w-full">
+                                    {/* Liste des sorts actifs */}
+                                    <div className="w-full">
+                                        <button
+                                            className="w-full bg-blue-500 text-white py-2 px-4 rounded text-xl mb-2"
+                                            onClick={() => setActiveOpen(!activeOpen)}
+                                        >
+                                            {activeOpen ? 'Cacher' : 'Afficher'} les sorts actifs
+                                        </button>
+                                        {activeOpen && (
+                                            <ul className="flex flex-col">
+                                                {playerSkill
+                                                    .filter(skill => skill.warSkills.type === 'actif')
+                                                    .map((skill, index) => (
+                                                        <li
+                                                            key={index}
+                                                            className="mt-2 group relative cursor-pointer p-2"
+                                                            onMouseEnter={() => handleMouseEnter(skill)}
+                                                            onMouseLeave={handleMouseLeave}
+                                                        >
+                                                            <div className="flex items-center">
+                                                                <div className="relative w-20 h-20 mr-2">
+                                                                    <Image
+                                                                        src={skill.warSkills.img}
+                                                                        alt={`${skill.warSkills.name} icon`}
+                                                                        layout="fill"
+                                                                        objectFit="contain"
+                                                                    />
+                                                                </div>
+                                                                <span className="font-bold">{skill.warSkills.name} ({skill.warSkills.cost} PA)</span>
+                                                                <span className={`${skill.warSkills.stat === 'str' ? 'text-orange-500' : 'text-green-500'} ml-2 md:ml-4`}>
+                                                                    {calculateDmg(updatedPlayerStats, skill.warSkills.stat, skill.warSkills.dmgMin, skill.warSkills.divider)} - {calculateDmg(updatedPlayerStats, skill.warSkills.stat, skill.warSkills.dmgMax, skill.warSkills.divider)} dmg
+                                                                </span>
+                                                                <span className="ml-2 text-red-500 md:ml-4">
+                                                                    Crit {calculateDmg(updatedPlayerStats, skill.warSkills.stat, skill.warSkills.crit, skill.warSkills.divider)} dmg
+                                                                </span>
+                                                                <span className="ml-2 md:ml-4">
+                                                                    Portée {skill.warSkills.dist}
+                                                                </span>
+                                                                <span className="ml-2 md:ml-4 text-gray-500">
+                                                                    Touché {Math.min(skill.warSkills.hit + updatedPlayerStats.hit, 95)} %
+                                                                </span>
+                                                                <span className="ml-2">
+                                                                    Type de dégâts: {typeMap[skill.warSkills.dmgType]}
+                                                                </span>
+                                                            </div>
+                                                            {hoveredSkill === skill && (
+                                                                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 p-2 bg-gray-700 text-white text-xs rounded w-max max-w-xs md:max-w-md lg:max-w-lg">
+                                                                    {skill.warSkills.description}
+                                                                </div>
+                                                            )}
+                                                        </li>
+                                                    ))}
+                                            </ul>
+                                        )}
                                     </div>
 
-                                    {/* Liste des sorts passifs filtrés */}
-                                    <ul className="flex flex-col w-full">
-                                        {filteredPassiveSkills.map((skill, index) => (
-                                            <li
-                                                key={index}
-                                                className={`mt-2 group relative cursor-pointer p-2 ${selectedPassiveSkills.includes(skill) ? 'bg-gray-300' : ''}`}
-                                                onClick={() => togglePassiveSkill(skill)}
-                                            >
-                                                <span className="font-bold">{skill.warSkills.name}</span>
-                                                <span className="mx-2">
-                                                    {skill.warSkills.upStr > 0 && <span>+{skill.warSkills.upStr} Force </span>}
-                                                    {skill.warSkills.upIntel > 0 && <span>+{skill.warSkills.upIntel} Intelligence </span>}
-                                                    {skill.warSkills.upDex > 0 && <span>+{skill.warSkills.upDex} Dextérité </span>}
-                                                    {skill.warSkills.upAcu > 0 && <span>+{skill.warSkills.upAcu} Acuité </span>}
-                                                    {skill.warSkills.upHp > 0 && <span>+{skill.warSkills.upHp} Vie</span>}
-                                                    {skill.warSkills.upCrit > 0 && <span>+{skill.warSkills.upCrit} % Chance de critique </span>}
-                                                    {skill.warSkills.upDefP > 0 && <span>+{skill.warSkills.upDefP} Toute défense physique </span>}
-                                                    {skill.warSkills.upDefM > 0 && <span>+{skill.warSkills.upDefM} Toute résistance magique </span>}
-                                                    {skill.warSkills.upDefPStand > 0 && <span>+{skill.warSkills.upDefPStand} Défense standard </span>}
-                                                    {skill.warSkills.upDefMStand > 0 && <span>+{skill.warSkills.upDefMStand} Résistance standard </span>}
-                                                    {skill.warSkills.upDefPierce > 0 && <span>+{skill.warSkills.upDefPierce} Défense perçante </span>}
-                                                    {skill.warSkills.upDefFire > 0 && <span>+{skill.warSkills.upDefFire} Résistance feu </span>}
-                                                    {skill.warSkills.upDefSlash > 0 && <span>+{skill.warSkills.upDefSlash} Défense tranchante </span>}
-                                                    {skill.warSkills.upDefLightning > 0 && <span>+{skill.warSkills.upDefLightning} Résistance foudre </span>}
-                                                    {skill.warSkills.upDefStrike > 0 && <span>+{skill.warSkills.upDefStrike} Défense percutante </span>}
-                                                    {skill.warSkills.upDefHoly > 0 && <span>+{skill.warSkills.upDefHoly} Résistance sacrée </span>}
-                                                    {skill.warSkills.upHit > 0 && <span>+{skill.warSkills.upHit} % Chance de toucher </span>}
-                                                    {skill.warSkills.upRegen > 0 && <span>+{skill.warSkills.upRegen} Régénération </span>}
-                                                </span>
-                                            </li>
-                                        ))}
-                                    </ul>
+                                    {/* Liste des sorts passifs */}
+                                    <div className="w-full">
+                                        <button
+                                            className="w-full bg-green-500 text-white py-2 px-4 rounded text-xl mb-2"
+                                            onClick={() => setPassiveOpen(!passiveOpen)}
+                                        >
+                                            {passiveOpen ? 'Cacher' : 'Afficher'} les sorts passifs
+                                        </button>
+
+                                        {passiveOpen && (
+                                            <div className="flex flex-col w-full">
+                                                <span className="text-center">(Vous pouvez sélectionner jusqu'à 5 sorts passifs)</span>
+
+                                                {/* Section de filtres */}
+                                                <div className="flex flex-wrap justify-center mb-4">
+                                                    {statFilters.map((filter) => (
+                                                        <label key={filter.key} className="mr-4 mb-2">
+                                                            <input
+                                                                type="checkbox"
+                                                                checked={selectedStats.includes(filter.key)}
+                                                                onChange={() => handleStatFilterChange(filter.key)}
+                                                            /> {filter.label}
+                                                        </label>
+                                                    ))}
+                                                </div>
+
+                                                {/* Liste des sorts passifs filtrés */}
+                                                <ul className="flex flex-col w-full">
+                                                    {filteredPassiveSkills.map((skill, index) => (
+                                                        <li
+                                                            key={index}
+                                                            className={`mt-2 group relative cursor-pointer p-2 ${selectedPassiveSkills.includes(skill) ? 'bg-gray-300' : ''}`}
+                                                            onClick={() => togglePassiveSkill(skill)}
+                                                        >
+                                                            <span className="font-bold">{skill.warSkills.name}</span>
+                                                            <span className="mx-2">
+                                                                {skill.warSkills.upStr > 0 && <span>+{skill.warSkills.upStr} Force </span>}
+                                                                {skill.warSkills.upIntel > 0 && <span>+{skill.warSkills.upIntel} Intelligence </span>}
+                                                                {skill.warSkills.upDex > 0 && <span>+{skill.warSkills.upDex} Dextérité </span>}
+                                                                {skill.warSkills.upAcu > 0 && <span>+{skill.warSkills.upAcu} Acuité </span>}
+                                                                {skill.warSkills.upHp > 0 && <span>+{skill.warSkills.upHp} Vie</span>}
+                                                                {skill.warSkills.upCrit > 0 && <span>+{skill.warSkills.upCrit} % Chance de critique </span>}
+                                                                {skill.warSkills.upDefP > 0 && <span>+{skill.warSkills.upDefP} Toute défense physique </span>}
+                                                                {skill.warSkills.upDefM > 0 && <span>+{skill.warSkills.upDefM} Toute résistance magique </span>}
+                                                                {skill.warSkills.upDefPStand > 0 && <span>+{skill.warSkills.upDefPStand} Défense standard </span>}
+                                                                {skill.warSkills.upDefMStand > 0 && <span>+{skill.warSkills.upDefMStand} Résistance standard </span>}
+                                                                {skill.warSkills.upDefPierce > 0 && <span>+{skill.warSkills.upDefPierce} Défense perçante </span>}
+                                                                {skill.warSkills.upDefFire > 0 && <span>+{skill.warSkills.upDefFire} Résistance feu </span>}
+                                                                {skill.warSkills.upDefSlash > 0 && <span>+{skill.warSkills.upDefSlash} Défense tranchante </span>}
+                                                                {skill.warSkills.upDefLightning > 0 && <span>+{skill.warSkills.upDefLightning} Résistance foudre </span>}
+                                                                {skill.warSkills.upDefStrike > 0 && <span>+{skill.warSkills.upDefStrike} Défense percutante </span>}
+                                                                {skill.warSkills.upDefHoly > 0 && <span>+{skill.warSkills.upDefHoly} Résistance sacrée </span>}
+                                                                {skill.warSkills.upHit > 0 && <span>+{skill.warSkills.upHit} % Chance de toucher </span>}
+                                                                {skill.warSkills.upRegen > 0 && <span>+{skill.warSkills.upRegen} Régénération </span>}
+                                                            </span>
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
-                            )}
+                                {/* Bouton pour fermer le menu */}
+                                <div className="relative w-full mt-4">
+                                    <div className="flex justify-center absolute bottom-2 left-1/2 transform -translate-x-1/2">
+                                        <button onClick={saveSelectedPassiveSkills} className="bg-green-500 text-white py-2 px-4 rounded text-xl mr-4">Sauvegarder</button>
+                                        <button onClick={closeModalSpell} className="bg-red-500 text-white py-2 px-4 rounded text-xl">Fermer</button>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                    {/* Bouton pour fermer le menu */}
-                    <div className="relative w-full mt-4">
-                        <div className="flex justify-center absolute bottom-2 left-1/2 transform -translate-x-1/2">
-                            <button onClick={saveSelectedPassiveSkills} className="bg-green-500 text-white py-2 px-4 rounded text-xl mr-4">Sauvegarder</button>
-                            <button onClick={closeModalSpell} className="bg-red-500 text-white py-2 px-4 rounded text-xl">Fermer</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        )}
+                    )}
                     {isModalMessage && (
                         <div className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center bg-black bg-opacity-50 text-black z-10">
                             <div className="bg-white p-4 rounded-lg relative w-3/4 h-3/4 max-h-3/4 overflow-auto flex flex-col justify-between">
@@ -1580,16 +1580,19 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                                         </ul>
                                     )}
                                     {activeTab === 'trophies' && (
-                                        <div className="flex overflow-x-auto space-x-4 ">
+                                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
                                             {playerTrophy.length > 0 ? (
                                                 playerTrophy.map((trophy, index) => (
-                                                    <div key={index} className="flex flex-col items-center p-2 border relative group ">
+                                                    <div key={index} className="flex flex-col items-center p-2 border relative group">
                                                         <span className="font-bold mb-2 text-center">{trophy.warTrophies.name}</span>
-                                                        <img
-                                                            src={trophy.warTrophies.imageUrl}
-                                                            alt={trophy.warTrophies.name}
-                                                            className="w-20 h-20 mb-2"
-                                                        />
+                                                        <div className="relative lg:w-26 lg:h-26 md:w-20 md:h-20 h-16 w-16 mx-auto mb-2">
+                                                            <Image
+                                                                src={trophy.warTrophies.imageUrl}
+                                                                alt={trophy.warTrophies.name}
+                                                                layout="fill"
+                                                                priority={true}
+                                                            />
+                                                        </div>
                                                         <div className="absolute left-1/2 transform -translate-x-1/2 -top-0 hidden group-hover:block bg-gray-700 text-white text-xs rounded py-1 px-2 z-50 w-max max-w-xs md:max-w-md lg:max-w-lg">
                                                             {trophy.warTrophies.hp > 0 && <p>HP: {trophy.warTrophies.hp}</p>}
                                                             {trophy.warTrophies.intel > 0 && <p>Intelligence: {trophy.warTrophies.intel}</p>}

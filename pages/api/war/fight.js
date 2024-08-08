@@ -218,5 +218,5 @@ export async function getTilesandCoordinates(playerPosition) {
 }
 
 export const xpToNextLevel = (level) => {
-    return Math.floor(level * 10 + 5 * Math.pow(1.2, level -1));
+    return Math.floor(level * 10 + 5 * Math.pow(1.1, level -1));
 }
