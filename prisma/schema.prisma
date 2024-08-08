@@ -219,6 +219,8 @@ model warPlayers {
   HumanoideKills    Int                 @default(0)
   JoueurKills       Int                 @default(0)
   MortvivantKills   Int                 @default(0)
+  AbominationKills  Int                 @default(0)
+  AutomateKills     Int                 @default(0)
   warMessages       warMessages[]
   warPlayerItems    warPlayerItems[]
   warPlayerSkills   warPlayerSkills[]

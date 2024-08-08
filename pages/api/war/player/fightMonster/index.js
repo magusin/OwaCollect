@@ -234,7 +234,7 @@ export default async function handler(req, res) {
             }
 
             if (player.pa < skill.warSkills.cost) {
-                return res.status(200).json({ message: 'Pas assez de PA pour lancer le sort', type: 'error' });
+                return res.status(400).json({ message: 'Pas assez de PA pour lancer le sort', type: 'error' });
             }
 
             const distance = calculateDistance(player.map, opponent.map);
@@ -465,9 +465,9 @@ export default async function handler(req, res) {
                             );
 
                             if (existingLootIndex > -1) {
-                                lootsWon[existingLootIndex].count += 1;
+                                lootsWon[existingLootIndex].count += loot.count;
                             } else {
-                                lootsWon.push({ ...loot, count: 1 });
+                                lootsWon.push({ ...loot, count: loot.count });
                             }
                             break;
                         }

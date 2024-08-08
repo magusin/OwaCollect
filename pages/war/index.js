@@ -579,7 +579,6 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
             }
             setSelectedTileMonsters(updatedMonstersOnTile);
             setSelectedTilePlayers(updatedPlayersOnTile);
-
             setShowAlert(true);
             setTimeout(() => {
                 setShowAlert(false);
