@@ -39,7 +39,7 @@ export default async function handler(req, res) {
 
                 const warmonsterData = {
                     monsterId: randomMonster.id,
-                    mapId: Math.floor(Math.random() * 400),
+                    mapId: Math.floor(Math.random() * 400) + 1,
                     level: level,
                     crit: randomMonster.crit,
                     hit: randomMonster.hit,
