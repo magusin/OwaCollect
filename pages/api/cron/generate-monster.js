@@ -5,7 +5,8 @@ const prisma = new PrismaClient();
 const levelsCounts = [
     { level: 1, count: 50 },
     { level: 5, count: 40 },
-    { level: 10, count: 30 }
+    { level: 10, count: 30 },
+    { level: 25, count: 10 },
 ];
 
 const getRandomValue = (min, max) => {

@@ -44,6 +44,16 @@ async function runMiddleware(req, res, fn) {
     })
 }
 
+// Fonction pour ajouter une notification
+async function addMessages(playerId, message) {
+    await prisma.warMessages.create({
+        data: {
+            petId: playerId,
+            message: message
+        },
+    });
+}
+
 // POST /api/war/player/item
 export default async function handler(req, res) {
     try {
@@ -100,7 +110,7 @@ export default async function handler(req, res) {
             const finalCount = item.count - count;
 
             if (finalCount < 0) {
-                return res.status(400).json({ message: 'Quantité insuffisante' });
+                return res.status(400).json({ message: 'Quantité incorrecte' });
             }
 
             if (item.warItems.card) {
@@ -113,7 +123,7 @@ export default async function handler(req, res) {
                     rarety = 'Epique';
                 }
 
-                let card = [];
+                let cards = [];
                 for (let i = 0; i < count; i++) {
                     const eligibleCards = await prisma.card.findMany({
                         where: {
@@ -125,24 +135,23 @@ export default async function handler(req, res) {
                     });
 
                     const randomIndex = Math.floor(Math.random() * eligibleCards.length);
-                    card.push(eligibleCards[randomIndex]);
+                    cards.push(eligibleCards[randomIndex]);
                 }
 
-                for (let i = 0; i < card.length; i++) {
-
+                for (const card of cards) {
                     const existingCard = await prisma.playercards.findFirst({
                         where: {
                             petId: decoded.id,
-                            cardId: card[i].id
+                            cardId: card.id
                         }
                     });
-
+            
                     if (existingCard) {
                         await prisma.playercards.update({
                             where: {
                                 petId_cardId: {
                                     petId: decoded.id,
-                                    cardId: card[i].id
+                                    cardId: card.id
                                 }
                             },
                             data: {
@@ -155,12 +164,15 @@ export default async function handler(req, res) {
                         await prisma.playercards.create({
                             data: {
                                 petId: decoded.id,
-                                cardId: card[i].id,
+                                cardId: card.id,
                                 count: 1,
                                 isNew: true
                             }
                         });
                     }
+            
+                    // Envoyer un message pour chaque carte obtenue
+                    await addMessages(decoded.id, `Vous avez obtenu une carte ${rarety} : ${card.name}`);
                 }
 
                 // Mettre à jour la quantité de l'objet
@@ -201,6 +213,7 @@ export default async function handler(req, res) {
                         }
                     }
                 });
+
                 return res.status(200).json({ message: `Vous avez obtenu ${count} carte ${rarety}`, updatedUser });
             } else if (item.warItems.point) {
                 const pointsWin = item.warItems.point * count;

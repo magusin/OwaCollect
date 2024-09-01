@@ -441,6 +441,21 @@ export default async function handler(req, res) {
                 const lootCount = opponent.monsters.lootCount;
 
                 const lootsWon = [];
+                if (opponent.monsters.id === 17) {
+                    // Rechercher l'objet `warItems` correspondant à l'itemId 10 dans les items disponibles
+                    const specialItem = await prisma.warItems.findUnique({
+                        where: { id: 10 } 
+                    });
+            
+                    if (specialItem) {
+                        lootsWon.push({
+                            itemId: specialItem.id,
+                            count: 1,
+                            warItems: specialItem
+                        });
+                    }
+                }
+
                 const playerSpells = player.warPlayerSkills.map(skill => skill.skillId);
                 const playerItems = player.warPlayerItems.map(item => ({
                     itemId: item.itemId,

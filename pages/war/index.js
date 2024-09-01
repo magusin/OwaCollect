@@ -864,12 +864,12 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                                         </div>
                                     ) : tile.warMonsters && tile.warMonsters.length > 0 ? (
                                         <div className="absolute inset-0 flex items-center justify-center">
-                                            <div className="relative w-3/4 h-3/4">
+                                            <div className={`relative w-3/4 h-3/4 ${tile.warMonsters[0].monsters.id === 17 ? 'border-solid border-blue-400 border-8 rounded-3xl' : 'rounded-lg'}`}>
                                                 <Image
                                                     src={tile.warMonsters[0].monsters.imageUrl}
                                                     alt={tile.warMonsters[0].monsters.name}
                                                     layout="fill"
-                                                    className="rounded-lg"
+                                                    className={`${tile.warMonsters[0].monsters.id === 17 ? 'rounded-xl' : 'rounded-lg'}`}
                                                 />
                                             </div>
                                         </div>

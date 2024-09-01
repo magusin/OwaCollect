@@ -200,7 +200,8 @@ export async function getTilesandCoordinates(playerPosition) {
                         select: {
                             name: true,
                             imageUrl: true,
-                            type: true
+                            type: true,
+                            id: true
                         }
                     }
                 }
