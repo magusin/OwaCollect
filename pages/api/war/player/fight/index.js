@@ -592,7 +592,8 @@ export default async function handler(req, res) {
                             xp: xpPlayer,
                             pa: {
                                 decrement: skill.warSkills.cost
-                            }
+                            },
+                            [playerKill]: killCount
                         },
                         include: {
                             map: true,
