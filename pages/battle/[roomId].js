@@ -1,35 +1,43 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/router';
 import { Client } from 'colyseus.js';
 import { useSession } from 'next-auth/react';
 
 export default function GameRoom() {
-  const [messages, setMessages] = useState([]);
-  const [message, setMessage] = useState('');
-  const [players, setPlayers] = useState([]);
-  const [isWaiting, setIsWaiting] = useState(false); // État pour gérer l'attente du joueur
+  const [myCards, setMyCards] = useState([]); // Stocker les cartes du joueur
+  const [gameState, setGameState] = useState(null); // État général du jeu
   const router = useRouter();
   const { roomId } = router.query;
   const { data: session } = useSession();
-  const client = new Client('ws://localhost:2567');
-  let room;
+  
+  const clientRef = useRef(null); // Référence pour le client Colyseus
+  const roomRef = useRef(null);   // Référence pour la room Colyseus
 
   useEffect(() => {
-    if (!roomId) return;
+    clientRef.current = new Client(`ws://${process.env.NEXT_PUBLIC_SERVER_URL}`);
+  }, []);
+
+  useEffect(() => {
+    if (!roomId || !session) return;
+    const userId = session?.user?.id || 'anonymous';
 
     async function joinRoom() {
       try {
-        const userId = session?.user?.id || 'anonymous';
-        console.log(`Attempting to join room with ID: ${roomId}`);
-        room = await client.joinById(roomId, { userId });
+        const room = await clientRef.current.joinById(roomId, { userId });
 
-        room.onMessage('message', (msg) => {
-          setMessages((prev) => [...prev, msg]);
+        // Stocker la référence de la salle (room)
+        roomRef.current = room;
+
+        // Réception des cartes envoyées par le serveur
+        room.onMessage('yourCards', (cards) => {
+          setMyCards(cards); // Mettre à jour les cartes du joueur
+          console.log('Your cards:', cards);
         });
 
-        room.onMessage('players', (data) => {
-          setPlayers(data.players);
-          setIsWaiting(data.players.length < 2); // Vérifier si les deux joueurs sont présents
+        // Réception du message indiquant que la partie commence
+        room.onMessage('startGame', (state) => {
+          setGameState(state);
+          console.log('Game started:', state);
         });
 
         console.log('Successfully joined room:', room);
@@ -40,51 +48,32 @@ export default function GameRoom() {
 
     joinRoom();
 
-    // Cleanup function to leave the room when the component is unmounted
+    // Quand le composant se démonte, quitter la room
     return () => {
-      if (room) {
-        room.leave();
+      if (roomRef.current) {
+        roomRef.current.leave();  // Quitter la salle lorsqu'on quitte la page
+        console.log('Left the room');
       }
     };
   }, [roomId, session]);
 
-  const sendMessage = () => {
-    if (room) {
-      room.send('message', message);
-      setMessage('');
-    }
-  };
-
   return (
     <div>
-      <h1>Partie {roomId}</h1>
-      {isWaiting ? (
-        <p>En attente d'un autre joueur...</p>
+      <h1>Game Room: {roomId}</h1>
+      <h2>Your Cards:</h2>
+      {myCards.length > 0 ? (
+        <ul>
+          {myCards.map((card, index) => (
+            <li key={index}>
+              <img src={card.picture} alt={card.name} />
+              <p>{card.name}</p>
+            </li>
+          ))}
+        </ul>
       ) : (
-        <div>
-          <h2>Joueurs présents :</h2>
-          <ul>
-            {players.map((player, index) => (
-              <li key={index}>{player}</li>
-            ))}
-          </ul>
-        </div>
+        <p>Loading your cards...</p>
       )}
-      <div>
-        <input
-          type="text"
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-          placeholder="Envoyer un message"
-        />
-        <button onClick={sendMessage}>Envoyer</button>
-      </div>
-      <div>
-        <h2>Messages :</h2>
-        {messages.map((msg, index) => (
-          <div key={index}>{msg}</div>
-        ))}
-      </div>
+      {gameState && <h2>Game started!</h2>}
     </div>
   );
 }
