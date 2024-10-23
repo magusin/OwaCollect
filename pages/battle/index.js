@@ -13,7 +13,7 @@ export default function BattleIndex() {
   const roomRef = useRef(null);
 
   useEffect(() => {
-    clientRef.current = new Client(`wss://${process.env.NEXT_PUBLIC_SERVER_URL}`);
+    clientRef.current = new Client(`ws://${process.env.NEXT_PUBLIC_SERVER_URL}`);
     console.log('Initialized Colyseus client');
   }, []);
 
@@ -25,7 +25,7 @@ export default function BattleIndex() {
       console.log(`User ID: ${userId}`);
 
       // Appel de l'API pour trouver ou créer une room
-      const response = await fetch(`https://${process.env.NEXT_PUBLIC_SERVER_URL}/matchmaking?userId=${userId}`);
+      const response = await fetch(`http://${process.env.NEXT_PUBLIC_SERVER_URL}/matchmaking?userId=${userId}`);
       const data = await response.json();
       console.log(`Matchmaking response:`, data);
 

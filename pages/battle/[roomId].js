@@ -5,13 +5,13 @@ import { useSession } from 'next-auth/react';
 
 export default function GameRoom() {
   const [myCards, setMyCards] = useState([]); // Stocker les cartes du joueur
-  const [gameState, setGameState] = useState(null); // État général du jeu
+  const [gameState, setGameState] = useState(null); // Stocker l'état général du jeu
   const router = useRouter();
   const { roomId } = router.query;
   const { data: session } = useSession();
   
-  const clientRef = useRef(null); // Référence pour le client Colyseus
-  const roomRef = useRef(null);   // Référence pour la room Colyseus
+  const clientRef = useRef(null);
+  const roomRef = useRef(null);
 
   useEffect(() => {
     clientRef.current = new Client(`ws://${process.env.NEXT_PUBLIC_SERVER_URL}`);
@@ -20,24 +20,25 @@ export default function GameRoom() {
   useEffect(() => {
     if (!roomId || !session) return;
     const userId = session?.user?.id || 'anonymous';
-
     async function joinRoom() {
+      console.log('im here test')
       try {
         const room = await clientRef.current.joinById(roomId, { userId });
-
-        // Stocker la référence de la salle (room)
         roomRef.current = room;
+
+        // Envoyer une requête pour demander le `gameState` actuel
+        room.send({ type: 'requestGameState' });
 
         // Réception des cartes envoyées par le serveur
         room.onMessage('yourCards', (cards) => {
-          setMyCards(cards); // Mettre à jour les cartes du joueur
+          setMyCards(cards);
           console.log('Your cards:', cards);
         });
 
-        // Réception du message indiquant que la partie commence
-        room.onMessage('startGame', (state) => {
+        // Réception de l'état du jeu envoyé par le serveur
+        room.onMessage('gameState', (state) => {
           setGameState(state);
-          console.log('Game started:', state);
+          console.log('Game state:', state);
         });
 
         console.log('Successfully joined room:', room);
@@ -48,7 +49,6 @@ export default function GameRoom() {
 
     joinRoom();
 
-    // Quand le composant se démonte, quitter la room
     return () => {
       if (roomRef.current) {
         roomRef.current.leave();  // Quitter la salle lorsqu'on quitte la page
@@ -73,7 +73,13 @@ export default function GameRoom() {
       ) : (
         <p>Loading your cards...</p>
       )}
-      {gameState && <h2>Game started!</h2>}
+
+      {gameState && (
+        <div>
+          <h2>Game State:</h2>
+          <pre>{JSON.stringify(gameState, null, 2)}</pre>
+        </div>
+      )}
     </div>
   );
 }
