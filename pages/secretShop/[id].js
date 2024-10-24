@@ -32,9 +32,9 @@ export default function SecretShop({ cards, totalPoints, errorServer }) {
     const [cardToBuy, setCardToBuy] = React.useState(null);
     const [selectedCategory, setSelectedCategory] = React.useState('Elden Ring');
 
-    const handleBuyCard = (cardId) => {
+    const handleBuyCard = ({card}) => {
         // Mise à jour de l'état pour la carte sélectionnée
-        setCardToBuy(cardId);
+        setCardToBuy(card);
         setShowModal(true);
     };
 
@@ -131,6 +131,8 @@ export default function SecretShop({ cards, totalPoints, errorServer }) {
         );
     }
 
+    console.log(cardToBuy)
+
     if (error) {
         return (
             <>
@@ -176,7 +178,7 @@ export default function SecretShop({ cards, totalPoints, errorServer }) {
                     }
                 }
             } else if (selectedCategory === "Dark Souls") {
-                const darkSoulsCardsIds = [170];
+                const darkSoulsCardsIds = [230];
                 for (const id of darkSoulsCardsIds) {
                     const card = ownedCardIds.has(id)
                     if (!card) {
@@ -228,19 +230,19 @@ export default function SecretShop({ cards, totalPoints, errorServer }) {
                                     <p className="mb-4">Prix: <b>500 OC</b></p>
                                     <button
                                         className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700 transition duration-300"
-                                        onClick={() => handleBuyCard(card.card.cardId)}
+                                        onClick={() => handleBuyCard(card)}
                                     >
                                         Acheter
                                     </button>
                                     {showModal && (
                                         <Modal
                                             setShowModal={setShowModal}
-                                            handleConfirm={() => handleConfirmBuyCard(cardToBuy, 500)}
+                                            handleConfirm={() => handleConfirmBuyCard(cardToBuy.cardId, 500)}
                                             title="Confirmation d'achat"
                                             message={
                                                 <>
                                                     {/* eslint-disable-next-line react/no-unescaped-entities */}
-                                                    Êtes-vous sûr de vouloir acheter la carte {cardToBuy} pour <b>500 OC</b> ?
+                                                    Êtes-vous sûr de vouloir acheter la carte {cardToBuy.number} pour <b>500 OC</b> ?
                                                 </>
                                             }
                                         />

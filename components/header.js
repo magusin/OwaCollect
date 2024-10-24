@@ -166,7 +166,7 @@ export default function Header({ points, player }) {
         </header>
       ) : (
         // if user hasn't session
-        <header className="w-full p-4" style={{ backgroundColor: '#009900' }}>
+        <header className="w-full p-4" style={{ backgroundColor: '#2B2D4280' }}>
           <div className="container mx-auto flex justify-center items-center h-auto">
             <Image
               src={"/images/owaCollect.png"}
