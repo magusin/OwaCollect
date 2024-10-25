@@ -131,8 +131,6 @@ export default function SecretShop({ cards, totalPoints, errorServer }) {
         );
     }
 
-    console.log(cardToBuy)
-
     if (error) {
         return (
             <>
