@@ -20,6 +20,7 @@ export default function Header({ points, player }) {
   const [alertType, setAlertType] = useState(null);
   const [userPoints, setUserPoints] = useState(points);
   const router = useRouter();
+  const [isRuelleOpen, setIsRuelleOpen] = useState(false);
 
   let user;
   if (typeof localStorage !== 'undefined') {
@@ -103,18 +104,18 @@ export default function Header({ points, player }) {
             {player && router.pathname === '/war' && (
               // Affichage des points de vie et des points d'action
               <div className="items-center hidden sm:max-lg:flex md:items-start ">
-              <div className="flex-col items-center mr-4">
-                <span>Vie : {player?.hp}/{player?.hpMax}</span>
-                <div className="relative w-full h-4 bg-gray-300 rounded">
-                  <div className="absolute top-0 left-0 h-4 bg-red-500 rounded" style={{ width: `${(player?.hp / player?.hpMax) * 100}%` }}></div>
+                <div className="flex-col items-center mr-4">
+                  <span>Vie : {player?.hp}/{player?.hpMax}</span>
+                  <div className="relative w-full h-4 bg-gray-300 rounded">
+                    <div className="absolute top-0 left-0 h-4 bg-red-500 rounded" style={{ width: `${(player?.hp / player?.hpMax) * 100}%` }}></div>
+                  </div>
                 </div>
-              </div>
                 <div className="flex-col items-center">
-                <span>PA : {player?.pa}/{player?.paMax}</span>
-                <div className="relative w-full h-4 bg-gray-300 rounded">
-                  <div className="absolute top-0 left-0 h-4 bg-blue-500 rounded" style={{ width: `${(player?.pa / player?.paMax) * 100}%` }}></div>
-                  </div> 
-              </div>
+                  <span>PA : {player?.pa}/{player?.paMax}</span>
+                  <div className="relative w-full h-4 bg-gray-300 rounded">
+                    <div className="absolute top-0 left-0 h-4 bg-blue-500 rounded" style={{ width: `${(player?.pa / player?.paMax) * 100}%` }}></div>
+                  </div>
+                </div>
               </div>
             )}
             {user && user.reward && isDateBeforeToday(user.reward) ? (
@@ -124,7 +125,17 @@ export default function Header({ points, player }) {
               <Link href="/collection" className="hover:text-gray-300">Collection</Link>
               <Link href="/shop" className="hover:text-gray-300">Boutique</Link>
               <Link href="/owarida" className="hover:text-gray-300">Owarida</Link>
-              <Link href="/alley9-3/4" className="hover:text-gray-300">Ruelle</Link>
+              <div className="relative cursor-pointer hover:text-gray-300"
+                onClick={() => setIsRuelleOpen(!isRuelleOpen)}
+              >
+                {isRuelleOpen && (
+                  <div className="absolute top-full left-0 flex flex-col bg-gray-800 text-white rounded shadow-lg p-2">
+                    <Link href="/alley9-3/4" className="hover:text-gray-300 px-4 py-2">Ruelle</Link>
+                    <Link href="/secretShop/tr74g4in" className="hover:text-gray-300 px-4 py-2">Marchand</Link>
+                    <Link href="/scribe" className="hover:text-gray-300 px-4 py-2">Scribe</Link>
+                  </div>
+                )}
+                Ruelle</div>
               <Link href="/war" className="hover:text-gray-300">Guerre</Link>
             </nav>
             <div className='flex items-center'>
@@ -154,6 +165,8 @@ export default function Header({ points, player }) {
               <Link href="/shop" className="text-center hover:text-gray-300 block">Boutique</Link>
               <Link href="/owarida" className="text-center hover:text-gray-300 block">Owarida</Link>
               <Link href="/alley9-3/4" className="text-center hover:text-gray-300 block">Ruelle</Link>
+              <Link href="/secretShop/tr74g4in" className="text-center hover:text-gray-300 block">Marchand</Link>
+              <Link href="/scribe" className="text-center hover:text-gray-300 block">Scribe</Link>
               <Link href="/war" className="text-center hover:text-gray-300 block">Guerre</Link>
               <button onClick={toggleDarkMode} className="w-full py-2 px-4 rounded flex justify-center items-center">
                 <DarkModeToggleSVG isDarkMode={darkMode} />
