@@ -330,15 +330,15 @@ const getTotalSecretsDiscovered = () => secretsPlayerData.length;
                                 <div className="flex flex-col text-2xl leading-9 font-bold" style={{ minHeight: "calc(100vh - 80px)" }}>
                                     <div className="flex-grow relative">
                                         <ul className="my-4 mx-8 ">
-                                            <li>Tout le monde sait que vieillir n'aide pas à rester jeune.</li>
-                                            <li>Rares sont ceux qui ont visité les studios originaux d'Apollo 11.</li>
-                                            <li>A ma connaissance, rentrer les codes découverts dans l'URL fonctionne.</li>
-                                            <li>C'est une femme qui double Bart.</li>
-                                            <li>Alimenter un feu avec son corps est déconseillé.</li>
-                                            <li>Saviez-vous que Mewtwo est enfermé dans la zone 51 ?</li>
-                                            <li>Si une technologie est suffisamment avancée, elle pourrait être indiscernable de la magie.</li>
-                                            <li>Imaginez qu'il y ait un code disséminé dans plusieurs pages pour accéder au marchand secret...</li>
-                                            <li>N'oubliez pas de retirer l'écran devant le ciel avant d'aller dormir, nous pourrions enfin voir la vraie lune.</li>
+                                            <li><i>T</i>out le monde sait que vieillir n'aide pas à rester jeune.</li>
+                                            <li><i>R</i>ares sont ceux qui ont visité les studios originaux d'Apollo 11.</li>
+                                            <li><i>A</i> ma connaissance, rentrer les codes découverts dans l'URL fonctionne.</li>
+                                            <li><i>C</i>'est une femme qui double Bart.</li>
+                                            <li><i>A</i>limenter un feu avec son corps est déconseillé.</li>
+                                            <li><i>S</i>aviez-vous que Mewtwo est enfermé dans la zone 51 ?</li>
+                                            <li><i>S</i>i une technologie est suffisamment avancée, elle pourrait être indiscernable de la magie.</li>
+                                            <li><i>I</i>maginez qu'il y ait un code disséminé dans plusieurs pages pour accéder au marchand secret...</li>
+                                            <li><i>N</i>'oubliez pas de retirer l'écran devant le ciel avant d'aller dormir, nous pourrions enfin voir la vraie lune.</li>
                                         </ul>
                                     </div>
                                     <button style={{ fontFamily: 'Style Script, cursive' }} className='font-bold text-xl p-2 rounded-lg mt-4' onClick={() => setPage(0)} >Retourner aux notes</button>
