@@ -18,6 +18,7 @@ export default function InteractiveRoom() {
   const [showLargeImage, setShowLargeImage] = useState(false);
   const router = useRouter();
   const [points, setPoints] = useState(0);
+  const [code, setCode] = useState('');
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -141,6 +142,21 @@ export default function InteractiveRoom() {
               A à la place du N
             </li>
           </ul>
+          <div className="mt-4">
+              <input
+                type="text"
+                value={code}
+                onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))} // Limite l'entrée à des chiffres
+                placeholder="Entrez le code numérique"
+                className="border px-2 py-1 rounded tb"
+              />
+              <button
+                // onClick={handleCodeSubmit}
+                className="ml-2 px-4 py-2 bg-blue-500 text-black rounded hover:bg-blue-700"
+              >
+                Entrer
+              </button>
+            </div>
         </div>
       case 'Commode':
         return (

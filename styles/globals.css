@@ -72,6 +72,10 @@
   color: #f7fafc;
 }
 
+.tb {
+  color: #2d3748;
+}
+
 body {
   color: rgb(var(--foreground-rgb));
   background: linear-gradient(
