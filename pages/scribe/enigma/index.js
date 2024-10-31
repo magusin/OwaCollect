@@ -13,6 +13,9 @@ export default function InteractiveRoom() {
   const { data: session, status } = useSession();
   const [selectedItem, setSelectedItem] = useState(null);
   const [selectedPage, setSelectedPage] = useState(0);
+  const [error, setError] = useState(null);
+  const [selectedTablet, setSelectedTablet] = useState(1);
+  const [showLargeImage, setShowLargeImage] = useState(false);
   const router = useRouter();
   const [points, setPoints] = useState(0);
 
@@ -61,6 +64,14 @@ export default function InteractiveRoom() {
     }
   }, [status, session]);
 
+  const tabletImages = {
+    1: 'https://i.postimg.cc/MZbb0dvp/Tablette-1.webp',
+    2: 'https://i.postimg.cc/wMH58sbz/Tablette-2.webp',
+    3: 'https://i.postimg.cc/7LFM9R3f/Tablette-3.webp',
+    4: 'https://i.postimg.cc/1znrpSNk/Tablette-4.webp',
+    5: 'https://i.postimg.cc/rm5GP9jg/Tablette-5.webp'
+  };
+
   const getInstruction = (item) => {
     switch (item) {
       case 'Horloge':
@@ -68,13 +79,13 @@ export default function InteractiveRoom() {
           <p>Les horloges sont usées, toutes arrêtées, les chiffres romains indiquants les heures sont effacés ou les aiguilles manquantes. Mais pour celles que j'ai pu lire j'ai noté les chiffres.</p>
           <ul>
             <li>
-              3:15
-            </li>
-            <li>
-              6:42
+              6:15
             </li>
             <li>
               10:09
+            </li>
+            <li>
+              6:42
             </li>
           </ul>
         </div>;
@@ -131,6 +142,36 @@ export default function InteractiveRoom() {
             </li>
           </ul>
         </div>
+      case 'Commode':
+        return (
+          <div className="flex flex-col items-center">
+            <p>La commode renferme cinq tablettes en bois. Elles contiennent des instructions laissées par Eléna.</p>
+            <div className="flex flex-wrap justify-center mt-4 space-x-4">
+              {/* Menu des tablettes */}
+              {[1, 2, 3, 4, 5].map((num) => (
+                <button
+                  key={num}
+                  className={`px-4 py-2 border rounded ${selectedTablet === num ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+                  onClick={() => setSelectedTablet(num)}
+                >
+                  Tablette {num}
+                </button>
+              ))}
+            </div>
+
+            {/* Afficher l'image de la tablette sélectionnée */}
+            <div className="relative w-3/4 sm:w-1/2 md:w-1/3 lg:w-1/4 h-48"> {/* Conteneur responsive */}
+              <Image
+                src={tabletImages[selectedTablet]}
+                alt={`Tablette ${selectedTablet}`}
+                layout="fill" // L'image remplira le conteneur
+                objectFit="contain" // Conserve le ratio de l'image
+                className="cursor-pointer rounded-lg"
+                onClick={() => setShowLargeImage(true)} // Clic pour afficher en grand
+              />
+            </div>
+          </div>
+        );
       case 'Livre':
         return (
           <div className="flex flex-col items-center">
@@ -166,6 +207,7 @@ export default function InteractiveRoom() {
                 <div>
                   <p>Les jours passent, et le poids de ma tâche s'alourdit. Mon esprit est partagé entre les souvenirs de ce que j’ai perdu et la réalité de ce que je dois encore accomplir.</p>
                   <p>La porte devant moi est un rappel constant que ce n’est pas seulement la lumière que nous protégeons ici, mais les âmes de ceux qui ne peuvent plus se défendre. Si quelqu'un découvre ces pages, qu'il sache qu'il existe toujours un espoir. Ne laissez jamais le Voile éternel vous submerger.</p>
+                  <p>Tout doit paraître ordinaire pour ce monde pour qu'aucun innocent ne puisse entrer par erreur, la porte est ordinaire mais juste un artefact, même sa poignée est factice.</p>
                 </div>
               )}
               {selectedPage === 5 && (
@@ -186,14 +228,14 @@ export default function InteractiveRoom() {
                 <div>
                   <p>On dit souvent que le passé fini par nous rattraper, et c'est ironique de voir comment les évènements peuvent se reproduire.</p>
                   <p>A toujours vouloir apporter la lumière comment ignorer sans cesse la noirceur en moi ?</p>
-                  <p>Et c'est une noirceur identique qui aujourd'hui me pourssuit.</p>
+                  <p>Et c'est une noirceur identique qui aujourd'hui me pourssuit de nouveau.</p>
                 </div>
               )}
               {selectedPage === 21 && (
                 <div>
                   <p>La porte est scellée, j'ai enfin terminé. Je sais que le temps finira par rendre son ouverture plus aisée mais c'est tant mieux, si quelqu'un en a un jour la force il pourra annihiler le Voile.</p>
                   <p>Je vais bientôt pouvoir retrouver les miens et laisser cette endroit en sachant que j'ai fais mon maximum pour le protéger.</p>
-                  <p>J'ai laissé des tablettes, la première est la solution pour ouvrir la porte, les suivantes pour le Lord que j'ai croisé un jour.</p>
+                  <p>J'ai laissé des tablettes, la première est la solution pour ouvrir la porte, les suivantes pour le Lord O que j'ai croisé un jour.</p>
                 </div>
               )}
             </div>
@@ -214,7 +256,7 @@ export default function InteractiveRoom() {
           {/* <p>Le Scribe</p> */}
           {/* Image de la salle */}
           <div className="relative w-full max-w-screen-lg h-auto mb-4 flex items-center justify-center">
-            <div className="relative w-full h-auto"> {/* Maintien le ratio 16/9 */}
+            <div className="relative w-full h-auto"> 
               <Image
                 src="/images/enigma.webp"
                 alt="Salle interactive"
@@ -312,7 +354,21 @@ export default function InteractiveRoom() {
               </div>
             </div>
           )}
-
+          {/* Affiche l'image en grand lorsque showLargeImage est true */}
+          {showLargeImage && (
+            <div className="fixed top-0 left-0 w-full h-full flex items-center justify-center bg-black bg-opacity-80 z-50">
+                <Image
+                  src={tabletImages[selectedTablet]}
+                  alt={`Tablette ${selectedTablet}`}
+                  layout='intrinsec' // Conserve les dimensions de l'image
+                  width={1024}
+                  height={1024}
+                  onClick={() => setShowLargeImage(false)} // Fermer l'affichage en grand
+                  className="rounded-lg cursor-pointer"
+                />
+           
+            </div>
+          )}
         </div>
         <Footer />
       </>
