@@ -1,5 +1,5 @@
 // Fichier principal de la page (par exemple pages/interactive-room.js)
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import Head from 'next/head';
 import Header from 'C/header';
@@ -8,17 +8,26 @@ import { useRouter } from 'next/router';
 import { signOut, useSession } from 'next-auth/react';
 import axiosInstance from 'utils/axiosInstance';
 import calculatePoints from 'utils/calculatePoints';
+import { getSession } from "next-auth/react";
+import axios from 'axios';
 
-export default function InteractiveRoom() {
+export default function InteractiveRoom({ secretsPlayerData, errorServer }) {
   const { data: session, status } = useSession();
   const [selectedItem, setSelectedItem] = useState(null);
   const [selectedPage, setSelectedPage] = useState(0);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState(errorServer || null);
   const [selectedTablet, setSelectedTablet] = useState(1);
   const [showLargeImage, setShowLargeImage] = useState(false);
   const router = useRouter();
   const [points, setPoints] = useState(0);
   const [code, setCode] = useState('');
+  const [message, setMessage] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [hodor, setHodor] = useState(secretsPlayerData.some(secret => secret.secretId === 18));
+  const [isVideoPlaying, setIsVideoPlaying] = useState(false);
+  const videoRef = useRef(null);
+
+  console.log('isVideoPlaying', isVideoPlaying);
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -65,12 +74,70 @@ export default function InteractiveRoom() {
     }
   }, [status, session]);
 
+  useEffect(() => {
+    // Lire la vidéo si isVideoPlaying est true
+    if (isVideoPlaying && videoRef.current) {
+      videoRef.current.play().catch(error => {
+        console.error("La lecture de la vidéo a échoué : ", error);
+      });
+    }
+  }, [isVideoPlaying]);
+
   const tabletImages = {
     1: 'https://i.postimg.cc/MZbb0dvp/Tablette-1.webp',
     2: 'https://i.postimg.cc/wMH58sbz/Tablette-2.webp',
     3: 'https://i.postimg.cc/7LFM9R3f/Tablette-3.webp',
     4: 'https://i.postimg.cc/1znrpSNk/Tablette-4.webp',
     5: 'https://i.postimg.cc/rm5GP9jg/Tablette-5.webp'
+  };
+
+  const HeadView = () => {
+    return (
+      <Head>
+        <title>Owarida - Enigma</title>
+        <meta name="description" content="Owarida - Stream" />
+        <meta name="keywords" content="Owarida, Stream, Twitch, scribe, enigma" />
+        <link rel="icon" href="/favicon.ico" />
+      </Head>
+    );
+  }
+
+  const handleDoorClick = () => {
+    if (hodor) {
+      console.log('here')
+      setIsVideoPlaying(true); // Joue la vidéo seulement si hodor est true
+      setSelectedItem(null); // Ferme la modale
+    } else {
+      setSelectedItem("Porte Scellée");
+    }
+  };
+
+  const handleCodeSubmit = async () => {
+    setLoading(true);
+    try {
+      const response = await axiosInstance.post('/api/verifyCode/enigma', { code }, {
+        customConfig: { session: session }
+      });
+
+      if (response.data.success && response.data.secret18) {
+        setMessage(response.data.message);
+        setHodor(true);
+      } else {
+        setMessage(response.data.message);
+      }
+    } catch (error) {
+      if (error.response.status === 401) {
+        setError('Erreur avec votre Token ou il est expiré. Veuillez vous reconnecter.')
+        setTimeout(() => {
+          signOut()
+          router.push('/');
+        }, 3000);
+      } else {
+        setError('Erreur lors de l\'envoi du code. ' + error.response?.data?.message || error.message);
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   const getInstruction = (item) => {
@@ -92,12 +159,12 @@ export default function InteractiveRoom() {
         </div>;
       case 'Porte Scellée':
         return <div>
-          <p>Une porte d'apparence classique mais impossible de l'ouvrir, je n'ai trouvé aucune clef. J'ai même essayé de l'enfoncer mais rien n'y fais, elle semble protégée par plus que du bois.</p>
+            <p>Une porte d'apparence classique mais impossible de l'ouvrir, je n'ai trouvé aucune clef. J'ai même essayé de l'enfoncer mais rien n'y fais, elle semble protégée par plus que du bois.</p>
         </div>
       case 'Machine à écrire':
         return <div>
           <p>Une vieille machine à écrire encore fonctionnelle.</p>
-          <p>J'ai remarqué une chose étrange, certaines touches du clavier son inverssées : </p>
+          <p>J'ai remarqué une chose étrange, certaines touches du clavier sont inversées : </p>
           <ul>
             <li>
               L à la place du A
@@ -143,20 +210,23 @@ export default function InteractiveRoom() {
             </li>
           </ul>
           <div className="mt-4">
-              <input
-                type="text"
-                value={code}
-                onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))} // Limite l'entrée à des chiffres
-                placeholder="Entrez le code numérique"
-                className="border px-2 py-1 rounded tb"
-              />
-              <button
-                // onClick={handleCodeSubmit}
-                className="ml-2 px-4 py-2 bg-blue-500 text-black rounded hover:bg-blue-700"
-              >
-                Entrer
-              </button>
-            </div>
+            <input
+              type="text"
+              value={code}
+              onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))} // Limite l'entrée à des chiffres
+              placeholder="Entrez le code numérique"
+              className="border px-2 py-1 rounded tb"
+            />
+            <button
+              onClick={handleCodeSubmit}
+              className="ml-2 px-4 py-2 bg-blue-500 text-black rounded hover:bg-blue-700"
+            >
+              Entrer
+            </button>
+          </div>
+          {message && (
+            <p className="mt-2 text-sm text-green-600">{message}</p>
+          )}
         </div>
       case 'Commode':
         return (
@@ -262,9 +332,40 @@ export default function InteractiveRoom() {
     }
   };
 
+  if (error) {
+    return (
+      <>
+        <HeadView />
+        <div className="flex flex-col h-screen" style={{ marginTop: "80px" }}>
+          <Header points={points} />
+          <div className="flex-grow flex justify-center items-center">
+            <span className="text-center text-red-500">⚠ {error}</span>
+          </div>
+          <Footer />
+        </div>
+      </>
+    );
+  }
+
+  if (status === "loading" || loading) {
+    return (
+      <>
+        <HeadView />
+        <div className="flex flex-col h-screen" style={{ marginTop: "80px" }}>
+          <Header points={points} />
+          <div className="flex-grow flex justify-center items-center">
+            <span className="text-center"><svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24"><path fill="#1f2937" d="M12,4a8,8,0,0,1,7.89,6.7A1.53,1.53,0,0,0,21.38,12h0a1.5,1.5,0,0,0,1.48-1.75,11,11,0,0,0-21.72,0A1.5,1.5,0,0,0,2.62,12h0a1.53,1.53,0,0,0,1.49-1.3A8,8,0,0,1,12,4Z"><animateTransform attributeName="transform" dur="0.75s" repeatCount="indefinite" type="rotate" values="0 12 12;360 12 12" /></path></svg></span>
+          </div>
+          <Footer />
+        </div>
+      </>
+    )
+  }
+
   if (session) {
     return (
       <>
+        <HeadView />
         <Header points={points} />
         <div className="flex flex-col items-center justify-center min-h-screen p-4" style={{ marginTop: "80px" }}>
           <p className='m-4'>J'ai découverts cette maison qui semble abandonnée au fond de la ruelle, j'arrive directement dans cette pièce et je ne parviens pas à ouvrir la porte. Je sens une aura étrange se dégager de ces lieux. J'ai fouillé toute la pièce dans ses moindres recoins et je tout relevé, je vous laisse investiguer. </p>
@@ -272,8 +373,17 @@ export default function InteractiveRoom() {
           {/* <p>Le Scribe</p> */}
           {/* Image de la salle */}
           <div className="relative w-full max-w-screen-lg h-auto mb-4 flex items-center justify-center">
-            <div className="relative w-full h-auto"> 
-              <Image
+            <div className="relative w-full h-auto">
+              <video
+              ref={videoRef}
+                src="/videos/doorOpen.mp4"
+                autoPlay={isVideoPlaying}
+                controls={false}
+                playsInline
+                onEnded={() => router.push('/')} 
+                className="w-full h-full object-cover rounded-lg"
+              />
+              {/* <Image
                 src="/images/enigma.webp"
                 alt="Salle interactive"
                 layout="responsive"
@@ -282,9 +392,11 @@ export default function InteractiveRoom() {
                 objectFit="contain"
                 quality={100} // Amélioration de la qualité de l'image
                 className="rounded-lg"
-              />
+              /> */}
 
-              {/* SVG interactif par-dessus l'image */}
+              {/* SVG interactif par-dessus la vidéo uniquement si la vidéo ne joue pas */}
+              {!isVideoPlaying && (
+                <>
               <svg className="absolute top-0 left-0 w-full h-full pointer-events-none" viewBox="0 0 1920 1080">
                 {/* Horloge interactive */}
                 <path
@@ -321,7 +433,7 @@ export default function InteractiveRoom() {
                   stroke="transparent"
                   strokeWidth="4"
                   className="cursor-pointer pointer-events-auto"
-                  onClick={() => setSelectedItem('Porte Scellée')}
+                  onClick={handleDoorClick}
                   onMouseEnter={(e) => e.target.setAttribute('stroke', 'blue')}
                   onMouseLeave={(e) => e.target.setAttribute('stroke', 'transparent')}
                 />
@@ -354,6 +466,8 @@ export default function InteractiveRoom() {
                   onMouseLeave={(e) => e.target.setAttribute('stroke', 'transparent')}
                 />
               </svg>
+              </>
+            )}
             </div>
           </div>
           {selectedItem && (
@@ -373,21 +487,68 @@ export default function InteractiveRoom() {
           {/* Affiche l'image en grand lorsque showLargeImage est true */}
           {showLargeImage && (
             <div className="fixed top-0 left-0 w-full h-full flex items-center justify-center bg-black bg-opacity-80 z-50">
-                <Image
-                  src={tabletImages[selectedTablet]}
-                  alt={`Tablette ${selectedTablet}`}
-                  layout='intrinsec' // Conserve les dimensions de l'image
-                  width={1024}
-                  height={1024}
-                  onClick={() => setShowLargeImage(false)} // Fermer l'affichage en grand
-                  className="rounded-lg cursor-pointer"
-                />
-           
+              <Image
+                src={tabletImages[selectedTablet]}
+                alt={`Tablette ${selectedTablet}`}
+                layout='intrinsec' // Conserve les dimensions de l'image
+                width={1024}
+                height={1024}
+                onClick={() => setShowLargeImage(false)} // Fermer l'affichage en grand
+                className="rounded-lg cursor-pointer"
+              />
+
             </div>
           )}
         </div>
         <Footer />
       </>
     );
+  }
+}
+
+export async function getServerSideProps(context) {
+
+  const session = await getSession(context);
+
+  if (!session) {
+    return {
+      props: { errorServer: 'Session expirée reconnectez-vous' },
+    }
+  }
+
+  try {
+    const timestamp = new Date().getTime().toString();
+    const signature = await axios.post(`${process.env.NEXTAUTH_URL}/api/generateSignature`, {
+      timestamp: timestamp
+    }, {
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${session.customJwt}`,
+        cookie: context.req.headers.cookie
+      }
+    });
+    const secretsPlayer = await axios.get(`${process.env.NEXTAUTH_URL}/api/user/secret`, {
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${session.customJwt}`,
+        cookie: context.req.headers.cookie,
+        'x-timestamp': timestamp,
+        'x-signature': signature.data.signature
+      }
+    })
+    const secretsPlayerData = await secretsPlayer.data
+    return {
+      props: { secretsPlayerData },
+    }
+  } catch (error) {
+    if (error.response?.status === 401) {
+      return {
+        props: { errorServer: 'Erreur avec votre Token ou il est expiré. Veuillez vous reconnecter.' },
+      }
+    } else {
+      return {
+        props: { errorServer: error.response?.data?.message || error.message },
+      }
+    }
   }
 }

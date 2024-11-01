@@ -27,11 +27,12 @@ export default function Scribe({ secretsPlayerData, errorServer }) {
         4: [7, 8],
         6: [9],
         7: [10],
-        8: [12, 11]
+        8: [12, 11],
+        9: [13, 14, 15, 16, 17]
     };
 
     // Fonction pour calculer le total de secrets découverts
-const getTotalSecretsDiscovered = () => secretsPlayerData.length;
+    const getTotalSecretsDiscovered = () => secretsPlayerData.length;
 
     const getSecretsCountForPage = (page) => {
         const pageSecrets = secretsByPage[page] || [];
@@ -136,9 +137,9 @@ const getTotalSecretsDiscovered = () => secretsPlayerData.length;
                                         <p className="text-red-600">Secret découvert</p>
                                     </div>
                                     {/* Affichage du total de secrets découverts */}
-    <div className="mb-6">
-      <p className="text-lg font-bold text-red-600">Total de secrets découverts : {getTotalSecretsDiscovered()} / 12</p>
-    </div>
+                                    <div className="mb-6">
+                                        <p className="text-lg font-bold text-red-600">Total de secrets découverts : {getTotalSecretsDiscovered()} / 12</p>
+                                    </div>
                                     <button className='font-bold text-xl p-2 rounded-lg mt-4' onClick={() => setPage(1)} >Page 1 (01 / 12 / 04 - TQWBYI)</button> <span style={{ color: 'red' }}>{getSecretsCountForPage(1)}</span>
                                     <button className='font-bold text-xl p-2 rounded-lg mt-4' onClick={() => setPage(2)} >Page 2 (17 / 02 / 06 - TKIRFG)</button> <span style={{ color: 'red' }}>{getSecretsCountForPage(2)}</span>
                                     <button className='font-bold text-xl p-2 rounded-lg mt-4' onClick={() => setPage(3)} >Page 3 (23 / 05 / 11 - BVTDUL)</button> <span style={{ color: 'red' }}>{getSecretsCountForPage(3)}</span>
@@ -354,7 +355,7 @@ const getTotalSecretsDiscovered = () => secretsPlayerData.length;
                         </div>
                     </div>
                 </div>
-                    <Footer />
+                <Footer />
             </>
         )
     }
@@ -396,7 +397,6 @@ export async function getServerSideProps(context) {
             props: { secretsPlayerData },
         }
     } catch (error) {
-        console.log(error)
         if (error.response?.status === 401) {
             return {
                 props: { errorServer: 'Erreur avec votre Token ou il est expiré. Veuillez vous reconnecter.' },

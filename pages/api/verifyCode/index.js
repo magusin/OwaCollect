@@ -75,9 +75,6 @@ export default async function handler(req, res) {
                 if (!userCode) {
                     return res.status(400).json({ message: 'Code non fourni' });
                 }
-                if (userCode.toLowerCase() === '5') {
-                    return res.status(200).json({ success: false, message: 'Les 5 mentent se sont des 8' });
-                }
                 else if (userCode.toLowerCase() === 'chien' || userCode.toLowerCase() === 'dog') {
                     return res.status(200).json({ success: false, message: 'Je suis de la team chat' });
                 }
