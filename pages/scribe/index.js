@@ -138,7 +138,7 @@ export default function Scribe({ secretsPlayerData, errorServer }) {
                                     </div>
                                     {/* Affichage du total de secrets découverts */}
                                     <div className="mb-6">
-                                        <p className="text-lg font-bold text-red-600">Total de secrets découverts : {getTotalSecretsDiscovered()} / 12</p>
+                                        <p className="text-lg font-bold text-red-600">Total de secrets découverts : {getTotalSecretsDiscovered()} / 17</p>
                                     </div>
                                     <button className='font-bold text-xl p-2 rounded-lg mt-4' onClick={() => setPage(1)} >Page 1 (01 / 12 / 04 - TQWBYI)</button> <span style={{ color: 'red' }}>{getSecretsCountForPage(1)}</span>
                                     <button className='font-bold text-xl p-2 rounded-lg mt-4' onClick={() => setPage(2)} >Page 2 (17 / 02 / 06 - TKIRFG)</button> <span style={{ color: 'red' }}>{getSecretsCountForPage(2)}</span>
@@ -148,6 +148,10 @@ export default function Scribe({ secretsPlayerData, errorServer }) {
                                     <button className='font-bold text-xl p-2 rounded-lg mt-4' onClick={() => setPage(6)} >Page 6 (10x10x6 - AZERTY)</button> <span style={{ color: 'red' }}>{getSecretsCountForPage(6)}</span>
                                     <button className='font-bold text-xl p-2 rounded-lg mt-4' onClick={() => setPage(7)} >Page 7 (MOTLET - CGUCGU)</button> <span style={{ color: 'red' }}>{getSecretsCountForPage(7)}</span>
                                     <button className='font-bold text-xl p-2 rounded-lg mt-4' onClick={() => setPage(8)} >Page 8 (???)</button> <span style={{ color: 'red' }}>{getSecretsCountForPage(8)}</span>
+
+                                    <p>J'ai trouvé une demeure emplie d'une aura de mystère.</p>
+                                    <button className='font-bold text-xl p-2 rounded-lg mt-4' onClick={() => router.push('/scribe/enigma')} >Enigma</button> <span style={{ color: 'red' }}>{getSecretsCountForPage(9)}</span>
+                                    {secretsPlayerData.find(secret => secret.secretId === 18) && <button className='font-bold text-xl p-2 rounded-lg mt-4' onClick={() => router.push('/')} >Se rendre au Sanctuaire</button>}
                                 </div>
                             )}
                             {page === 1 && (

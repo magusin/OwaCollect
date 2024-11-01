@@ -27,8 +27,6 @@ export default function InteractiveRoom({ secretsPlayerData, errorServer }) {
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
   const videoRef = useRef(null);
 
-  console.log('isVideoPlaying', isVideoPlaying);
-
   useEffect(() => {
     if (status === 'unauthenticated') {
       router.push('/');
@@ -96,7 +94,7 @@ export default function InteractiveRoom({ secretsPlayerData, errorServer }) {
       <Head>
         <title>Owarida - Enigma</title>
         <meta name="description" content="Owarida - Stream" />
-        <meta name="keywords" content="Owarida, Stream, Twitch, scribe, enigma" />
+        <meta name="keywords" content="Owarida, Stream, Twitch, scribe, enigma, card" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
     );
@@ -104,9 +102,8 @@ export default function InteractiveRoom({ secretsPlayerData, errorServer }) {
 
   const handleDoorClick = () => {
     if (hodor) {
-      console.log('here')
-      setIsVideoPlaying(true); // Joue la vidéo seulement si hodor est true
-      setSelectedItem(null); // Ferme la modale
+      setIsVideoPlaying(true); 
+      setSelectedItem(null); 
     } else {
       setSelectedItem("Porte Scellée");
     }
@@ -380,7 +377,7 @@ export default function InteractiveRoom({ secretsPlayerData, errorServer }) {
                 autoPlay={isVideoPlaying}
                 controls={false}
                 playsInline
-                onEnded={() => router.push('/')} 
+                onEnded={() => router.push('/scribe/sanctuary')} 
                 className="w-full h-full object-cover rounded-lg"
               />
               {/* <Image
