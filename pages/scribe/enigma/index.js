@@ -85,7 +85,7 @@ export default function InteractiveRoom({ secretsPlayerData, errorServer }) {
     1: 'https://i.postimg.cc/MZbb0dvp/Tablette-1.webp',
     2: 'https://i.postimg.cc/wMH58sbz/Tablette-2.webp',
     3: 'https://i.postimg.cc/7LFM9R3f/Tablette-3.webp',
-    4: 'https://i.postimg.cc/1znrpSNk/Tablette-4.webp',
+    4: 'https://i.postimg.cc/KzVVSgJF/Tablette-4-1.png',
     5: 'https://i.postimg.cc/rm5GP9jg/Tablette-5.webp'
   };
 
@@ -141,7 +141,7 @@ export default function InteractiveRoom({ secretsPlayerData, errorServer }) {
     switch (item) {
       case 'Horloge':
         return <div>
-          <p>Les horloges sont usées, toutes arrêtées, les chiffres romains indiquants les heures sont effacés ou les aiguilles manquantes. Mais pour celles que j'ai pu lire j'ai noté les chiffres.</p>
+          <p>Les horloges sont usées, toutes arrêtées, les chiffres romains indiquant les heures sont effacés ou les aiguilles manquantes. Mais pour celles que j'ai pu lire j'ai noté les chiffres.</p>
           <ul>
             <li>
               6:15
@@ -156,7 +156,7 @@ export default function InteractiveRoom({ secretsPlayerData, errorServer }) {
         </div>;
       case 'Porte Scellée':
         return <div>
-            <p>Une porte d'apparence classique mais impossible de l'ouvrir, je n'ai trouvé aucune clef. J'ai même essayé de l'enfoncer mais rien n'y fais, elle semble protégée par plus que du bois.</p>
+            <p>Une porte d'apparence classique mais impossible de l'ouvrir, je n'ai trouvé aucune clef. J'ai même essayé de l'enfoncer mais rien n'y fait, elle semble protégée par plus que du bois.</p>
         </div>
       case 'Machine à écrire':
         return <div>
@@ -258,7 +258,7 @@ export default function InteractiveRoom({ secretsPlayerData, errorServer }) {
       case 'Livre':
         return (
           <div className="flex flex-col items-center">
-            <p>En feuilletant le livre poussiéreux sur le bureau j'ai retranscris pour vous les pages qui avec le temps pouvait être encore lisible.</p>
+            <p>En feuilletant le livre poussiéreux sur le bureau j'ai retranscrit pour vous les pages qui, avec le temps, pouvaient être encore lisibles.</p>
             {/* Menu des pages du livre */}
             <div className="flex flex-wrap overflow-x-auto space-x-4 mt-4 mb-6">
               {[1, 2, 3, 5, 8, 13, 21].map((num, index) => (
@@ -282,7 +282,7 @@ export default function InteractiveRoom({ secretsPlayerData, errorServer }) {
               {selectedPage === 2 && (
                 <div>
                   <p>Quand je suis arrivée ici, je n'avais aucune idée de comment cela s'était produit. Pourtant, il était impératif que rien ne puisse me suivre.</p>
-                  <p>Cette endroit recèle d'objets singuliers, et parmis eux j'ai trouvé une machine pour écrire et j'ai adoré cette outil; elle permet d'écrire les histoires et me servira a ouvrir la porte pour repartir et terminer ma propre histoire ici.</p>
+                  <p>Cette endroit recèle d'objets singuliers, et parmi eux j'ai trouvé une machine pour écrire et j'ai adoré cet outil; elle permet d'écrire les histoires et me servira a ouvrir la porte pour repartir et terminer ma propre histoire ici.</p>
                   <p>Elle évoque aussi le souvenir de mon frère, lui qui n'a jamais renoncé à sauver les siens, même lorsque les ténèbres semblaient tout engloutir.</p>
                 </div>
               )}
@@ -297,7 +297,7 @@ export default function InteractiveRoom({ secretsPlayerData, errorServer }) {
                 <div>
                   <p>La corruption qui consumme lentement mon corps est incurable, c'est un fardeau que je dois porter chaque jour, mais je ne peux pas laisser cet obstacle me détourner de ma mission. </p>
                   <p>Le lieu derrière cette porte est un sanctuaire pour moi, en l'honneur de mon frère; un être empli de compassion et de pouvoir, qui aurait tout donné pour voir la corruption éradiquée.</p>
-                  <p>Le Voile est constament en mouvements et même si l'insertitude de ses mouvements le rend imprévisible, il demeure certain qu'il finira par arriver à destination et peu importe la destination.</p>
+                  <p>Le Voile est constamment en mouvements et même si l'insertitude de ses mouvements le rend imprévisible, il demeure certain qu'il finira par arriver à destination et peu importe la destination.</p>
                 </div>
               )}
               {selectedPage === 8 && (
@@ -309,14 +309,14 @@ export default function InteractiveRoom({ secretsPlayerData, errorServer }) {
               )}
               {selectedPage === 13 && (
                 <div>
-                  <p>On dit souvent que le passé fini par nous rattraper, et c'est ironique de voir comment les évènements peuvent se reproduire.</p>
-                  <p>A toujours vouloir apporter la lumière comment ignorer sans cesse la noirceur en moi ?</p>
-                  <p>Et c'est une noirceur identique qui aujourd'hui me pourssuit de nouveau.</p>
+                  <p>On dit souvent que le passé finit par nous rattraper et c'est ironique de voir comment les évènements peuvent se reproduire.</p>
+                  <p>A toujours vouloir apporter la lumière, comment ignorer sans cesse la noirceur en moi ?</p>
+                  <p>Et c'est une noirceur identique qui, aujourd'hui me pourssuit de nouveau.</p>
                 </div>
               )}
               {selectedPage === 21 && (
                 <div>
-                  <p>La porte est scellée, j'ai enfin terminé. Je sais que le temps finira par rendre son ouverture plus aisée mais c'est tant mieux, si quelqu'un en a un jour la force il pourra annihiler le Voile.</p>
+                  <p>La porte est scellée, j'ai enfin terminé. Je sais que le temps finira par rendre son ouverture plus aisée mais c'est tant mieux. Si quelqu'un en a un jour la force, il pourra annihiler le Voile.</p>
                   <p>Je vais bientôt pouvoir retrouver les miens et laisser cette endroit en sachant que j'ai fais mon maximum pour le protéger.</p>
                   <p>J'ai laissé des tablettes, la première est la solution pour ouvrir la porte, les suivantes pour le Lord O que j'ai croisé un jour.</p>
                 </div>
@@ -365,7 +365,7 @@ export default function InteractiveRoom({ secretsPlayerData, errorServer }) {
         <HeadView />
         <Header points={points} />
         <div className="flex flex-col items-center justify-center min-h-screen p-4" style={{ marginTop: "80px" }}>
-          <p className='m-4'>J'ai découverts cette maison qui semble abandonnée au fond de la ruelle, j'arrive directement dans cette pièce et je ne parviens pas à ouvrir la porte. Je sens une aura étrange se dégager de ces lieux. J'ai fouillé toute la pièce dans ses moindres recoins et je tout relevé, je vous laisse investiguer. </p>
+          <p className='m-4'>J'ai découvert cette maison qui semble abandonnée au fond de la ruelle, j'arrive directement dans cette pièce et je ne parviens pas à ouvrir la porte. Je sens une aura étrange se dégager de ces lieux. J'ai fouillé toute la pièce dans ses moindres recoins et j'ai tout relevé, je vous laisse investiguer. </p>
           <p>Respectueusement, votre Scribe.</p>
           {/* <p>Le Scribe</p> */}
           {/* Image de la salle */}
