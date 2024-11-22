@@ -43,7 +43,7 @@ export default function App({ Component, pageProps }) {
                 "@context": "https://schema.org",
                 "@type": "Website",
                 "name": "Owarida Collect",
-                "url": "https://votre-site.com",
+                "url": "https://owarida.fr",
                 "description": "Gagnez des points en regardant les streams Twitch d'Owarida et échangez-les contre des cartes digitales.",
                 "sameAs": [
                   "https://www.twitch.tv/owarida",
