@@ -62,8 +62,8 @@ export default function Login() {
     return (
       <Head>
         <title>Owarida Collect | Connectez-vous avec Twitch et gagnez des owarida coins</title>
-        <meta name="description" content="Collectez des owarida coins en regardant les streams Twitch d'Owarida et échangez-les contre des cartes de vos jeux." />
-        <meta name="keywords" content="owarida, owarida collect, connexion, twitch, owarida coins, stream, elden ring" />
+        <meta name="description" content="Regardez les streams Twitch d'Owarida, gagnez des Owarida Coins, et collectionnez des cartes des jeux FromSoftware." />
+        <meta name="keywords" content="owarida, twitch, owarida coins, elden ring, dark souls, jeux vidéos, cartes digitales, récompenses" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
     )
