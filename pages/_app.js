@@ -47,7 +47,7 @@ export default function App({ Component, pageProps }) {
                 "description": "Gagnez des points en regardant les streams Twitch d'Owarida et échangez-les contre des cartes digitales.",
                 "sameAs": [
                   "https://www.twitch.tv/owarida",
-                  "https://twitter.com/owarida"
+                  "https://www.youtube.com/c/Owarida"
                 ]
               }),
             }}
