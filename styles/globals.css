@@ -20,6 +20,10 @@
   .gray {
     background-color: #374151
   }
+
+  .border-black {
+    border-color: #ffffff;
+  }
 } 
 
 .dark-mode {
@@ -37,7 +41,7 @@
 }
 
 .dark-mode .bg-gray-200 {
-  background-color: #4a5568;
+  background-color: #ffffff;
 }
 
 .dark-mode .bg-gray-300 {
@@ -60,7 +64,7 @@
   background-color: #e2e8f0;
 }
 
-.dark-mode .bg-gray-800 {
+.dark-mode .bg-gray-800:not(.safe) {
   background-color: #edf2f7;
 }
 
@@ -146,7 +150,7 @@ body {
   display: block;
   max-width: 100%;
 }
-/* styles/globals.css ou un fichier CSS spécifique pour le composant */
+
 .aspect-w-16 {
   position: relative;
   width: 100%;
@@ -166,31 +170,6 @@ body {
   height: 100%;
   object-fit: cover; /* S'assure que l'image couvre la zone sans être déformée */
 }
-
-/* .swiper-button-next, .swiper-button-prev {
-  background-color: #000;
-  color: #fff;
-  width: 30px;
-  height: 30px;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 10;
-}
-
-.swiper-button-next, .swiper-button-prev {
-  background-color: rgba(0, 0, 0, 0.5); 
-  color: white;
-  width: 30px;
-  height: 30px;
-  position: absolute; 
-  top: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 1000; 
-}
-
-.swiper-button-next::after, .swiper-button-prev::after {
-  font-size: 20px; 
-} */
 
 .swiper-button-prev {
   z-index: 90;

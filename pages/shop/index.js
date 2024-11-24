@@ -158,12 +158,12 @@ export default function Shop({ productsData, totalPoints, errorServer }) {
             <HeadView />
             <div className="flex flex-col min-h-screen">
                 <Header points={points} />
-                <div className="flex-grow container text-black mx-auto px-4 md:my-8 my-4" style={{ marginTop: "80px" }}>
+                <div className="flex-grow container text-black pt-4 mx-auto px-4 md:my-8 my-4" style={{ marginTop: "80px" }}>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         {/*  itérer sur produit */}
                         {products.map((product, index) => (
-                            <div key={index} className="border rounded-lg p-4 shadow hover:shadow-lg transition bg-white">
+                            <div key={index} className="rounded-lg p-4 shadow hover:shadow-lg transition bg-white">
                                 <Image className="w-full h-auto object-cover rounded-t-lg" src={`${product.picture}.png`} alt={`${product.name} pack picture`} width={300} height={300} priority />
 
                                 <div className="mt-2">

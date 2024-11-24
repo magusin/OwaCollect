@@ -8,7 +8,7 @@ export default function Footer() {
     return (
         <>
         {session ? (
-        <footer className={`text-center md:flex justify-around items-center min-w-full w-full text-white`} style={{ backgroundColor:'#2B2D42', minHeight: '50px' }}>
+        <footer className={`z-10 text-center md:flex justify-around items-center min-w-full w-full text-white`} style={{ backgroundColor:'#2B2D42', minHeight: '50px' }}>
             <p>© 2024 - OwaCollect</p>
             <nav className="md:flex space-x-4 md:space-x-8 xl:space-x-16">
                 <Link href="/cgu" className="hover:text-gray-300">CGU</Link>

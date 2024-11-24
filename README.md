@@ -43,6 +43,7 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/deploym
 ### ORM Prisma Command
 npx prisma db pull
 npx prisma generate
+npx prisma studio
 
 SiteMap
 

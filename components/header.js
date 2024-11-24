@@ -160,7 +160,7 @@ export default function Header({ points, player }) {
           </div>
           {/* Menu déroulant pour petits écrans */}
           {isMenuOpen && (
-            <div className="lg:hidden absolute top-full left-0 right-0 p-4 bg-gray-800">
+            <div className="lg:hidden absolute top-full left-0 right-0 p-4 text-white" style={{ backgroundColor: isScrolled ? '#2B2D4280' : '#2B2D42' }}>
               <Link href="/collection" className="text-center hover:text-gray-300 block">Collection</Link>
               <Link href="/shop" className="text-center hover:text-gray-300 block">Boutique</Link>
               <Link href="/owarida" className="text-center hover:text-gray-300 block">Owarida</Link>
@@ -179,14 +179,14 @@ export default function Header({ points, player }) {
         </header>
       ) : (
         // if user hasn't session
-        <header className="w-full p-4" style={{ backgroundColor: '#2B2D4280' }}>
+        <header className="w-full p-4" style={{ backgroundColor: '#2B2D42' }}>
           <div className="container mx-auto flex justify-center items-center h-auto">
             <Image
               src={"/images/owaCollect.png"}
               alt="banner owaCollect"
               priority={true}
-              width={300}
-              height={300}
+              width={250}
+              height={200}
             />
           </div>
         </header>
