@@ -106,26 +106,38 @@ export default function Login() {
         <div className="flex flex-col min-h-screen">
           <Header points={points} />
 
-          <div className="flex-grow flex justify-center items-center">
-            <div className={`${darkMode ? 'border-gray-200' : 'border-black'} mt-4 p-4 border rounded-lg md:mt-0`}>
-              <h2 className="text-lg font-semibold text-center">{user.name}</h2>
-              <div className="flex flex-col md:flex-row items-center justify-center mt-4">
-                <div className="h-[200px] w-[200px] md:w-[250px] md:h-[250px] lg:w-[300px] lg:h-[300px]">
+          <div className="flex-grow flex justify-center items-center m-4">
+            <div className='mt-4 p-6 border rounded-xl shadow-lg md:mt-0 bg-white border-gray-300 text-gray-900'>
+              {/* User Name */}
+              <h2 className="text-2xl font-bold text-black text-center mb-4">{user.name}</h2>
+
+              {/* Profile Section */}
+              <div className="flex flex-col md:flex-row items-center justify-center">
+                {/* User Image */}
+                <div className="h-[200px] w-[200px] md:w-[250px] md:h-[250px] lg:w-[300px] lg:h-[300px] overflow-hidden rounded-full shadow-md">
                   <Image
                     src={user.imageUrl}
                     alt={user.name}
-                    className="rounded-full"
+                    className="rounded-full object-cover"
                     priority={true}
                     width={300}
                     height={300}
                   />
                 </div>
-                <div className="md:px-6 md:py-4">
-                  <div className="md:px-6 py-4 flex md:flex-col justify-between ">
-                    <span className={`${darkMode ? 'bg-gray-200' : 'bg-gray-300'} text-lg inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-red-700 mr-2 mb-2 whitespace-nowrap`}>Subs: {user.subs}</span>
-                    <span className={`${darkMode ? 'bg-gray-200' : 'bg-gray-300'} text-lg inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-red-700 mr-2 mb-2 whitespace-nowrap`}>Messages: {user.messages}</span>
-                    <span className={`${darkMode ? 'bg-gray-200' : 'bg-gray-300'} text-lg inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-red-700 mr-2 mb-2 whitespace-nowrap`}>Gifts: {user.gifts}</span>
-                    <span className={`${darkMode ? 'bg-gray-200' : 'bg-gray-300'} text-lg inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-red-700 mr-2 mb-2 whitespace-nowrap`}>Bits: {user.bits}</span>
+
+                {/* User Stats */}
+                <div className="mt-6 md:mt-0 md:ml-6 flex flex-wrap justify-center md:justify-start gap-4">
+                  <div className="bg-blue-100 text-blue-800 dark:bg-blue-700 dark:text-blue-200 px-4 py-2 rounded-full text-sm font-semibold shadow-sm">
+                    Subs: {user.subs}
+                  </div>
+                  <div className="bg-green-100 text-green-800 dark:bg-green-700 dark:text-green-200 px-4 py-2 rounded-full text-sm font-semibold shadow-sm">
+                    Messages: {user.messages}
+                  </div>
+                  <div className="bg-yellow-100 text-yellow-800 dark:bg-yellow-700 dark:text-yellow-200 px-4 py-2 rounded-full text-sm font-semibold shadow-sm">
+                    Gifts: {user.gifts}
+                  </div>
+                  <div className="bg-red-100 text-red-800 dark:bg-red-700 dark:text-red-200 px-4 py-2 rounded-full text-sm font-semibold shadow-sm">
+                    Bits: {user.bits}
                   </div>
                 </div>
               </div>
@@ -143,10 +155,10 @@ export default function Login() {
         <HeadView />
         <Header />
         <div
-          className="relative flex flex-col w-full justify-center items-center h-[400px] md:h-[500px] xl:h-[600px] 2xl:h-[650px] bg-gray-800"
+          className="relative flex flex-col w-full justify-center items-center h-[400px] md:h-[500px] xl:h-[550px] 2xl:h-[600px] bg-gray-800"
           style={{
             background: "radial-gradient(circle, #CCCCCC, #0f171b)",
-            
+
           }}
         >
           {/* Image de fond */}
@@ -202,13 +214,13 @@ export default function Login() {
             Qu'est-ce qu'Owarida Collect ?
           </h2>
           <p className="text-lg max-w-3xl text-center text-gray-300 leading-relaxed">
-    Owarida Collect est la plateforme ultime pour les fans de streams Twitch et des jeux FromSoftware ! 
-    Connectez votre compte Twitch pour transformer vos <span className="text-blue-400 font-semibold">points de chaîne</span> et <span className="text-yellow-400 font-semibold"> abonnements</span> en 
-    <span className="text-green-400 font-semibold"> Owarida Coins</span>. 
-    Utilisez ces coins pour débloquer des cartes digitales exclusives et enrichir votre collection, 
-    avec des designs inspirés des univers épiques comme <span className="text-yellow-400 font-semibold">Elden Ring </span> 
-    et <span className="text-red-400 font-semibold">Dark Souls</span>.
-  </p>
+            Owarida Collect est la plateforme ultime pour les fans de streams Twitch et des jeux FromSoftware !
+            Connectez votre compte Twitch pour transformer vos <span className="text-blue-400 font-semibold">points de chaîne</span> et <span className="text-yellow-400 font-semibold"> abonnements</span> en
+            <span className="text-green-400 font-semibold"> Owarida Coins</span>.
+            Utilisez ces coins pour débloquer des cartes digitales exclusives et enrichir votre collection,
+            avec des designs inspirés des univers épiques comme <span className="text-yellow-400 font-semibold">Elden Ring </span>
+            et <span className="text-red-400 font-semibold">Dark Souls</span>.
+          </p>
           <div className="flex flex-col xl:flex-row mt-12 gap-6">
             <div className="flex flex-col items-center">
               <Image
@@ -219,7 +231,7 @@ export default function Login() {
               />
               <h3 className="text-xl font-semibold mt-4">Regardez les streams</h3>
               <p className="text-center text-gray-400 px-8">
-              Regardez les streams Twitch d’<Link className="font-bold underline" href="https://www.twitch.tv/owarida">Owarida</Link> et échangez vos points de chaîne pour obtenir des Owarida Coins. Plus vous participez, plus vous gagnez !
+                Regardez les streams Twitch d’<Link className="font-bold underline" href="https://www.twitch.tv/owarida">Owarida</Link> et échangez vos points de chaîne pour obtenir des Owarida Coins. Plus vous participez, plus vous gagnez !
               </p>
             </div>
             {/* <div className="flex flex-col items-center">
@@ -243,7 +255,7 @@ export default function Login() {
               />
               <h3 className="text-xl font-semibold mt-4">Échangez vos points</h3>
               <p className="text-center text-gray-400 px-8">
-              Utilisez vos Owarida Coins pour accéder à des cartes digitales uniques et devenir un véritable collectionneur !
+                Utilisez vos Owarida Coins pour accéder à des cartes digitales uniques et devenir un véritable collectionneur !
               </p>
             </div>
           </div>

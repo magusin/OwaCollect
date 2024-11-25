@@ -213,7 +213,7 @@ export default function Owarida({ totalPoints, errorServer }) {
                         <p className={message != '' && message.includes('Code correct !') ? "text-green-500 bg-white" : "text-red-500 bg-white"}>{message != '' ? message : 'Vous avez un code pour Owarida ?'}</p>
                         <div className="flex">
                         <input
-                            className="border-2 w-full border p-2 tb"
+                            className="border-2 w-full border p-2 input"
                             type="text"
                             value={code}
                             onChange={(e) => setCode(e.target.value)}

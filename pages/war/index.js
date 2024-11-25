@@ -1004,14 +1004,14 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                                                 <div className="flex-1 text-center mb-2 sm:mb-0 sm:mr-4 relative group">
                                                     <p className="font-bold">Force</p>
                                                     <p>{updatedPlayerStats.str}</p>
-                                                    <div className="absolute left-1/2 transform -translate-x-1/2 -top-8 hidden group-hover:block bg-gray-700 text-white text-xs rounded py-1 px-2">
+                                                    <div className="absolute left-1/2 transform -translate-x-1/2 -top-8 hidden group-hover:block bg-gray-700 safe text-white text-xs rounded py-1 px-2">
                                                         Influe sur les dégats physiques
                                                     </div>
                                                 </div>
                                                 <div className="flex-1 text-center relative group">
                                                     <p className="font-bold">Intelligence</p>
                                                     <p>{updatedPlayerStats.intel}</p>
-                                                    <div className="absolute left-1/2 transform -translate-x-1/2 -top-8 hidden group-hover:block bg-gray-700 text-white text-xs rounded py-1 px-2">
+                                                    <div className="absolute left-1/2 transform -translate-x-1/2 -top-8 hidden group-hover:block bg-gray-700 safe text-white text-xs rounded py-1 px-2">
                                                         Influe sur les dégats magiques
                                                     </div>
                                                 </div>
@@ -1022,14 +1022,14 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                                                 <div className="flex-1 text-center mb-2 sm:mb-0 sm:mr-4 relative group">
                                                     <p className="font-bold">Dextérité</p>
                                                     <p>{updatedPlayerStats.dex}</p>
-                                                    <div className="absolute left-1/2 transform -translate-x-1/2 -top-8 hidden group-hover:block bg-gray-700 text-white text-xs rounded py-1 px-2">
+                                                    <div className="absolute left-1/2 transform -translate-x-1/2 -top-8 hidden group-hover:block bg-gray-700 safe text-white text-xs rounded py-1 px-2">
                                                         Permet d'esquiver les attaques physiques
                                                     </div>
                                                 </div>
                                                 <div className="flex-1 text-center relative group">
                                                     <p className="font-bold">Acuité</p>
                                                     <p>{updatedPlayerStats.acu}</p>
-                                                    <div className="absolute left-1/2 transform -translate-x-1/2 -top-8 hidden group-hover:block bg-gray-700 text-white text-xs rounded py-1 px-2">
+                                                    <div className="absolute left-1/2 transform -translate-x-1/2 -top-8 hidden group-hover:block bg-gray-700 safe text-white text-xs rounded py-1 px-2">
                                                         Permet de bloquer les attaques magiques
                                                     </div>
                                                 </div>
@@ -1044,7 +1044,7 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                                                 <div className="flex-1 text-center mb-2 sm:mb-0 sm:mr-4 relative group">
                                                     <p className="font-bold">Chance de Toucher</p>
                                                     <p>+{updatedPlayerStats.hit} %</p>
-                                                    <div className="absolute left-1/2 transform -translate-x-1/2 -top-8 hidden group-hover:block bg-gray-700 text-white text-xs rounded py-1 px-2">
+                                                    <div className="absolute left-1/2 transform -translate-x-1/2 -top-8 hidden group-hover:block bg-gray-700 safe text-white text-xs rounded py-1 px-2">
                                                         S'additionne aux chance de toucher de chaque sort (max 95%)
                                                     </div>
                                                 </div>
@@ -1055,14 +1055,14 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                                                 <div className="flex-1 text-center mb-2 sm:mb-0 sm:mr-4 relative group">
                                                     <p className="font-bold">Points d'Action</p>
                                                     <p>{updatedPlayerStats.pa}</p>
-                                                    <div className="absolute left-1/2 transform -translate-x-1/2 -top-8 hidden group-hover:block bg-gray-700 text-white text-xs rounded py-1 px-2">
+                                                    <div className="absolute left-1/2 transform -translate-x-1/2 -top-8 hidden group-hover:block bg-gray-700 safe text-white text-xs rounded py-1 px-2">
                                                         Récupération de 2 PA par heure (max {updatedPlayerStats.paMax})
                                                     </div>
                                                 </div>
                                                 <div className="flex-1 text-center relative group">
                                                     <p className="font-bold">Régénération</p>
                                                     <p>{updatedPlayerStats.regen}</p>
-                                                    <div className="absolute left-1/2 transform -translate-x-1/2 -top-8 hidden group-hover:block bg-gray-700 text-white text-xs rounded py-1 px-2">
+                                                    <div className="absolute left-1/2 transform -translate-x-1/2 -top-8 hidden group-hover:block bg-gray-700 safe text-white text-xs rounded py-1 px-2">
                                                         Récupération de {updatedPlayerStats.regen} points de vie par heure
                                                     </div>
                                                 </div>
@@ -1087,14 +1087,14 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                                                 <div className="flex-1 text-center mb-2 sm:mb-0 sm:mr-4 relative group">
                                                     <p className="font-bold">Défense Standard</p>
                                                     <p>{updatedPlayerStats.defPStand + updatedPlayerStats.defP}</p>
-                                                    <div className="absolute left-1/2 transform -translate-x-1/2 -top-8 hidden group-hover:block bg-gray-700 text-white text-xs rounded py-1 px-2">
+                                                    <div className="absolute left-1/2 transform -translate-x-1/2 -top-8 hidden group-hover:block bg-gray-700 safe text-white text-xs rounded py-1 px-2">
                                                         {updatedPlayerStats.defPStand} + {updatedPlayerStats.defP} = {calculateDef(updatedPlayerStats, 'Pstandard')}% de réduction (max 80%)
                                                     </div>
                                                 </div>
                                                 <div className="flex-1 text-center relative group">
                                                     <p className="font-bold">Résistance Standard</p>
                                                     <p>{updatedPlayerStats.defMStand + updatedPlayerStats.defM}</p>
-                                                    <div className="absolute left-1/2 transform -translate-x-1/2 -top-8 hidden group-hover:block bg-gray-700 text-white text-xs rounded py-1 px-2">
+                                                    <div className="absolute left-1/2 transform -translate-x-1/2 -top-8 hidden group-hover:block bg-gray-700 safe text-white text-xs rounded py-1 px-2">
                                                         {updatedPlayerStats.defMStand} + {updatedPlayerStats.defM} = {calculateDef(updatedPlayerStats, 'Mstandard')}% de réduction (max 80%)
                                                     </div>
                                                 </div>
@@ -1103,14 +1103,14 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                                                 <div className="flex-1 text-center mb-2 sm:mb-0 sm:mr-4 relative group">
                                                     <p className="font-bold">Défense Perçante</p>
                                                     <p>{updatedPlayerStats.defPierce + updatedPlayerStats.defP}</p>
-                                                    <div className="absolute left-1/2 transform -translate-x-1/2 -top-8 hidden group-hover:block bg-gray-700 text-white text-xs rounded py-1 px-2">
+                                                    <div className="absolute left-1/2 transform -translate-x-1/2 -top-8 hidden group-hover:block bg-gray-700 safe text-white text-xs rounded py-1 px-2">
                                                         {updatedPlayerStats.defPierce} + {updatedPlayerStats.defP} = {calculateDef(updatedPlayerStats, 'Pierce')}% de réduction (max 80%)
                                                     </div>
                                                 </div>
                                                 <div className="flex-1 text-center relative group">
                                                     <p className="font-bold">Résistance Feu</p>
                                                     <p>{updatedPlayerStats.defFire + updatedPlayerStats.defM}</p>
-                                                    <div className="absolute left-1/2 transform -translate-x-1/2 -top-8 hidden group-hover:block bg-gray-700 text-white text-xs rounded py-1 px-2">
+                                                    <div className="absolute left-1/2 transform -translate-x-1/2 -top-8 hidden group-hover:block bg-gray-700 safe text-white text-xs rounded py-1 px-2">
                                                         {updatedPlayerStats.defFire} + {updatedPlayerStats.defM} = {calculateDef(updatedPlayerStats, 'Fire')}% de réduction (max 80%)
                                                     </div>
                                                 </div>
@@ -1119,14 +1119,14 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                                                 <div className="flex-1 text-center mb-2 sm:mb-0 sm:mr-4 relative group">
                                                     <p className="font-bold">Défense Tranchante</p>
                                                     <p>{updatedPlayerStats.defSlash + updatedPlayerStats.defP}</p>
-                                                    <div className="absolute left-1/2 transform -translate-x-1/2 -top-8 hidden group-hover:block bg-gray-700 text-white text-xs rounded py-1 px-2">
+                                                    <div className="absolute left-1/2 transform -translate-x-1/2 -top-8 hidden group-hover:block bg-gray-700 safe text-white text-xs rounded py-1 px-2">
                                                         {updatedPlayerStats.defSlash} + {updatedPlayerStats.defP} = {calculateDef(updatedPlayerStats, 'Slash')}% de réduction (max 80%)
                                                     </div>
                                                 </div>
                                                 <div className="flex-1 text-center relative group">
                                                     <p className="font-bold">Résistance Foudre</p>
                                                     <p>{updatedPlayerStats.defLightning + updatedPlayerStats.defM}</p>
-                                                    <div className="absolute left-1/2 transform -translate-x-1/2 -top-8 hidden group-hover:block bg-gray-700 text-white text-xs rounded py-1 px-2">
+                                                    <div className="absolute left-1/2 transform -translate-x-1/2 -top-8 hidden group-hover:block bg-gray-700 safe text-white text-xs rounded py-1 px-2">
                                                         {updatedPlayerStats.defLightning} + {updatedPlayerStats.defM} = {calculateDef(updatedPlayerStats, 'Lightning')}% de réduction (max 80%)
                                                     </div>
                                                 </div>
@@ -1135,14 +1135,14 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                                                 <div className="flex-1 text-center mb-2 sm:mb-0 sm:mr-4 relative group">
                                                     <p className="font-bold">Défense Percutante</p>
                                                     <p>{updatedPlayerStats.defStrike + updatedPlayerStats.defP}</p>
-                                                    <div className="absolute left-1/2 transform -translate-x-1/2 -top-8 hidden group-hover:block bg-gray-700 text-white text-xs rounded py-1 px-2">
+                                                    <div className="absolute left-1/2 transform -translate-x-1/2 -top-8 hidden group-hover:block bg-gray-700 safe text-white text-xs rounded py-1 px-2">
                                                         {updatedPlayerStats.defHoly} + {updatedPlayerStats.defP} = {calculateDef(updatedPlayerStats, 'Strike')}% de réduction (max 80%)
                                                     </div>
                                                 </div>
                                                 <div className="flex-1 text-center relative group">
                                                     <p className="font-bold">Résistance Sacrée</p>
                                                     <p>{updatedPlayerStats.defHoly + updatedPlayerStats.defM}</p>
-                                                    <div className="absolute left-1/2 transform -translate-x-1/2 -top-8 hidden group-hover:block bg-gray-700 text-white text-xs rounded py-1 px-2">
+                                                    <div className="absolute left-1/2 transform -translate-x-1/2 -top-8 hidden group-hover:block bg-gray-700 safe text-white text-xs rounded py-1 px-2">
                                                         {updatedPlayerStats.defHoly} + {updatedPlayerStats.defM} = {calculateDef(updatedPlayerStats, 'Holy')}% de réduction (max 80%)
                                                     </div>
                                                 </div>
@@ -1197,14 +1197,14 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                                         <div className="flex-1 text-center mb-2 sm:mb-0 sm:mr-4 relative group">
                                             <p className="font-bold">Force</p>
                                             <p>{selectedMonster.str}</p>
-                                            <div className="absolute left-1/2 transform -translate-x-1/2 -top-8 hidden group-hover:block bg-gray-700 text-white text-xs rounded py-1 px-2">
+                                            <div className="absolute left-1/2 transform -translate-x-1/2 -top-8 hidden group-hover:block bg-gray-700 safe text-white text-xs rounded py-1 px-2">
                                                 Influe sur les dégâts physiques
                                             </div>
                                         </div>
                                         <div className="flex-1 text-center relative group">
                                             <p className="font-bold">Intelligence</p>
                                             <p>{selectedMonster.intel}</p>
-                                            <div className="absolute left-1/2 transform -translate-x-1/2 -top-8 hidden group-hover:block bg-gray-700 text-white text-xs rounded py-1 px-2">
+                                            <div className="absolute left-1/2 transform -translate-x-1/2 -top-8 hidden group-hover:block bg-gray-700 safe text-white text-xs rounded py-1 px-2">
                                                 Influe sur les dégâts magiques
                                             </div>
                                         </div>
@@ -1215,14 +1215,14 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                                         <div className="flex-1 text-center mb-2 sm:mb-0 sm:mr-4 relative group">
                                             <p className="font-bold">Dextérité</p>
                                             <p>{selectedMonster.dex}</p>
-                                            <div className="absolute left-1/2 transform -translate-x-1/2 -top-8 hidden group-hover:block bg-gray-700 text-white text-xs rounded py-1 px-2">
+                                            <div className="absolute left-1/2 transform -translate-x-1/2 -top-8 hidden group-hover:block bg-gray-700 safe text-white text-xs rounded py-1 px-2">
                                                 Permet d'esquiver les attaques physiques
                                             </div>
                                         </div>
                                         <div className="flex-1 text-center relative group">
                                             <p className="font-bold">Acuité</p>
                                             <p>{selectedMonster.acu}</p>
-                                            <div className="absolute left-1/2 transform -translate-x-1/2 -top-8 hidden group-hover:block bg-gray-700 text-white text-xs rounded py-1 px-2">
+                                            <div className="absolute left-1/2 transform -translate-x-1/2 -top-8 hidden group-hover:block bg-gray-700 safe text-white text-xs rounded py-1 px-2">
                                                 Permet de bloquer les attaques magiques
                                             </div>
                                         </div>
@@ -1312,7 +1312,7 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                                     {filteredSpells.map((skill, index) => (
                                         <li
                                             key={index}
-                                            className={`flex items-center p-2 border-b ${selectedFightSpell === skill ? 'bg-blue-200' : ''} ${skill.warSkills.dist < calculateDistance(player.map, selectedPlayer?.map || selectedMonster?.map) || (updatedPlayerStats.pa < skill.warSkills.cost) ? 'bg-gray-700 cursor-not-allowed' : 'cursor-pointer'}`}
+                                            className={`flex items-center p-2 border-b ${selectedFightSpell === skill ? 'bg-blue-200' : ''} ${skill.warSkills.dist < calculateDistance(player.map, selectedPlayer?.map || selectedMonster?.map) || (updatedPlayerStats.pa < skill.warSkills.cost) ? 'bg-gray-700 safe cursor-not-allowed' : 'cursor-pointer'}`}
                                             onClick={() => {
                                                 if (skill.warSkills.dist >= calculateDistance(player.map, selectedPlayer?.map || selectedMonster?.map) && updatedPlayerStats.pa >= skill.warSkills.cost) {
                                                     setSelectedFightSpell(skill);
@@ -1346,7 +1346,7 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                                                 </span>
                                             </div>
                                             {hoveredSkill === skill && (
-                                                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 p-2 bg-gray-700 text-white text-xs rounded w-max max-w-xs md:max-w-md lg:max-w-lg">
+                                                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 p-2 bg-gray-700 safe text-white text-xs rounded w-max max-w-xs md:max-w-md lg:max-w-lg">
                                                     {skill.warSkills.description}
                                                 </div>
                                             )}
@@ -1414,7 +1414,7 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                                                                 </span>
                                                             </div>
                                                             {hoveredSkill === skill && (
-                                                                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 p-2 bg-gray-700 text-white text-xs rounded w-max max-w-xs md:max-w-md lg:max-w-lg">
+                                                                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 p-2 bg-gray-700 safe text-white safe text-xs rounded w-max max-w-xs md:max-w-md lg:max-w-lg">
                                                                     {skill.warSkills.description}
                                                                 </div>
                                                             )}
@@ -1567,7 +1567,7 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                                                             <span> - Quantité : {item.count}</span>
                                                         </div>
                                                         {hoveredItem === item && (
-                                                            <div className="absolute left-1/2 transform -translate-x-1/2 -top-8 p-2 bg-gray-700 text-white rounded shadow-lg w-48">
+                                                            <div className="absolute left-1/2 transform -translate-x-1/2 -top-0 p-2 bg-gray-700 safe text-white rounded shadow-lg w-48">
                                                                 {item.warItems.description}
                                                             </div>
                                                         )}
@@ -1592,7 +1592,7 @@ export default function War({ errorServer, war, initialPlayer, totalPoints }) {
                                                                 priority={true}
                                                             />
                                                         </div>
-                                                        <div className="absolute left-1/2 transform -translate-x-1/2 -top-0 hidden group-hover:block bg-gray-700 text-white text-xs rounded py-1 px-2 z-50 w-max max-w-xs md:max-w-md lg:max-w-lg">
+                                                        <div className="absolute left-1/2 transform -translate-x-1/2 -top-0 hidden group-hover:block bg-gray-700 safe text-white text-xs rounded py-1 px-2 z-50 w-max max-w-xs md:max-w-md lg:max-w-lg">
                                                             {trophy.warTrophies.hp > 0 && <p>HP: {trophy.warTrophies.hp}</p>}
                                                             {trophy.warTrophies.intel > 0 && <p>Intelligence: {trophy.warTrophies.intel}</p>}
                                                             {trophy.warTrophies.str > 0 && <p>Force: {trophy.warTrophies.str}</p>}

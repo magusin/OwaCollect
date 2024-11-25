@@ -24,12 +24,86 @@
   .border-black {
     border-color: #ffffff;
   }
+
+  .bg-white {
+    background-color: #374151;
+  }
+
+  .bg-gray-100 {
+    background-color: #2d3748;
+  }
+
+  .bg-gray-200 {
+    background-color: #4a5568;
+  }
+
+  .bg-gray-300 {
+    background-color: #718096;
+  }
+
+  .bg-gray-400 {
+    background-color: #90a0b7;
+  }
+
+  .bg-gray-500:not(.safe) {
+    background-color: #a0aec0;
+  }
+
+  .bg-gray-600:not(.safe) {
+    background-color: #cbd5e0;
+  }
+
+  .bg-gray-700:not(.safe) {
+    background-color: #e2e8f0;
+  }
+
+  .bg-gray-800:not(.safe) {
+    background-color: #edf2f7;
+  }
+
+  .text-black {
+    color: #f7fafc;
+  }
+
+  
 } 
 
 .dark-mode {
   --foreground-rgb: 255, 255, 255;
   --background-start-rgb: 38, 40, 42;
   --background-end-rgb: 0, 0, 0;
+}
+
+.dark-mode .bg-blue-100 {
+  background-color: rgb(29 78 216)
+}
+
+.dark-mode .bg-green-100 {
+  background-color: rgb(21 128 61)
+}
+
+.dark-mode .bg-red-100 {
+  background-color: rgb(185 28 28)
+}
+
+.dark-mode .bg-yellow-100 {
+  background-color: rgb(161 98 7)
+}
+
+.dark-mode .text-blue-800 {
+  color: rgb(191 219 254)
+}
+
+.dark-mode .text-green-800 {
+  color: rgb(187 247 208)
+}
+
+.dark-mode .text-red-800 {
+  color: rgb(254 202 202)
+}
+
+.dark-mode .text-yellow-800 {
+  color: rgb(254 243 199)
 }
 
 .dark-mode .bg-white {
@@ -41,7 +115,7 @@
 }
 
 .dark-mode .bg-gray-200 {
-  background-color: #ffffff;
+  background-color: #4a5568;
 }
 
 .dark-mode .bg-gray-300 {
@@ -52,15 +126,15 @@
   background-color: #90a0b7;
 }
 
-.dark-mode .bg-gray-500 {
+.dark-mode .bg-gray-500:not(.safe) {
   background-color: #a0aec0;
 }
 
-.dark-mode .bg-gray-600 {
+.dark-mode .bg-gray-600:not(.safe) {
   background-color: #cbd5e0;
 }
 
-.dark-mode .bg-gray-700 {
+.dark-mode .bg-gray-700:not(.safe) {
   background-color: #e2e8f0;
 }
 
@@ -68,7 +142,7 @@
   background-color: #edf2f7;
 }
 
-.dark-mode .bg-gray-900 {
+.dark-mode .bg-gray-900:not(.safe) {
   background-color: #f7fafc;
 }
 
@@ -77,6 +151,10 @@
 }
 
 .tb {
+  color: #000000;
+}
+
+.input {
   color: #2d3748;
 }
 

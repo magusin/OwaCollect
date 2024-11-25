@@ -125,9 +125,9 @@ export default function Scribe({ secretsPlayerData, errorServer }) {
                         width: '100%',
                         minHeight: '100%',
                     }}>
-                        <div className="m-4 text-black" style={{ marginTop: "80px" }}>
+                        <div className="m-4" style={{ marginTop: "80px" }}>
                             {page === 0 && (
-                                <div className="flex flex-col items-center min-h-screen">
+                                <div className="flex tb safe flex-col items-center min-h-screen">
                                     <h1 className="text-4xl text-center font-bold my-4">Les écrits du scribe</h1>
                                     <p className="text-center">Le scribe a laissé d&apos;étranges écrits.</p>
                                     <p>Pour chaque page il y a des codes à trouver. Ca peut être un thème a deviner, un code caché dans la page ...</p>

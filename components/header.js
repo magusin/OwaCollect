@@ -98,7 +98,7 @@ export default function Header({ points, player }) {
         <header className={`fixed top-0 left-0 right-0 z-10 transition duration-300 ease-in-out font-bold ${isScrolled ? 'backdrop-blur' : ''} text-white p-4 w-full`} style={{ backgroundColor: isScrolled ? '#2B2D4280' : '#2B2D42' }}>
           <div className="flex justify-between items-center">
             <Link href='/' className="flex items-center">
-              <span className={`${darkMode ? 'border-black' : 'border-white'} mr-4 border-r-2 pr-2`}>{session.user.name}</span>
+              <span className='border-white mr-4 border-r-2 pr-2'>{session.user.name}</span>
               <span className="mr-4">{userPoints ? userPoints : 0} OC</span>
             </Link>
             {player && router.pathname === '/war' && (
@@ -128,13 +128,6 @@ export default function Header({ points, player }) {
               <div className="relative cursor-pointer hover:text-gray-300"
                 onClick={() => setIsRuelleOpen(!isRuelleOpen)}
               >
-                {isRuelleOpen && (
-                  <div className="absolute top-full left-0 flex flex-col bg-gray-800 text-white rounded shadow-lg p-2">
-                    <Link href="/alley9-3/4" className="hover:text-gray-300 px-4 py-2">Ruelle</Link>
-                    <Link href="/secretShop/tr74g4in" className="hover:text-gray-300 px-4 py-2">Marchand</Link>
-                    <Link href="/scribe" className="hover:text-gray-300 px-4 py-2">Scribe</Link>
-                  </div>
-                )}
                 Ruelle</div>
               <Link href="/war" className="hover:text-gray-300">Guerre</Link>
             </nav>
@@ -176,6 +169,14 @@ export default function Header({ points, player }) {
               </button>
             </div>
           )}
+        {isRuelleOpen && (
+          <div className="absolute top-full left-0 flex w-full z-10 text-white rounded shadow-lg p-2 justify-center" style={{ backgroundColor: isScrolled ? '#2B2D4280' : '#2B2D42' }}>
+            <Link href="/alley9-3/4" className="hover:text-gray-300 px-4 py-2">Ruelle</Link>
+            <Link href="/secretShop/tr74g4in" className="hover:text-gray-300 px-4 py-2">Marchand</Link>
+            <Link href="/scribe" className="hover:text-gray-300 px-4 py-2">Scribe</Link>
+            <Link href="/scribe/enigma" className="hover:text-gray-300 px-4 py-2">Enigma</Link>
+          </div>
+        )}
         </header>
       ) : (
         // if user hasn't session
