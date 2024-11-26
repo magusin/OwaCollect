@@ -78,11 +78,11 @@
   background-color: rgb(29 78 216)
 }
 
-.dark-mode .bg-green-100 {
+.dark-mode .bg-green-100:not(.safe) {
   background-color: rgb(21 128 61)
 }
 
-.dark-mode .bg-red-100 {
+.dark-mode .bg-red-100:not(.safe) {
   background-color: rgb(185 28 28)
 }
 
