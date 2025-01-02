@@ -536,8 +536,12 @@ export default async function handler(req, res) {
                 const monsterType = opponent.monsters.type;
                 const monsterTypeKill = monsterType + 'Kills';
                 const killCount = player[monsterTypeKill] + 1;
-
-                const trophyMilestones = [1, 10, 25, 50, 100];
+                const trophyMilestones = [];
+                if (opponent.monsters.id === 17) {
+                trophyMilestones = [1, 5, 15, 30, 50, 75, 100];
+                } else {
+                trophyMilestones = [1, 10, 25, 50, 100];
+                }
 
                 if (trophyMilestones.includes(killCount)) {
                     const trophyMessage = `Vous avez tué ${killCount} de type ${monsterType} et débloqué un nouveau trophée`;

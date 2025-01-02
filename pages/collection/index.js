@@ -433,12 +433,12 @@ export default function Collection({ cards, totalPoints, errorServer }) {
                                 <div key={card.id} onClick={() => handleCardClick(card)} className="text-black relative flex flex-col items-center justify-center m-4 cursor-pointer">
                                     <div className="relative w-[100px] h-[100px] sm:w-[150px] sm:h-[150px] md:w-[200px] md:h-[200px] lg:w-[250px] lg:h-[250px] xl:w-[300px] xl:h-[300px] 2xl:w-[350px] 2xl:h-[350px]">
                                         <Image
-                                            priority={true}
                                             src={ownedCardIds.has(card.id) ? `${card.picture}` : `${card.picture_back}`}
                                             alt={ownedCardIds.has(card.id) ? card.name : 'Dos de la carte ' + card.id}
                                             layout="fill"
                                             objectFit="contain"
                                             sizes="100%"
+                                            loading="lazy"
                                         />
                                     </div>
                                     
@@ -481,35 +481,35 @@ export default function Collection({ cards, totalPoints, errorServer }) {
                                 <div className="flex flex-wrap flex-row p-4 h-full w-full items-center justify-center md:flex-col">
                                     {/* Button previous card */}
                                     <button className="w-20 xl:w-auto md:w-24">
-                                        <Image onClick={previousCard} src="/images/previous.png" alt="previous card" objectFit="contain" objectPosition="center" width={130} height={100} />
+                                        <Image onClick={previousCard} src="/images/previous.png" alt="previous card" objectFit="contain" objectPosition="center" width={130} height={100} loading="lazy" />
                                     </button>
                                     {/* Image card */}
                                     <div className="relative h-full" style={{ width: '100%', maxWidth: '100vh' }}>
                                         <div className="aspect-w-1 aspect-h-1 ">
                                             <Image
-                                                priority={true}
                                                 src={ownedCardIds.has(selectedCard.id) ? `${selectedCard.picture}` : `${selectedCard.picture_back}`}
                                                 alt={ownedCardIds.has(selectedCard.id) ? selectedCard.name : 'Dos de la carte ' + selectedCard.id}
                                                 layout="fill"
                                                 objectFit="contain"
                                                 sizes="100%"
+                                                loading="lazy"
                                             />
                                         </div>
                                     </div>
                                     {/* Button next card */}
                                     <button className="w-20 xl:w-auto md:w-24">
-                                        <Image onClick={nextCard} src="/images/next.png" alt="next card" objectFit="contain" objectPosition="center" width={130} height={100} />
+                                        <Image onClick={nextCard} src="/images/next.png" alt="next card" objectFit="contain" objectPosition="center" width={130} height={100} loading="lazy" />
                                     </button>
                                     {/* Button sell up */}
                                     {ownedCardIds.has(selectedCard.id) && (cardCounts[selectedCard.id] > 1) && (
                                         <button onClick={handleSell} disabled={!cardCounts[selectedCard.id] > 1} className="w-20 absolute bottom-2 left-4 md:w-24 xl:w-auto">
-                                            <Image src="/images/sell.png" alt="next card" objectFit="contain" objectPosition="center" width={100} height={100} />
+                                            <Image src="/images/sell.png" alt="next card" objectFit="contain" objectPosition="center" width={100} height={100} loading="lazy" />
                                         </button>
                                     )}
                                     {/* Button level up */}
                                     {ownedCardIds.has(selectedCard.id) && (selectedCard.evolveCost) && (!ownedCardIds.has(selectedCard.id + 1)) && (
                                         <button onClick={handleLevelUp} disabled={!(cardCounts[selectedCard.id] > 2 && points >= selectedCard.evolveCost)} className={`w-16 md:w-24 lg:w-28 xl:w-32 absolute bottom-0 ${cardCounts[selectedCard.id] > 2 ? "border border-yellow-500" : ""}  md:bottom-0 z-10`}>
-                                            <Image src="/images/levelUp.png" alt="next card" objectFit="contain" objectPosition="center" width={120} height={120} />
+                                            <Image src="/images/levelUp.png" alt="next card" objectFit="contain" objectPosition="center" width={120} height={120} loading="lazy" />
                                         </button>
                                     )}
                                     {/* Button close */}

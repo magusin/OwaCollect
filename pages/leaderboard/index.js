@@ -158,10 +158,10 @@ export default function Leaderboard({ totalPoints, errorServer, leaderboard }) {
                                         </div>
                                         <div className="relative justify-center items-center" style={{ height: '200px', width: '200px' }}>
                                             <div className="absolute z-0">
-                                                <Image src={getAvatarImage(player.rank -1)} alt="Avatar Border" width={200} height={200} />
+                                                <Image src={getAvatarImage(player.rank -1)} alt="Avatar Border" width={200} height={200} loading="lazy" />
                                             </div>
                                             <div className="z-10" style={{ paddingTop: "50px", marginLeft: "50px" }}>
-                                                <Image src={player.imageUrl} alt={player.name} width={100} height={100} className="rounded-full" />
+                                                <Image src={player.imageUrl} alt={player.name} width={100} height={100} className="rounded-full" loading="lazy" />
                                             </div>
                                         </div>
                                     </div>
