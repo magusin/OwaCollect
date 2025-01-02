@@ -536,7 +536,7 @@ export default async function handler(req, res) {
                 const monsterType = opponent.monsters.type;
                 const monsterTypeKill = monsterType + 'Kills';
                 const killCount = player[monsterTypeKill] + 1;
-                const trophyMilestones = [];
+                let trophyMilestones = [];
                 if (opponent.monsters.id === 17) {
                 trophyMilestones = [1, 5, 15, 30, 50, 75, 100];
                 } else {
