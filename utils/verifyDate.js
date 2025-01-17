@@ -5,6 +5,8 @@ export default function isDateBeforeToday(dateString) {
     const rewardDateString = rewardDate.toISOString(); // Format ISO : YYYY-MM-DDTHH:mm:ss.sssZ
   
     const today = new Date();
+
+    console.log('here')
   
     // Extraire les parties année, mois, jour de la date actuelle
     const yearToday = today.getFullYear();

@@ -42,8 +42,9 @@ export default function Header({ points, player }) {
   const getReward = async () => {
     try {
       const res = await axiosInstance.get('/api/user/reward', {
-        customConfig: { session: session }
+        customConfig: { session: session },
       });
+  
       if (res.status === 200) {
         const data = await res.data;
         localStorage.setItem('userOC', JSON.stringify(data.user));
@@ -56,18 +57,50 @@ export default function Header({ points, player }) {
         setTimeout(() => {
           setShowAlert(false);
         }, 5000);
-      } else if (res.status === 400) {
-        setAlertMessage(res.data.message);
+      }
+    } catch (error) {
+      console.log('error', error);
+  
+      // Vérifiez si une réponse existe (erreur Axios)
+      if (error.response) {
+        const { status, data } = error.response;
+  
+        if (status === 404 && data.message.includes('does not subscribe')) {
+          // Cas où l'utilisateur n'est pas abonné
+          setAlertMessage("Vous devez être abonné pour obtenir une récompense.");
+          setAlertType('error');
+          setShowAlert(true);
+          setTimeout(() => {
+            setShowAlert(false);
+          }, 5000);
+        } else if (status === 400) {
+          // Autres erreurs spécifiques
+          setAlertMessage(data.message || "Une erreur est survenue.");
+          setAlertType('error');
+          setShowAlert(true);
+          setTimeout(() => {
+            setShowAlert(false);
+          }, 5000);
+        } else {
+          // Erreur générique pour d'autres statuts
+          setAlertMessage("Une erreur inattendue est survenue.");
+          setAlertType('error');
+          setShowAlert(true);
+          setTimeout(() => {
+            setShowAlert(false);
+          }, 5000);
+        }
+      } else {
+        // Erreur réseau ou problème interne
+        setAlertMessage("Impossible de communiquer avec le serveur. Veuillez réessayer.");
         setAlertType('error');
         setShowAlert(true);
         setTimeout(() => {
           setShowAlert(false);
         }, 5000);
       }
-    } catch (error) {
-      console.error(error);
     }
-  }
+  };
 
   useEffect(() => {
     const handleScroll = () => {

@@ -48,7 +48,7 @@ function onError(err, res) {
 }
 
 export default async function handler(req, res) {
-    console.log('req', req)
+
   try {
     // Authentification via NextAuth
     const nextToken = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
@@ -91,18 +91,43 @@ export default async function handler(req, res) {
         return res.status(404).json({ message: 'Utilisateur introuvable' });
       }
 
-      // Vérification de l'abonnement Twitch
-      const urlSub = `https://api.twitch.tv/helix/subscriptions/user?broadcaster_id=${process.env.BROADCASTER_ID}&user_id=${decoded.id}`;
-      const subscriptionsResponse = await axios.get(urlSub, {
-        headers: {
-          'Client-ID': process.env.TWITCH_CLIENT_ID,
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
-
-      const subs = subscriptionsResponse?.data;
-      if (!subs || subs.data.length === 0) {
-        return res.status(400).json({ message: 'Vous devez être abonné pour obtenir une récompense' });
+      try {
+        const urlSub = `https://api.twitch.tv/helix/subscriptions/user?broadcaster_id=${process.env.BROADCASTER_ID}&user_id=${decoded.id}`;
+        const subscriptionsResponse = await axios.get(urlSub, {
+          headers: {
+            'Client-ID': process.env.TWITCH_CLIENT_ID,
+            Authorization: `Bearer ${accessToken}`,
+          },
+        });
+      
+        console.log('Réponse API Twitch:', subscriptionsResponse);
+      
+        const subs = subscriptionsResponse.data;
+      
+        if (!subs || subs.data.length === 0) {
+          return res.status(400).json({ message: 'Vous devez être abonné pour obtenir une récompense' });
+        }
+      } catch (error) {
+        // Gestion des erreurs spécifiques à Axios
+        if (error.response) {
+          // La requête a été faite et le serveur a répondu avec un code de statut hors de la plage 2xx
+          console.error('Erreur réponse API:', {
+            status: error.response.status,
+            data: error.response.data,
+            headers: error.response.headers,
+          });
+          return res.status(error.response.status).json({
+            message: error.response.data.message || 'Erreur lors de la requête Twitch',
+          });
+        } else if (error.request) {
+          // La requête a été faite mais aucune réponse n'a été reçue
+          console.error('Erreur requête non reçue:', error.request);
+          return res.status(500).json({ message: 'Aucune réponse reçue de Twitch' });
+        } else {
+          // Erreur dans la configuration de la requête
+          console.error('Erreur configuration requête:', error.message);
+          return res.status(500).json({ message: 'Erreur lors de la configuration de la requête Twitch' });
+        }
       }
 
       // Vérification de la dernière récompense
