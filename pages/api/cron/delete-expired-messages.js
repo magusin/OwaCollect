@@ -19,10 +19,8 @@ export default async function handler(req, res) {
             }
         });
 
-        console.log(`Expired messages deleted at ${now.toISOString()}`);
         res.status(200).json({ message: 'Expired messages deleted successfully' });
     } catch (error) {
-        console.error('Error deleting expired messages:', error);
         res.status(500).json({ message: 'Error deleting expired messages', error: error.message });
     } finally {
         await prisma.$disconnect();
