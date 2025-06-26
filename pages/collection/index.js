@@ -57,11 +57,11 @@ export default function Collection({ cards, totalPoints, errorServer }) {
     const handleSwitchChange = (position) => {
         // Logique pour modifier l'état en fonction de la position
         if (position === 30) {
-            setFilterState('non possédé'); // Exemple
+            setFilterState('non possédé');
         } else if (position === 75) {
-            setFilterState('none'); // Exemple
+            setFilterState('none'); 
         } else if (position === 120) {
-            setFilterState('possédé'); // Exemple
+            setFilterState('possédé'); 
         }
     };
 

@@ -23,28 +23,31 @@ model achievements {
 }
 
 model pets {
-  id                          Int                 @id @default(autoincrement())
-  userId                      String              @unique(map: "userId") @db.VarChar(255)
-  name                        String              @db.VarChar(255)
-  imageUrl                    String              @db.VarChar(1024)
-  xp                          Int?                @default(0)
-  level                       Int?                @default(1)
-  subs                        Int                 @default(0)
-  gifts                       Int                 @default(0)
-  messages                    Int                 @default(0)
-  bits                        Int                 @default(0)
-  guess                       Int                 @default(0)
-  quiz                        Int                 @default(0)
-  pointsUsed                  Int?                @default(0)
-  messagesOC                  Int                 @default(0)
-  reward                      DateTime            @default(dbgenerated("'2024-04-06'")) @db.Date
-  duels_duels_player1IdTopets duels[]             @relation("duels_player1IdTopets")
-  duels_duels_player2IdTopets duels[]             @relation("duels_player2IdTopets")
-  duels_duels_winnerIdTopets  duels[]             @relation("duels_winnerIdTopets")
-  playercards                 playercards[]
-  secretsdiscovered           secretsdiscovered[]
-  user_achievements           user_achievements[]
-  war                         warPlayers?
+  id                                              Int                 @id @default(autoincrement())
+  userId                                          String              @unique(map: "userId") @db.VarChar(255)
+  name                                            String              @db.VarChar(255)
+  imageUrl                                        String              @db.VarChar(1024)
+  xp                                              Int?                @default(0)
+  level                                           Int?                @default(1)
+  subs                                            Int                 @default(0)
+  gifts                                           Int                 @default(0)
+  messages                                        Int                 @default(0)
+  bits                                            Int                 @default(0)
+  guess                                           Int                 @default(0)
+  quiz                                            Int                 @default(0)
+  pointsUsed                                      Int?                @default(0)
+  messagesOC                                      Int                 @default(0)
+  reward                                          DateTime            @default(dbgenerated("'2024-04-06'")) @db.Date
+  creature_capture                                creature_capture[]
+  creature_trades_creature_trades_seller_idTopets creature_trades[]   @relation("creature_trades_seller_idTopets")
+  creature_trades_creature_trades_buyer_idTopets  creature_trades[]   @relation("creature_trades_buyer_idTopets")
+  duels_duels_player1IdTopets                     duels[]             @relation("duels_player1IdTopets")
+  duels_duels_player2IdTopets                     duels[]             @relation("duels_player2IdTopets")
+  duels_duels_winnerIdTopets                      duels[]             @relation("duels_winnerIdTopets")
+  playercards                                     playercards[]
+  secretsdiscovered                               secretsdiscovered[]
+  user_achievements                               user_achievements[]
+  war                                             warPlayers?
 }
 
 model user_achievements {
@@ -69,6 +72,7 @@ model card {
   name         String        @db.VarChar(255)
   picture      String        @db.VarChar(255)
   picture_back String        @map("picture-back") @db.VarChar(255)
+  picture_gold String?       @db.VarChar(255)
   isDraw       Boolean
   evolvedId    Int?
   evolveCost   Int?
@@ -90,6 +94,7 @@ model playercards {
   count    Int
   isInDeck Boolean @default(false)
   isNew    Boolean @default(false)
+  isGold   Boolean @default(false)
   card     card    @relation(fields: [cardId], references: [id], onDelete: Cascade, map: "playercards_ibfk_1")
   pets     pets    @relation(fields: [petId], references: [userId], onDelete: Cascade, map: "playercards_ibfk_2")
 
@@ -467,4 +472,114 @@ model warPlayerTrophies {
   @@id([petId, trophyId])
   @@unique([petId, trophyId], map: "PPRIMARY")
   @@index([trophyId], map: "trophyId")
+}
+
+model creature_battles {
+  id                                                              Int               @id @default(autoincrement())
+  capture1_id                                                     Int
+  capture2_id                                                     Int
+  winner_id                                                       Int?
+  created_at                                                      DateTime?         @default(now()) @db.DateTime(0)
+  creature_capture_creature_battles_capture1_idTocreature_capture creature_capture  @relation("creature_battles_capture1_idTocreature_capture", fields: [capture1_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "creature_battles_ibfk_1")
+  creature_capture_creature_battles_capture2_idTocreature_capture creature_capture  @relation("creature_battles_capture2_idTocreature_capture", fields: [capture2_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "creature_battles_ibfk_2")
+  creature_capture_creature_battles_winner_idTocreature_capture   creature_capture? @relation("creature_battles_winner_idTocreature_capture", fields: [winner_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "creature_battles_ibfk_3")
+
+  @@index([capture1_id], map: "capture1_id")
+  @@index([capture2_id], map: "capture2_id")
+  @@index([winner_id], map: "winner_id")
+}
+
+model creature_breeding {
+  id                                                                    Int               @id @default(autoincrement())
+  parent1_id                                                            Int
+  parent2_id                                                            Int
+  child_capture_id                                                      Int?
+  started_at                                                            DateTime?         @default(now()) @db.DateTime(0)
+  completed_at                                                          DateTime?         @db.DateTime(0)
+  creature_capture_creature_breeding_parent1_idTocreature_capture       creature_capture  @relation("creature_breeding_parent1_idTocreature_capture", fields: [parent1_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "creature_breeding_ibfk_1")
+  creature_capture_creature_breeding_parent2_idTocreature_capture       creature_capture  @relation("creature_breeding_parent2_idTocreature_capture", fields: [parent2_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "creature_breeding_ibfk_2")
+  creature_capture_creature_breeding_child_capture_idTocreature_capture creature_capture? @relation("creature_breeding_child_capture_idTocreature_capture", fields: [child_capture_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "creature_breeding_ibfk_3")
+
+  @@index([child_capture_id], map: "child_capture_id")
+  @@index([parent1_id], map: "parent1_id")
+  @@index([parent2_id], map: "parent2_id")
+}
+
+model creature_capture {
+  id                                                                     Int                 @id @default(autoincrement())
+  species_id                                                             Int
+  user_id                                                                String              @db.VarChar(255)
+  nickname                                                               String?             @db.VarChar(100)
+  is_shiny                                                               Boolean?            @default(false)
+  hp                                                                     Int?
+  attack                                                                 Int?
+  defense                                                                Int?
+  speed                                                                  Int?
+  created_at                                                             DateTime?           @default(now()) @db.DateTime(0)
+  is_for_sale                                                            Boolean?            @default(false)
+  price                                                                  Int?
+  iv_hp                                                                  Int?
+  iv_attack                                                              Int?
+  iv_defense                                                             Int?
+  iv_speed                                                               Int?
+  potentiel_total                                                        Int?
+  puissance                                                              Int?
+  creature_battles_creature_battles_capture1_idTocreature_capture        creature_battles[]  @relation("creature_battles_capture1_idTocreature_capture")
+  creature_battles_creature_battles_capture2_idTocreature_capture        creature_battles[]  @relation("creature_battles_capture2_idTocreature_capture")
+  creature_battles_creature_battles_winner_idTocreature_capture          creature_battles[]  @relation("creature_battles_winner_idTocreature_capture")
+  creature_breeding_creature_breeding_parent1_idTocreature_capture       creature_breeding[] @relation("creature_breeding_parent1_idTocreature_capture")
+  creature_breeding_creature_breeding_parent2_idTocreature_capture       creature_breeding[] @relation("creature_breeding_parent2_idTocreature_capture")
+  creature_breeding_creature_breeding_child_capture_idTocreature_capture creature_breeding[] @relation("creature_breeding_child_capture_idTocreature_capture")
+  creature_list                                                          creature_list       @relation(fields: [species_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "creature_capture_ibfk_1")
+  pets                                                                   pets                @relation(fields: [user_id], references: [userId], onDelete: NoAction, onUpdate: NoAction, map: "creature_capture_ibfk_2")
+  creature_trades                                                        creature_trades[]
+
+  @@index([species_id], map: "species_id")
+  @@index([user_id], map: "user_id")
+}
+
+model creature_list {
+  id                 Int                  @id @default(autoincrement())
+  name               String               @db.VarChar(100)
+  game_name          String?              @db.VarChar(100)
+  image_url          String?              @db.Text
+  is_shiny_available Boolean?             @default(false)
+  shiny_image_url    String?              @db.Text
+  rarity             creature_list_rarity
+  base_hp            Int?
+  base_attack        Int?
+  base_defense       Int?
+  base_speed         Int?
+  creature_capture   creature_capture[]
+}
+
+model creature_trades {
+  id                                   Int                     @id @default(autoincrement())
+  seller_id                            String                  @db.VarChar(255)
+  buyer_id                             String?                 @db.VarChar(255)
+  capture_id                           Int
+  price                                Int?
+  status                               creature_trades_status? @default(open)
+  created_at                           DateTime?               @default(now()) @db.DateTime(0)
+  completed_at                         DateTime?               @db.DateTime(0)
+  creature_capture                     creature_capture        @relation(fields: [capture_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "creature_trades_ibfk_1")
+  pets_creature_trades_seller_idTopets pets                    @relation("creature_trades_seller_idTopets", fields: [seller_id], references: [userId], onDelete: NoAction, onUpdate: NoAction, map: "creature_trades_ibfk_2")
+  pets_creature_trades_buyer_idTopets  pets?                   @relation("creature_trades_buyer_idTopets", fields: [buyer_id], references: [userId], onDelete: NoAction, onUpdate: NoAction, map: "creature_trades_ibfk_3")
+
+  @@index([buyer_id], map: "buyer_id")
+  @@index([capture_id], map: "capture_id")
+  @@index([seller_id], map: "seller_id")
+}
+
+enum creature_trades_status {
+  open
+  completed
+  cancelled
+}
+
+enum creature_list_rarity {
+  common
+  rare
+  epic
+  legendary
 }

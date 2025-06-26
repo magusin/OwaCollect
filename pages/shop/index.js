@@ -55,6 +55,7 @@ export default function Shop({ productsData, totalPoints, errorServer }) {
                 // if response status is 200 then set cards in state and show modal
                 if (response.status === 200) {
                     const data = await response.data;
+                    console.log('Achat réussi:', data);
                     // await editUserPoints(selectedProduct);
                     localStorage.setItem('userOC', JSON.stringify(data.userData));
                     const totalPoints = calculatePoints(data.userData);
@@ -114,7 +115,7 @@ export default function Shop({ productsData, totalPoints, errorServer }) {
     function HeadView() {
         return (
             <Head>
-                <title>Shop | Owarida</title>
+                <title>Boutique | Owarida</title>
                 <meta name="description" content="Achetez des packs de cartes dans le shop d'Owarida" />
                 <meta name="keywords" content="Owarida, shop, cartes, packs, points, elden ring" />
                 <link rel="icon" href="/favicon.ico" />
@@ -176,13 +177,13 @@ export default function Shop({ productsData, totalPoints, errorServer }) {
                                     <Modal
                                         setShowModal={setShowModal}
                                         handleConfirm={(quantity) => handleConfirmPurchase(selectedProduct, quantity)}
-                                        title="Confirmation d'Achat"
+                                        title="Confirmation d'achat"
                                         message={
                                             <>
                                                 Êtes-vous sûr de vouloir acheter <b>{selectedProduct.name}</b> pack pour <b>{selectedProduct.price} OC</b> ?
                                             </>
                                         }
-                                        maxQuantity={Math.floor(points / selectedProduct.price) > 50 ? 50 : Math.floor(points / selectedProduct.price)}
+                                        maxQuantity={Math.floor(points / selectedProduct.price) > 10 ? 10 : Math.floor(points / selectedProduct.price)}
                                         cost={selectedProduct.price}
                                         buy={true}
                                     />

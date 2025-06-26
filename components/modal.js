@@ -13,7 +13,7 @@ export default function Modal ({ sell, buy, setShowModal, handleConfirm, title, 
 
     return (
      
-        <div className="text-black fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center">
+        <div className="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center">
             <div className="bg-white p-4 rounded-lg shadow-xl">
                 <h2 className="text-xl font-bold mb-4">{title}</h2>
                 <p>{message}</p>
@@ -26,7 +26,7 @@ export default function Modal ({ sell, buy, setShowModal, handleConfirm, title, 
                     onChange={handleChange}
                     min={1}
                     max={maxQuantity}
-                    className="border rounded p-2 text-center w-full mb-4"
+                    className="text-black border rounded p-2 text-center w-full mb-4"
                     />
                     </>
                 )}
@@ -39,7 +39,7 @@ export default function Modal ({ sell, buy, setShowModal, handleConfirm, title, 
                     onChange={handleChange}
                     min={1}
                     max={maxQuantity}
-                    className="border rounded p-2 text-center w-full mb-4"
+                    className="tb border rounded p-2 text-center w-full mb-4"
                     />
                     <p className='my-2'>Prix total : <b>{finalCost} OC</b></p>
                     </>

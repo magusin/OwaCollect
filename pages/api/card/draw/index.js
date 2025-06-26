@@ -79,7 +79,7 @@ export default async function handler(req, res) {
                 if (typeof quantity !== 'number' || typeof category !== 'string' || typeof cost !== 'number') {
                     return res.status(400).json({ message: 'Invalid input types' });
                 }
-                if (quantity < 1 || quantity > 50) {
+                if (quantity < 1 || quantity > 10) {
                     return res.status(400).json({ message: 'Quantité invalide' });
                 }
                 if (quantity * 500 != cost) {
@@ -97,13 +97,19 @@ export default async function handler(req, res) {
                 if (cost > availablePoints) {
                     return res.status(400).json({ message: 'Pas assez de points' });
                 }
+                // Tirer les cartes filtrées par catégorie
                 const cards = await prisma.card.findMany({
                     where: {
                         category: category,
                         isDraw: true
+                    },
+                    orderBy: {
+                        dropRate: 'asc'
                     }
                 })
+                // Définir le taux de drop total
                 const totalDropRate = cards[cards.length - 1].dropRate;
+
 
                 const selectRandomCard = () => {
                     let randomNum = Math.random() * totalDropRate;
@@ -124,34 +130,87 @@ export default async function handler(req, res) {
                     }
                 };
 
-                const selectedCards = Array.from({ length: 5 * quantity }, () => selectRandomCard(totalDropRate));
+                const drawnCards = Array.from({ length: quantity * 5 }, () => selectRandomCard());
 
-                const selectedCardsMap = selectedCards.reduce((acc, card) => {
-                    if (!acc[card.id]) {
-                        acc[card.id] = { ...card, count: 0 };
-                    }
-                    acc[card.id].count += 1;
-                    return acc;
-                }, {});
-
-                for (const card of Object.values(selectedCardsMap)) {
-                    await prisma.$executeRaw`INSERT INTO playercards (petId, cardId, count, isNew)
-                    VALUES (${decoded.id}, ${card.id}, ${card.count}, true)
-                    ON DUPLICATE KEY UPDATE count = count + ${card.count}`;
+                const ownedRaw = await prisma.playercards.findMany({
+                  where: { petId: decoded.id },
+                  select: {
+                    cardId: true,
+                    isGold: true,
+                    isNew: true
+                  }
+                });
+            
+                const ownedMap = new Map();
+                for (const c of ownedRaw) {
+                  const key = `${c.cardId}-${c.isGold ? 'gold' : 'normal'}`;
+                  ownedMap.set(key, { isNew: c.isNew });
                 }
-                    // Déduire les points du joueur
-                    const userData = await prisma.pets.update({
-                        where: {
-                            userId: decoded.id
-                        },
-                        data: {
-                            pointsUsed: {
-                                increment: cost
-                            }
-                        }
+            
+                const resultMap = new Map();
+            
+                for (const card of drawnCards) {
+                  const hasNormal = ownedMap.has(`${card.id}-normal`);
+                  const hasGold = ownedMap.has(`${card.id}-gold`);
+            
+                  let isGold = false;
+                  if (hasNormal && card.picture_gold && Math.random() < 0.05 && !hasGold) {
+                    isGold = true;
+                  }
+            
+                  const key = `${card.id}-${isGold ? 'gold' : 'normal'}`;
+                  const existingStatus = ownedMap.get(key);
+            
+                  let isNew = false;
+                  if (!existingStatus) {
+                    isNew = true;
+                  } else if (existingStatus.isNew) {
+                    isNew = true;
+                  } else if (isGold && !hasGold) {
+                    isNew = true;
+                  }
+            
+                  ownedMap.set(key, { isNew });
+            
+                  if (!resultMap.has(key)) {
+                    resultMap.set(key, {
+                      id: card.id,
+                      name: card.name,
+                      picture: card.picture,
+                      picture_back: isGold ? card.picture_gold : card.picture_back,
+                      isGold,
+                      isNew,
+                      count: 0,
+                      category: card.category,
+                      rarety: card.rarety
                     });
-                    
-                res.status(200).json({ selectedCards, userData })
+                  }
+            
+                  resultMap.get(key).count += 1;
+                }
+            
+                // Bulk insert
+                const values = Array.from(resultMap.values()).map(c =>
+                  `('${decoded.id}', ${c.id}, ${c.count}, ${c.isGold ? 1 : 0}, ${c.isNew ? 1 : 0})`
+                ).join(', ');
+            
+                await prisma.$executeRawUnsafe(`
+                  INSERT INTO playercards (petId, cardId, count, isGold, isNew)
+                  VALUES ${values}
+                  ON DUPLICATE KEY UPDATE
+                    count = count + VALUES(count),
+                    isNew = IF(playercards.isNew = true OR (playercards.isGold = false AND VALUES(isGold) = true), true, VALUES(isNew)),
+                    isGold = IF(playercards.isGold = true OR VALUES(isGold) = true, true, false)
+                `);
+            
+                const updatedUser = await prisma.pets.update({
+                  where: { userId: decoded.id },
+                  data: { pointsUsed: { increment: cost } }
+                });
+            
+                const cardsToReturn = Array.from(resultMap.values());
+
+                res.status(200).json({ selectedCards: cardsToReturn, userData: updatedUser });
                 break
             default:
                 res.status(405).end(`Method ${req.method} Not Allowed`)
