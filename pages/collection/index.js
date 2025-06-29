@@ -1,9 +1,8 @@
-import React from "react";
+import React, { useMemo, useCallback, useEffect, useState } from "react";
 import Image from 'next/legacy/image';
 import axios from 'axios'
 import calculatePoints from '@/utils/calculatePoints';
 import { signOut, useSession } from 'next-auth/react';
-import { useEffect } from "react";
 import { useRouter } from 'next/router';
 import Header from 'C/header';
 import { getSession } from "next-auth/react";
@@ -15,55 +14,147 @@ import axiosInstance from "@/utils/axiosInstance";
 import Head from 'next/head';
 
 export default function Collection({ cards, totalPoints, errorServer }) {
-
-    const [error, setError] = React.useState(errorServer || null);
     const { data: session, status } = useSession();
     const router = useRouter();
-    const [loading, setLoading] = React.useState(false);
-    const [points, setPoints] = React.useState(totalPoints || 0);
-    const [selectedCard, setSelectedCard] = React.useState(null);
-    const [showModal, setShowModal] = React.useState(false);
-    const [showModalSell, setShowModalSell] = React.useState(false);
-    const [showAlert, setShowAlert] = React.useState(false);
-    const [alertMessage, setAlertMessage] = React.useState('');
-    const [alertType, setAlertType] = React.useState(null);
-    const [isFetching, setIsFetching] = React.useState(false);
-    const [allCard, setAllCard] = React.useState(cards?.cards);
-    const [playerCards, setPlayerCards] = React.useState(cards?.playerCards);
-    const [selectedRarity, setSelectedRarity] = React.useState('Toutes');
-    const [showOwnedOnly, setShowOwnedOnly] = React.useState(false);
-    const [showLevelUpOnly, setShowLevelUpOnly] = React.useState(false);
-    const [filteredCards, setFilteredCards] = React.useState(allCard);
-    const [filterState, setFilterState] = React.useState("none");
-    const [showNewOnly, setShowNewOnly] = React.useState(false);
-    const [selectedCategory, setSelectedCategory] = React.useState(
-        () => {
-            if (typeof localStorage !== 'undefined') {
-                return localStorage.getItem('categoryOC') || null;
-            } else {
-                return null;
-            }
-        }
-    );
-    const ownedCardIds = new Set(playerCards?.map(card => card.cardId));
-    const allCardsName = new Map(allCard?.map(card => [card.id, card]));
-    const newCards = new Set(playerCards?.filter(card => card.isNew).map(card => card.cardId));
-    // Créer un objet pour le suivi du count pour chaque cardId
-    const cardCounts = playerCards?.reduce((acc, card) => {
-        acc[card.cardId] = card.count;
-        return acc;
-    }, {});
 
-    const handleSwitchChange = (position) => {
-        // Logique pour modifier l'état en fonction de la position
-        if (position === 30) {
-            setFilterState('non possédé');
-        } else if (position === 75) {
-            setFilterState('none'); 
-        } else if (position === 120) {
-            setFilterState('possédé'); 
+    const [error, setError] = useState(errorServer || null);
+    const [loading, setLoading] = useState(false);
+    const [points, setPoints] = useState(totalPoints || 0);
+    const [selectedCard, setSelectedCard] = useState(null);
+    const [showModal, setShowModal] = useState(false);
+    const [showModalSell, setShowModalSell] = useState(false);
+    const [showAlert, setShowAlert] = useState(false);
+    const [alertMessage, setAlertMessage] = useState('');
+    const [alertType, setAlertType] = useState(null);
+    const [allCard, setAllCard] = useState(cards?.cards);
+    const [playerCards, setPlayerCards] = useState(cards?.playerCards);
+    const [selectedRarity, setSelectedRarity] = useState('Toutes');
+    const [filterState, setFilterState] = useState("none");
+    const [showOwnedOnly, setShowOwnedOnly] = useState(false);
+    const [showLevelUpOnly, setShowLevelUpOnly] = useState(false);
+    const [showNewOnly, setShowNewOnly] = useState(false);
+    const [selectedCategory, setSelectedCategory] = useState(() => {
+        if (typeof localStorage !== 'undefined') {
+            return localStorage.getItem('categoryOC') || null;
         }
+        return null;
+    });
+
+    const playerCardMap = useMemo(() => {
+        const map = new Map();
+        playerCards?.forEach((pc) => {
+            map.set(Number(pc.id), {
+                ...pc,
+            });
+        });
+        return map;
+    }, [playerCards]);
+
+
+    const newCards = useMemo(() => {
+        return new Set(playerCards?.filter(card => card.isNew).map(card => card.cardId));
+    }, [playerCards]);
+
+    const cardCounts = useMemo(() => {
+        const map = {};
+        playerCards?.forEach((card) => {
+            map[card.cardId] = card.count;
+        });
+        return map;
+    }, [playerCards]);
+
+    const ownedCardIds = useMemo(() => new Set(playerCards?.map(card => card.cardId)), [playerCards]);
+
+    const mergedCardMap = useMemo(() => {
+        const map = new Map();
+        allCard.forEach(card => {
+            const owned = playerCards.find(p =>
+                p.id === card.id
+            );
+
+            const merged = {
+                ...card,
+                picture: owned?.picture ?? null,
+                picture_gold: owned?.isGold ? owned.picture_gold : null,
+                isGold: owned?.isGold ?? false,
+                isNew: owned?.isNew ?? false,
+                count: owned?.count ?? 0,
+                owned: !!owned, // important !
+                name: owned?.name || card.name,
+            };
+
+            map.set(card.id, merged);
+        });
+        return map;
+    }, [allCard, playerCards]);
+
+    const mergedCards = Array.from(mergedCardMap.values());
+
+    console.log('selectedCard', selectedCard);
+
+    const filteredCards = useMemo(() => {
+        return Array.from(mergedCardMap.values()).filter(card => {
+            const isCorrectRarity = selectedRarity === 'Toutes' || card.rarety === selectedRarity;
+            const category = card.category === selectedCategory;
+            const canLevelUp = card.count >= 3 && points >= card.evolveCost && card.evolveCost !== null && !mergedCardMap.has(card.id + 1);
+
+            if (showNewOnly && !card.isNew) return false;
+            if (filterState === 'non possédé' && card.owned) return false;
+            if (filterState === 'possédé' && !card.owned) return false;
+            if (showOwnedOnly && !card.owned) return false;
+            if (showLevelUpOnly && !canLevelUp) return false;
+
+            return isCorrectRarity && category;
+        });
+    }, [
+        mergedCards,
+        selectedRarity,
+        selectedCategory,
+        showNewOnly,
+        filterState,
+        showOwnedOnly,
+        showLevelUpOnly,
+        points,
+        ownedCardIds
+    ]);
+
+    const getImageSrc = (card) => {
+        if (card.owned) {
+            return card.isGold && card.picture_gold
+                ? card.picture_gold
+                : card.picture || '/images/card-placeholder.webp';
+        }
+        return card.picture || card.picture_back || '/images/card-placeholder.webp';
     };
+
+    const handleSwitchChange = useCallback((position) => {
+        if (position === 30) setFilterState('non possédé');
+        else if (position === 75) setFilterState('none');
+        else if (position === 120) setFilterState('possédé');
+    }, []);
+
+    const handleRarityChange = useCallback((rarity) => setSelectedRarity(rarity), []);
+
+    const handleCategoryChange = useCallback((category) => {
+        if (typeof localStorage !== 'undefined') {
+            localStorage.setItem('categoryOC', category);
+        }
+        setSelectedCategory(category);
+    }, []);
+
+    const handleShowLevelUpOnlyChange = useCallback((e) => setShowLevelUpOnly(e.target.checked), []);
+    const handleShowNewOnlyChange = useCallback((e) => setShowNewOnly(e.target.checked), []);
+
+    const handleCardClick = useCallback((card) => {
+        setSelectedCard(card);
+        if (card.isNew) {
+            axiosInstance.put('/api/card/view', { cardId: card.id }, {
+                customConfig: { session: session }
+            }).then(() => {
+                setPlayerCards(current => current.map(c => c.cardId === card.id ? { ...c, isNew: false } : c));
+            }).catch(error => console.error(error));
+        }
+    }, [session]);
 
     // Fonction pour enlever NEW
     const removeNew = async (cardId) => {
@@ -111,6 +202,24 @@ export default function Collection({ cards, totalPoints, errorServer }) {
                 localStorage.setItem('points', totalPoints);
                 setPoints(totalPoints);
                 setPlayerCards(data.allPlayerCards);
+                const updatedPlayerCard = data.allPlayerCards.find(card => card.id === selectedCard.id);
+
+                if (updatedPlayerCard) {
+                    setSelectedCard(prev => ({
+                        ...prev,
+                        id: updatedPlayerCard.id,
+                        name: updatedPlayerCard.name,
+                        rarety: updatedPlayerCard.rarety,
+                        isNew: updatedPlayerCard.isNew,
+                        category: updatedPlayerCard.category,
+                        number: updatedPlayerCard.number,
+                        owned: true,
+                        count: updatedPlayerCard.count,
+                        isGold: updatedPlayerCard.isGold,
+                        picture: updatedPlayerCard.picture,
+                        picture_gold: updatedPlayerCard.picture_gold,
+                    }));
+                }
                 setAlertType('success');
                 setAlertMessage(
                     <>
@@ -137,26 +246,6 @@ export default function Collection({ cards, totalPoints, errorServer }) {
         }
     }
 
-    // Mettre à jour les cartes filtrées lorsque le filtre change
-    useEffect(() => {
-        let newFilteredCards = allCard?.filter(card => {
-            const cardOwned = ownedCardIds.has(card.id);
-            const isNew = newCards.has(card.id);
-            const canLevelUp = cardCounts[card.id] >= 3 && points >= card.evolveCost && card.evolveCost !== null && !ownedCardIds.has(card.id + 1);
-            const isCorrectRarity = selectedRarity === 'Toutes' || card.rarety === selectedRarity;
-            const category = card.category === selectedCategory;
-            // Logique de filtrage basée sur la position du switch
-            if (showNewOnly && !isNew) return false;
-            if (filterState === 'non possédé' && cardOwned) return false; // Si le switch est à gauche, exclure les cartes possédées
-            if (filterState === 'possédé' && !cardOwned) return false; // Si le switch est à droite, exclure les cartes non possédées
-            if (showOwnedOnly && !cardOwned) return false;
-            if (showLevelUpOnly && !canLevelUp) return false;
-            return isCorrectRarity && (category);
-        });
-        setFilteredCards(newFilteredCards);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [showOwnedOnly, allCard, selectedRarity, showLevelUpOnly, selectedCard, filterState, selectedCategory, showNewOnly]);
-
     // fonction de level up de la carte
     const handleConfirmLevelUp = async (selectedCard) => {
         setLoading(true);
@@ -174,15 +263,24 @@ export default function Collection({ cards, totalPoints, errorServer }) {
                     setPoints(totalPoints);
                     setPlayerCards(data.allPlayerCards);
                     setAlertType('success');
-                    const newCard = allCard.find(card => card.id === data.updatedCard.cardId);
-                    setFilteredCards(filteredCards => {
-                        const isCardIncluded = filteredCards.some(card => card.id === data.updatedCard.cardId);
-                        if (!isCardIncluded) {
-                            return [...filteredCards, newCard]
-                        }
-                        return filteredCards;
-                    })
-                    setSelectedCard(newCard)
+                    const updatedPlayerCard = data.allPlayerCards.find(card => card.id === selectedCard.id +1);
+
+                    if (updatedPlayerCard) {
+                        setSelectedCard(prev => ({
+                            ...prev,
+                            count: updatedPlayerCard.count,
+                            id: updatedPlayerCard.id,
+                            name: updatedPlayerCard.name,
+                            rarety: updatedPlayerCard.rarety,
+                            isNew: updatedPlayerCard.isNew,
+                            category: updatedPlayerCard.category,
+                            number: updatedPlayerCard.number,
+                            owned: true,
+                            isGold: updatedPlayerCard.isGold,
+                            picture: updatedPlayerCard.picture,
+                            picture_gold: updatedPlayerCard.picture_gold,
+                        }));
+                    }
                     setAlertMessage(
                         <>
                             Vous avez level Up la carte <b>{selectedCard.name}</b>
@@ -225,35 +323,7 @@ export default function Collection({ cards, totalPoints, errorServer }) {
         setShowModalSell(true);
     };
 
-    // Fonction pour mettre à jour la rareté sélectionnée
-    const handleRarityChange = (rarity) => {
-        setSelectedRarity(rarity);
-    };
-
-    const handleCategoryChange = (category) => {
-        if (typeof localStorage !== 'undefined') {
-            localStorage.setItem('categoryOC', category);
-        }
-        setSelectedCategory(category);
-    };
-
     const selectedCardIndex = filteredCards?.findIndex(card => card.id === selectedCard?.id);
-    // Gestionnaire de clic pour sélectionner une carte
-    const handleCardClick = (card) => {
-        setSelectedCard(card);
-        if (newCards.has(card.id)) {
-            removeNew(card.id);
-        }
-    };
-
-    // Fonction pour gérer le changement de filtre
-    const handleShowLevelUpOnlyChange = (event) => {
-        setShowLevelUpOnly(event.target.checked);
-    };
-
-    const handleShowNewOnlyChange = (event) => {
-        setShowNewOnly(event.target.checked);
-    };
 
     const nextCard = () => {
         const prevCard = filteredCards[(selectedCardIndex + 1) % filteredCards.length];
@@ -344,16 +414,16 @@ export default function Collection({ cards, totalPoints, errorServer }) {
                 <div className="flex flex-col h-screen" style={{ marginTop: "80px" }}>
                     <Header points={points} />
                     <div className="flex-grow flex flex-col items-center">
-                    <div className="cursor-pointer relative w-16 w-[200px] h-[200px] sm:w-[250px] md:w-[300px] lg:w-[350px] xl:w-[400px] 2xl:w-[450px] m-4" onClick={() => router.push('/leaderboard')} >
-                                <Image
-                                    src="/images/bannière-leaderboard.webp"
-                                    alt="Leaderboard Banner"
-                                    layout="fill"
-                                    objectFit="contain"
-                                    sizes="100%"
-                                    priority={true}
-                                />
-                            </div>
+                        <div className="cursor-pointer relative w-16 w-[200px] h-[200px] sm:w-[250px] md:w-[300px] lg:w-[350px] xl:w-[400px] 2xl:w-[450px] m-4" onClick={() => router.push('/leaderboard')} >
+                            <Image
+                                src="/images/bannière-leaderboard.webp"
+                                alt="Leaderboard Banner"
+                                layout="fill"
+                                objectFit="contain"
+                                sizes="100%"
+                                priority={true}
+                            />
+                        </div>
                         {!selectedCategory && (
                             <h1 className="flex flex-wrap justify-center font-bold text-xl m-4">
                                 Sélectionnez une catégorie
@@ -428,33 +498,33 @@ export default function Collection({ cards, totalPoints, errorServer }) {
                             </span>
                         </div>
                         <div className="flex flex-wrap justify-center">
-                        
+
                             {filteredCards.map((card) => (
                                 <div key={card.id} onClick={() => handleCardClick(card)} className="text-black relative flex flex-col items-center justify-center m-4 cursor-pointer">
                                     <div className="relative w-[100px] h-[100px] sm:w-[150px] sm:h-[150px] md:w-[200px] md:h-[200px] lg:w-[250px] lg:h-[250px] xl:w-[300px] xl:h-[300px] 2xl:w-[350px] 2xl:h-[350px]">
                                         <Image
-                                            src={ownedCardIds.has(card.id) ? `${card.picture}` : `${card.picture_back}`}
-                                            alt={ownedCardIds.has(card.id) ? card.name : 'Dos de la carte ' + card.id}
+                                            src={card.owned ? getImageSrc(card) : card.picture_back}
+                                            alt={card.owned ? card.name : 'Dos de la carte ' + card.id}
                                             layout="fill"
                                             objectFit="contain"
                                             sizes="100%"
                                             loading="lazy"
                                         />
                                     </div>
-                                    
-                                    <div className={`absolute inset-0 flex items-center justify-center rounded-full ${ownedCardIds.has(card.id) ? "hidden" : ""}`}>
+
+                                    <div className={`absolute inset-0 flex items-center justify-center rounded-full ${card.owned ? "hidden" : ""}`}>
                                         <div className="bg-white/80 backdrop-blur-sm rounded-full px-2 py-1 md:px-4 md:py-2 text-lg font-semibold shadow-xl border border-gray-300">
                                             {card.number}
                                         </div>
                                     </div>
-                                    {newCards.has(card.id) && (
+                                    {card.isNew && (
                                         <div className="absolute top-0 right-0 bg-green-500 text-orange-500 md:text-base rounded-full px-2 py-1 text-sm font-bold">
                                             NEW
                                         </div>
                                     )}
-                                    {cardCounts[card.id] > 1 && (
+                                    {card.id && card.count > 1 && (
                                         <div className="absolute bottom-2 right-2 bg-red-600 text-white rounded-full px-2 py-1 text-sm font-bold">
-                                            X {cardCounts[card.id]}
+                                            X {card.count}
                                         </div>
                                     )}
                                     <span className="absolute bottom-2 left-2 text-black bg-white rounded-full font-bold text-xl cursor-pointer group w-5 h-5 flex items-center justify-center">
@@ -462,14 +532,14 @@ export default function Collection({ cards, totalPoints, errorServer }) {
                                         <span className="tooltip-text absolute hidden group-hover:block bg-gray-700 text-white text-xs rounded p-2 -ml-5 -mb-6 bottom-12 left-6 md:text-base w-[100px] sm:w-[100px] md:w-[150px] lg:w-[200px] xl:w-[250px] 2xl:w-[300px]">
                                             {card.id === 117 || card.id === 51 || card.id === 101 || card.id === 222 ? "S'obtient via un événement"
                                                 : card.id === 66 ? "S'obtient en résolvant Enigma"
-                                                : card.isDraw === true
-                                                    ? `S'obtient via la boutique ${card.evolveCost ? "et peut level Up" : ""}`
-                                                    : (!allCardsName.get(card.id - 1)?.evolvedId)
-                                                        ? "Vendu par un mystérieux marchand"
-                                                        : `S'obtient via le level Up de ${ownedCardIds.has(card.id - 1)
-                                                            ? allCardsName.get(card.id - 1)?.name
-                                                            : card.number - 1
-                                                        }`
+                                                    : card.isDraw === true
+                                                        ? `S'obtient via la boutique ${card.evolveCost ? "et peut level Up" : ""}`
+                                                        : (card.evolvedId)
+                                                            ? "Vendu par un mystérieux marchand"
+                                                            : `S'obtient via le level Up de ${card.owned
+                                                                ? playerCardMap.get(card.id - 1)?.name || "Carte précédente"
+                                                                : card.number - 1
+                                                            }`
                                             }
                                         </span>
                                     </span>
@@ -487,8 +557,14 @@ export default function Collection({ cards, totalPoints, errorServer }) {
                                     <div className="relative h-full" style={{ width: '100%', maxWidth: '100vh' }}>
                                         <div className="aspect-w-1 aspect-h-1 ">
                                             <Image
-                                                src={ownedCardIds.has(selectedCard.id) ? `${selectedCard.picture}` : `${selectedCard.picture_back}`}
-                                                alt={ownedCardIds.has(selectedCard.id) ? selectedCard.name : 'Dos de la carte ' + selectedCard.id}
+                                                src={
+                                                    selectedCard.isGold
+                                                        ? selectedCard.picture_gold
+                                                        : selectedCard.owned
+                                                            ? selectedCard.picture
+                                                            : selectedCard.picture_back
+                                                }
+                                                alt={selectedCard.owned ? selectedCard.name : 'Dos de la carte ' + selectedCard.id}
                                                 layout="fill"
                                                 objectFit="contain"
                                                 sizes="100%"
@@ -501,14 +577,14 @@ export default function Collection({ cards, totalPoints, errorServer }) {
                                         <Image onClick={nextCard} src="/images/next.png" alt="next card" objectFit="contain" objectPosition="center" width={130} height={100} loading="lazy" />
                                     </button>
                                     {/* Button sell up */}
-                                    {ownedCardIds.has(selectedCard.id) && (cardCounts[selectedCard.id] > 1) && (
-                                        <button onClick={handleSell} disabled={!cardCounts[selectedCard.id] > 1} className="w-20 absolute bottom-2 left-4 md:w-24 xl:w-auto">
+                                    {selectedCard.owned && (selectedCard.count > 1) && (
+                                        <button onClick={handleSell} disabled={!selectedCard.count > 1} className="w-20 absolute bottom-2 left-4 md:w-24 xl:w-auto">
                                             <Image src="/images/sell.png" alt="next card" objectFit="contain" objectPosition="center" width={100} height={100} loading="lazy" />
                                         </button>
                                     )}
                                     {/* Button level up */}
-                                    {ownedCardIds.has(selectedCard.id) && (selectedCard.evolveCost) && (!ownedCardIds.has(selectedCard.id + 1)) && (
-                                        <button onClick={handleLevelUp} disabled={!(cardCounts[selectedCard.id] > 2 && points >= selectedCard.evolveCost)} className={`w-16 md:w-24 lg:w-28 xl:w-32 absolute bottom-0 ${cardCounts[selectedCard.id] > 2 ? "border border-yellow-500" : ""}  md:bottom-0 z-10`}>
+                                    {selectedCard.owned && (selectedCard.evolveCost) && (!ownedCardIds.has(selectedCard.id + 1)) && (
+                                        <button onClick={handleLevelUp} disabled={!(selectedCard.count > 2 && points >= selectedCard.evolveCost)} className={`w-16 md:w-24 lg:w-28 xl:w-32 absolute bottom-0 ${selectedCard.count > 2 ? "border border-yellow-500" : ""}  md:bottom-0 z-10`}>
                                             <Image src="/images/levelUp.png" alt="next card" objectFit="contain" objectPosition="center" width={120} height={120} loading="lazy" />
                                         </button>
                                     )}
@@ -540,7 +616,7 @@ export default function Collection({ cards, totalPoints, errorServer }) {
                                                 Combien d'exemplaires de <b>{selectedCard.name}</b> souhaitez-vous vendre ?
                                             </>
                                         }
-                                        maxQuantity={cardCounts[selectedCard.id] - 1}
+                                        maxQuantity={selectedCard.count - 1}
                                         cost={selectedCard.rarety === 'Rare' ? 70 : selectedCard.rarety === 'Epique' ? 150 : 30}
                                         sell={true}
                                     />

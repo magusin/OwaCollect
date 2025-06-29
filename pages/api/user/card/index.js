@@ -65,21 +65,47 @@ export default async function handler(req, res) {
         switch (req.method) {
             case 'GET':
                 // Récupérer toutes les cartes
-                const cards = await prisma.card.findMany()
-
-                // Récupérer les cartes du joueur
+                const cards = await prisma.card.findMany({
+                    select: {
+                        id: true,
+                        rarety: true,
+                        isDraw: true,
+                        evolvedId: true,
+                        evolveCost: true, // ✅ pour vérifier si la carte peut évoluer
+                        category: true,
+                        number: true,
+                        picture_back: true, // ✅ uniquement l'image de dos
+                    }
+                })
+                // Récupérer les cartes du joueur avec détails
                 const playerCards = await prisma.playercards.findMany({
                     where: {
                         petId: decoded.id
                     },
                     include: {
-                        card: true // Inclut les détails des cartes
+                        card: true
                     }
                 });
 
-                // Renvoyer les produits et les cartes du joueur
-                res.status(200).json({ cards, playerCards });
-                break
+                // Mapper et filtrer les infos à retourner
+                const safePlayerCards = playerCards.map(pc => ({
+                    id: pc.card.id,
+                    count: pc.count,
+                    isNew: pc.isNew,
+                    isInDeck: pc.isInDeck,
+                    isGold: pc.isGold,
+                    name: pc.card.name,
+                    rarety: pc.card.rarety,
+                    category: pc.card.category,
+                    number: pc.card.number,
+                    picture: pc.card.picture, 
+                    owned: true,             // Toujours le recto
+                    picture_back: pc.card.picture_back,    // Toujours le verso
+                    picture_gold: pc.isGold ? pc.card.picture_gold : null // ✅ seulement si goldée
+                }));
+
+                res.status(200).json({ cards, playerCards: safePlayerCards });
+                break;
             case 'PUT':
                 const signature = await verifySignature(req);
                 if (!signature) {
@@ -192,7 +218,22 @@ export default async function handler(req, res) {
                     }
                 });
 
-                res.status(200).json({ updatedCard: playerCardsEdit, allPlayerCards, userData });
+                // Mapper et filtrer les infos à retourner
+                const safeAllPlayerCards = allPlayerCards.map(card => ({
+                    id: card.card.id,
+                    name: card.card.name,
+                    count: card.count,
+                    rarety: card.card.rarety,
+                    isNew: card.isNew,
+                    isGold: card.isGold,
+                    category: card.card.category,
+                    number: card.card.number,
+                    picture: card.card.picture,
+                    picture_back: card.card.picture_back,
+                    picture_gold: card.isGold ? card.card.picture_gold : null
+                }));
+
+                res.status(200).json({ updatedCard: playerCardsEdit, allPlayerCards: safeAllPlayerCards, userData });
                 break
             default:
                 res.status(405).end(`Method ${req.method} Not Allowed`)

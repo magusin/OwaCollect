@@ -166,7 +166,23 @@ export default async function handler(req, res) {
                     }
                 });
 
-                res.status(200).json({ allPlayerCards, userData });
+                // Mapper et filtrer les infos à retourner
+                 const safePlayerCards = allPlayerCards.map(card => ({
+                    id: card.card.id,
+                    name: card.card.name,
+                    count: card.count,
+                    rarety: card.card.rarety,
+                    isNew: card.isNew,
+                    isGold: card.isGold,
+                    category: card.card.category,
+                    number: card.card.number,
+                    owned: card.count > 0,
+                    picture: card.card.picture,
+                    picture_back: card.card.picture_back,
+                    picture_gold: card.isGold ? card.card.picture_gold : null
+                }));
+
+                res.status(200).json({ allPlayerCards: safePlayerCards, userData });
                 break
 
             default:
