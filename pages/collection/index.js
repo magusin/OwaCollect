@@ -12,6 +12,8 @@ import Footer from "@/components/footer";
 import Switch from "@/components/filterToggleSVG";
 import axiosInstance from "@/utils/axiosInstance";
 import Head from 'next/head';
+import ParticlesGold from '@/components/ParticlesGold';
+
 
 export default function Collection({ cards, totalPoints, errorServer }) {
     const { data: session, status } = useSession();
@@ -89,8 +91,6 @@ export default function Collection({ cards, totalPoints, errorServer }) {
     }, [allCard, playerCards]);
 
     const mergedCards = Array.from(mergedCardMap.values());
-
-    console.log('selectedCard', selectedCard);
 
     const filteredCards = useMemo(() => {
         return Array.from(mergedCardMap.values()).filter(card => {
@@ -263,7 +263,7 @@ export default function Collection({ cards, totalPoints, errorServer }) {
                     setPoints(totalPoints);
                     setPlayerCards(data.allPlayerCards);
                     setAlertType('success');
-                    const updatedPlayerCard = data.allPlayerCards.find(card => card.id === selectedCard.id +1);
+                    const updatedPlayerCard = data.allPlayerCards.find(card => card.id === selectedCard.id + 1);
 
                     if (updatedPlayerCard) {
                         setSelectedCard(prev => ({
@@ -521,6 +521,9 @@ export default function Collection({ cards, totalPoints, errorServer }) {
                                         <div className="absolute top-0 right-0 bg-green-500 text-orange-500 md:text-base rounded-full px-2 py-1 text-sm font-bold">
                                             NEW
                                         </div>
+                                    )}
+                                    {card.isGold && (
+                                        <ParticlesGold />
                                     )}
                                     {card.id && card.count > 1 && (
                                         <div className="absolute bottom-2 right-2 bg-red-600 text-white rounded-full px-2 py-1 text-sm font-bold">

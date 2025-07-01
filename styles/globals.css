@@ -463,3 +463,50 @@ body {
     padding-left: 190px;
   }
 }
+
+@keyframes sparkle {
+  0% {
+    transform: translateY(0) scale(1);
+    opacity: 0.9;
+  }
+  100% {
+    transform: translateY(-60px) scale(0.5);
+    opacity: 0;
+  }
+}
+
+.sparkle {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: radial-gradient(circle, rgba(255,223,100,1) 0%, rgba(255,215,0,0.5) 60%, transparent 100%);
+  border-radius: 50%;
+  animation: sparkle 1.6s ease-out forwards;
+  pointer-events: none;
+  filter: blur(0.6px);
+}
+
+.card-shine {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    130deg,
+    rgba(255, 255, 255, 0.1) 0%,
+    rgba(255, 255, 255, 0.3) 50%,
+    rgba(255, 255, 255, 0.1) 100%
+  );
+  background-size: 200% 200%;
+  animation: shine 3s linear infinite;
+  mix-blend-mode: overlay;
+  border-radius: 8px;
+}
+
+@keyframes shine {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
