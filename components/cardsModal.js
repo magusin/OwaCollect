@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import Image from 'next/legacy/image';
+import GoldParticles from './ParticlesGold';
+import GoldShineFrame from './GoldShineFrame';
 
 export default function CardsModal({ cards, onClose }) {
     const [currentPage, setCurrentPage] = useState(0);
@@ -37,12 +39,12 @@ export default function CardsModal({ cards, onClose }) {
                     ))}
                 </div>
                 <div className="flex justify-center mt-4">
-                {currentPage === totalPages - 1 ? (
-                    <button onClick={onClose} className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700 transition duration-200">Fermer</button>
-                ) : (
-                    <button onClick={handleNextPage} className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700 transition duration-200">Suivant</button>
-                )}
-            </div>
+                    {currentPage === totalPages - 1 ? (
+                        <button onClick={onClose} className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700 transition duration-200">Fermer</button>
+                    ) : (
+                        <button onClick={handleNextPage} className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700 transition duration-200">Suivant</button>
+                    )}
+                </div>
             </div>
         </div>
     );
@@ -53,7 +55,7 @@ function Card({ card, index, flipped, onClick }) {
         <div className="card relative mx-auto cursor-pointer w-[100px] h-[100px] sm:w-[150px] sm:h-[150px] md:w-[200px] md:h-[200px] lg:w-[250px] lg:h-[250px] xl:w-[300px] xl:h-[300px] 2xl:w-[300px] 2xl:h-[300px]" onClick={onClick} >
             <div className={`card-inner ${flipped ? 'flipped' : ''}`}>
                 {/* // Afficher l'image de la carte */}
-                <div className="absolute inset-0 rounded-lg card-front">
+                <div className={`absolute inset-0 rounded-lg card-front ${card.isGold ? 'border-4 border-yellow-500' : ''}`}>
                     <Image src={`${card.picture_back}`} alt={`Dos de la carte ${index}`} layout="fill" objectFit="fill" className="rounded-lg" priority={true} />
                 </div>
                 {/* // Si card.isNew est vrai, ajoutez un NEW */}
@@ -62,7 +64,13 @@ function Card({ card, index, flipped, onClick }) {
                         NEW
                     </div>
                 )}
-                <div className={`card-back absolute inset-0 transform ${flipped ? 'rotate-y-180' : ''} ${card.isGold ? 'border-4 border-yellow-500' : ''}`}>
+                {card.isGold && (
+                    <>
+                        <GoldParticles />
+                        <GoldShineFrame />
+                    </>
+                )}
+                <div className={`card-back absolute inset-0 transform ${flipped ? 'rotate-y-180' : ''}`}>
                     <Image src={`${card.picture}`} alt={`Carte ${index}`} layout="fill" objectFit="fill" className="rounded-lg" priority={true} />
                 </div>
             </div>

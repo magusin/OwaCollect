@@ -16,7 +16,7 @@ export default function GoldParticles() {
       sparkle.style.left = `${Math.random() * 100}%`;
       sparkle.style.top = `${Math.random() * 100}%`;
       sparkle.style.animationDuration = `${1 + Math.random()}s`;
-      sparkle.style.width = `${3 + Math.random() * 4}px`;
+      sparkle.style.width = `${3 + Math.random() * 3}px`;
       sparkle.style.height = sparkle.style.width;
 
       container.appendChild(sparkle);
@@ -24,7 +24,7 @@ export default function GoldParticles() {
       setTimeout(() => {
         sparkle.remove();
       }, 1800);
-    }, 120);
+    }, 360);
 
     return () => clearInterval(interval);
   }, []);

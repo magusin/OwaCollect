@@ -13,6 +13,7 @@ import Switch from "@/components/filterToggleSVG";
 import axiosInstance from "@/utils/axiosInstance";
 import Head from 'next/head';
 import ParticlesGold from '@/components/ParticlesGold';
+import GoldShineFrame from "@/components/GoldShineFrame";
 
 
 export default function Collection({ cards, totalPoints, errorServer }) {
@@ -148,11 +149,7 @@ export default function Collection({ cards, totalPoints, errorServer }) {
     const handleCardClick = useCallback((card) => {
         setSelectedCard(card);
         if (card.isNew) {
-            axiosInstance.put('/api/card/view', { cardId: card.id }, {
-                customConfig: { session: session }
-            }).then(() => {
-                setPlayerCards(current => current.map(c => c.cardId === card.id ? { ...c, isNew: false } : c));
-            }).catch(error => console.error(error));
+            removeNew(card.id);
         }
     }, [session]);
 
@@ -166,7 +163,7 @@ export default function Collection({ cards, totalPoints, errorServer }) {
                 const data = await response.data;
                 setPlayerCards(currentCards =>
                     currentCards.map(card =>
-                        card.cardId === cardId ? { ...card, isNew: false } : card
+                        card.id === cardId ? { ...card, isNew: false } : card
                     )
                 );
             }
@@ -469,7 +466,7 @@ export default function Collection({ cards, totalPoints, errorServer }) {
                                             checked={showLevelUpOnly}
                                             onChange={handleShowLevelUpOnlyChange}
                                         />
-                                        Level Up possible
+                                        LevelownedCardIds Up possible
                                     </label>
                                     <label>
                                         <input
@@ -523,7 +520,10 @@ export default function Collection({ cards, totalPoints, errorServer }) {
                                         </div>
                                     )}
                                     {card.isGold && (
+                                        <>
                                         <ParticlesGold />
+                                        <GoldShineFrame />
+                                        </>
                                     )}
                                     {card.id && card.count > 1 && (
                                         <div className="absolute bottom-2 right-2 bg-red-600 text-white rounded-full px-2 py-1 text-sm font-bold">
