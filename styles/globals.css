@@ -65,6 +65,10 @@
     color: #f7fafc;
   }
 
+  .tooltip-text {
+    color: black !important;
+  }
+
   
 } 
 
@@ -206,7 +210,12 @@ body {
   visibility: hidden; 
   position: absolute;
   z-index: 100; 
+  color: white;
   
+}
+
+.dark-mode .tooltip-text {
+  color: black; /* Couleur du texte de la tooltip en mode sombre */
 }
 
 .group:hover .tooltip-text {
@@ -520,7 +529,7 @@ body {
   opacity: 0;
   pointer-events: none;
   animation: sparkleFrame 1s ease-in-out forwards;
-  filter: drop-shadow(0 0 6px rgba(156, 159, 107, 0.8));
+  filter: drop-shadow(0 0 6px rgba(171, 178, 46, 0.8));
 }
 
 @keyframes sparkleFrame {

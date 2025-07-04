@@ -97,7 +97,11 @@ export default function Collection({ cards, totalPoints, errorServer }) {
         return Array.from(mergedCardMap.values()).filter(card => {
             const isCorrectRarity = selectedRarity === 'Toutes' || card.rarety === selectedRarity;
             const category = card.category === selectedCategory;
-            const canLevelUp = card.count >= 3 && points >= card.evolveCost && card.evolveCost !== null && !mergedCardMap.has(card.id + 1);
+            const canLevelUp = card.owned &&
+                card.count >= 3 &&
+                points >= card.evolveCost &&
+                card.evolveCost !== null &&
+                !ownedCardIds.has(card.id + 1);
 
             if (showNewOnly && !card.isNew) return false;
             if (filterState === 'non possédé' && card.owned) return false;
@@ -118,6 +122,12 @@ export default function Collection({ cards, totalPoints, errorServer }) {
         points,
         ownedCardIds
     ]);
+
+    const discoveredCardsCount = useMemo(() => {
+        return filteredCards.filter(card => card.owned).length;
+      }, [filteredCards]);
+      
+      const totalFilteredCardsCount = filteredCards.length;
 
     const getImageSrc = (card) => {
         if (card.owned) {
@@ -466,7 +476,7 @@ export default function Collection({ cards, totalPoints, errorServer }) {
                                             checked={showLevelUpOnly}
                                             onChange={handleShowLevelUpOnlyChange}
                                         />
-                                        LevelownedCardIds Up possible
+                                        Level Up possible
                                     </label>
                                     <label>
                                         <input
@@ -481,11 +491,11 @@ export default function Collection({ cards, totalPoints, errorServer }) {
                             </div>
                         )}
                         <div className="flex items-center text-lg font-semibold my-4">
-                            <span>{`Cartes découvertes : ${filteredCards.filter(card => ownedCardIds.has(card.id)).length
-                                } / ${filteredCards.length}`}</span>
+                        <span>{`Cartes découvertes : ${discoveredCardsCount} / ${totalFilteredCardsCount}`}</span>
+
                             <span className="relative mx-4 md:mx-8 text-black bg-white rounded-full font-bold text-xl cursor-pointer group w-10 h-10 flex items-center justify-center">
                                 ?
-                                <span className="tooltip-text absolute hidden group-hover:block bg-gray-700 text-white text-xs rounded p-2 bottom-full mb-2 left-1/2 transform -translate-x-1/2 w-[200px] md:w-[400px] md:text-base lg:w-[450px] 2xl:w-[500px]">
+                                <span className="tooltip-text absolute hidden group-hover:block bg-gray-700 text-xs rounded p-2 bottom-full mb-2 left-1/2 transform -translate-x-1/2 w-[200px] md:w-[400px] md:text-base lg:w-[450px] 2xl:w-[500px]">
                                     <div className="flex flex-col">
                                         <span>Les <b>OC</b> s&apos;obtiennent en participant au stream d&apos;Owarida.</span>
                                         <span>Il y a trois raretés de cartes : <b>Commune</b>, <b>Rare</b> et <b>Epique</b>.</span>
@@ -510,7 +520,7 @@ export default function Collection({ cards, totalPoints, errorServer }) {
                                     </div>
 
                                     <div className={`absolute inset-0 flex items-center justify-center rounded-full ${card.owned ? "hidden" : ""}`}>
-                                        <div className="bg-white/80 backdrop-blur-sm rounded-full px-2 py-1 md:px-4 md:py-2 text-lg font-semibold shadow-xl border border-gray-300">
+                                        <div className="bg-white/80 backdrop-blur-sm rounded-full px-2 py-1 md:px-4 md:py-2 text-lg font-semibold shadow-xl border border-gray-300 tb">
                                             {card.number}
                                         </div>
                                     </div>
@@ -521,8 +531,8 @@ export default function Collection({ cards, totalPoints, errorServer }) {
                                     )}
                                     {card.isGold && (
                                         <>
-                                        <ParticlesGold />
-                                        <GoldShineFrame />
+                                            <ParticlesGold />
+                                            <GoldShineFrame />
                                         </>
                                     )}
                                     {card.id && card.count > 1 && (
