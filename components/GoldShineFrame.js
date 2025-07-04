@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 
-export default function GoldShineFrame({ category, rarety }) {
+export default function GoldShineFrame({ category, rarety, isFull }) {
   const containerRef = useRef(null);
 
   function getSparklePositions(category, rarety) {
@@ -10,26 +10,39 @@ export default function GoldShineFrame({ category, rarety }) {
 
     switch (category) {
       case 'Elden Ring':
+        
         switch (rarety) {
           case 'Commune':
-            positions = [
+            positions = isFull ? [
+              { top: '10%', right: '12.5%' },
+              { bottom: '11%', left: '12%' },
+              { top: '48.5%', right: '11%' },
+              { top: '48.5%', left: '10.5%' },
+              { bottom: '14%', right: '49%' },
+              
+            ] : [
               { top: '9.5%', right: '9%' },
               { bottom: '9.5%', left: '8%' },
               { top: '47%', right: '7%' },
               { top: '47%', left: '6%' },
               { bottom: '12%', right: '48%' },
-              
-            ];
+            ]
             break;
           case 'Rare':
-            positions = [
+            positions = isFull ? [
+              { bottom: '19.5%', left: '49%' },
+              { top: '48.5%', right: '16.8%' },
+              { top: '48.5%', left: '16.8%' },
+              { bottom: '10%', left: '10%' },
+              { top: '9%', right: '11%' }
+              
+            ] : [
               { bottom: '18%', left: '47%' },
               { top: '47%', right: '13%' },
               { top: '47%', left: '13%' },
               { bottom: '9%', left: '6%' },
               { top: '9%', right: '6%' }
-              
-            ];
+            ]
             break;
             // A finir
           case 'Epique':
@@ -87,7 +100,7 @@ export default function GoldShineFrame({ category, rarety }) {
       if (!container) return;
 
       const sparkle = document.createElement('div');
-      sparkle.className = 'sparkle-frame';
+      sparkle.className = isFull ? 'sparkle-frame-full' : 'sparkle-frame';
 
       const positions = getSparklePositions(category, rarety);
 

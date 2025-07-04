@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 
-export default function GoldParticles() {
+export default function GoldParticles( {isFull} ) {
   const containerRef = useRef(null);
 
   useEffect(() => {
@@ -11,12 +11,12 @@ export default function GoldParticles() {
       if (!container) return;
 
       const sparkle = document.createElement('div');
-      sparkle.className = 'sparkle';
+      sparkle.className = isFull ? 'sparkle-full' : 'sparkle';
 
-      sparkle.style.left = `${Math.random() * 100}%`;
-      sparkle.style.top = `${Math.random() * 100}%`;
+      sparkle.style.left = isFull ? `${Math.random() * 90}%` : `${Math.random() * 100}%`;
+      sparkle.style.top = isFull ? `${Math.random() * 90}%` : `${Math.random() * 100}%`;
       sparkle.style.animationDuration = `${1 + Math.random()}s`;
-      sparkle.style.width = `${3 + Math.random() * 3}px`;
+      sparkle.style.width = isFull ? `${6 + Math.random() * 6}px` : `${3 + Math.random() * 3}px`;
       sparkle.style.height = sparkle.style.width;
 
       container.appendChild(sparkle);
@@ -24,7 +24,7 @@ export default function GoldParticles() {
       setTimeout(() => {
         sparkle.remove();
       }, 1800);
-    }, 360);
+    }, 160);
 
     return () => clearInterval(interval);
   }, []);

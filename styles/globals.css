@@ -495,6 +495,17 @@ body {
   filter: blur(0.6px);
 }
 
+.sparkle-full {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  background: radial-gradient(circle, rgba(255,223,100,1) 0%, rgba(255,215,0,0.5) 60%, transparent 100%);
+  border-radius: 50%;
+  animation: sparkle 1.6s ease-out forwards;
+  pointer-events: none;
+  filter: blur(0.6px);
+}
+
 .card-shine {
   position: absolute;
   inset: 0;
@@ -524,6 +535,18 @@ body {
   position: absolute;
   width: 16px;
   height: 16px;
+  background: radial-gradient(circle, rgba(151, 170, 40, 0.8), transparent);
+  border-radius: 50%;
+  opacity: 0;
+  pointer-events: none;
+  animation: sparkleFrame 1s ease-in-out forwards;
+  filter: drop-shadow(0 0 6px rgba(171, 178, 46, 0.8));
+}
+
+.sparkle-frame-full {
+  position: absolute;
+  width: 28px;
+  height: 28px;
   background: radial-gradient(circle, rgba(151, 170, 40, 0.8), transparent);
   border-radius: 50%;
   opacity: 0;

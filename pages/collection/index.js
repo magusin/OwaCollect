@@ -531,8 +531,8 @@ export default function Collection({ cards, totalPoints, errorServer }) {
                                     )}
                                     {card.isGold && (
                                         <>
-                                            <ParticlesGold />
-                                            <GoldShineFrame category={card.category} rarety={card.rarety} />
+                                            <ParticlesGold isFull={false} />
+                                            <GoldShineFrame category={card.category} rarety={card.rarety} isFull={false} />
                                         </>
                                     )}
                                     {card.id && card.count > 1 && (
@@ -570,16 +570,17 @@ export default function Collection({ cards, totalPoints, errorServer }) {
                                     {/* Image card */}
                                     <div className="relative h-full" style={{ width: '100%', maxWidth: '100vh' }}>
                                         <div className="aspect-w-1 aspect-h-1 ">
-                                            {/* {selectedCard.isGold && (
+                                            {selectedCard.isGold && (
                                                 <>
                                                     <GoldShineFrame
                                                         category={selectedCard.category}
                                                         rarety={selectedCard.rarety}
+                                                        isFull={true}
                                                     />
                                                    
-                                                    <ParticlesGold />
+                                                    <ParticlesGold isFull={true} />
                                                 </>
-                                            )} */}
+                                            )}
                                             <Image
                                                 src={
                                                     selectedCard.isGold
