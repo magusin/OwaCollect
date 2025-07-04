@@ -125,9 +125,9 @@ export default function Collection({ cards, totalPoints, errorServer }) {
 
     const discoveredCardsCount = useMemo(() => {
         return filteredCards.filter(card => card.owned).length;
-      }, [filteredCards]);
-      
-      const totalFilteredCardsCount = filteredCards.length;
+    }, [filteredCards]);
+
+    const totalFilteredCardsCount = filteredCards.length;
 
     const getImageSrc = (card) => {
         if (card.owned) {
@@ -491,7 +491,7 @@ export default function Collection({ cards, totalPoints, errorServer }) {
                             </div>
                         )}
                         <div className="flex items-center text-lg font-semibold my-4">
-                        <span>{`Cartes découvertes : ${discoveredCardsCount} / ${totalFilteredCardsCount}`}</span>
+                            <span>{`Cartes découvertes : ${discoveredCardsCount} / ${totalFilteredCardsCount}`}</span>
 
                             <span className="relative mx-4 md:mx-8 text-black bg-white rounded-full font-bold text-xl cursor-pointer group w-10 h-10 flex items-center justify-center">
                                 ?
@@ -532,7 +532,7 @@ export default function Collection({ cards, totalPoints, errorServer }) {
                                     {card.isGold && (
                                         <>
                                             <ParticlesGold />
-                                            <GoldShineFrame />
+                                            <GoldShineFrame category={card.category} rarety={card.rarety} />
                                         </>
                                     )}
                                     {card.id && card.count > 1 && (
@@ -563,12 +563,23 @@ export default function Collection({ cards, totalPoints, errorServer }) {
                             <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-20 px-4 py-6 overflow-y-auto h-full w-full">
                                 <div className="flex flex-wrap flex-row p-4 h-full w-full items-center justify-center md:flex-col">
                                     {/* Button previous card */}
+
                                     <button className="w-20 xl:w-auto md:w-24">
                                         <Image onClick={previousCard} src="/images/previous.png" alt="previous card" objectFit="contain" objectPosition="center" width={130} height={100} loading="lazy" />
                                     </button>
                                     {/* Image card */}
                                     <div className="relative h-full" style={{ width: '100%', maxWidth: '100vh' }}>
                                         <div className="aspect-w-1 aspect-h-1 ">
+                                            {/* {selectedCard.isGold && (
+                                                <>
+                                                    <GoldShineFrame
+                                                        category={selectedCard.category}
+                                                        rarety={selectedCard.rarety}
+                                                    />
+                                                   
+                                                    <ParticlesGold />
+                                                </>
+                                            )} */}
                                             <Image
                                                 src={
                                                     selectedCard.isGold

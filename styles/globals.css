@@ -524,7 +524,7 @@ body {
   position: absolute;
   width: 16px;
   height: 16px;
-  background: radial-gradient(circle, rgba(167, 205, 205, 0.8), transparent);
+  background: radial-gradient(circle, rgba(151, 170, 40, 0.8), transparent);
   border-radius: 50%;
   opacity: 0;
   pointer-events: none;
