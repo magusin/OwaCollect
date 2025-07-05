@@ -144,7 +144,7 @@ export default function Leaderboard({ totalPoints, errorServer, leaderboard }) {
                 <Header points={points} />
                 <div className="container mx-auto flex flex-col items-center p-4" style={{ marginTop: "80px" }}>
                     <input
-                        className="border p-2 rounded mb-4 text-black"
+                        className="tb border p-2 rounded mb-4"
                         placeholder="Recherche par nom..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
