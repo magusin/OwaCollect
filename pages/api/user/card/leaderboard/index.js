@@ -49,69 +49,67 @@ async function runMiddleware(req, res, fn) {
 // GET /api/user/card/leaderboard
 
 export default async function handler(req, res) {
-    try {
-        await runMiddleware(req, res, corsMiddleware);
-        if (req.method === 'GET') {
-            const nextToken = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+  try {
+    await runMiddleware(req, res, corsMiddleware);
 
-            if (!nextToken) {
-                return res.status(401).json({ message: 'Utilisateur non authentifié' });
-            }
-            const signature = await verifySignature(req);
-            if (!signature) {
-                return res.status(400).json({ message: 'Signature invalide' });
-            } 
-            // Step 1: Aggregate player cards to get petIds and counts
-    const leaderboardAggregate = await prisma.playercards.groupBy({
-        by: ['petId'],
-        _count: {
-          cardId: true
-        },
-        orderBy: {
-          _count: {
-            cardId: 'desc'
-          }
-        },
-        where: {
-          petId: {
-            notIn: ['165781486', '75524984']
-          }
-        }
-      });
-  
-      // Extract petIds for querying pets
-      const petIds = leaderboardAggregate.map(item => item.petId);
-  
-      // Step 2: Fetch pets with those petIds
-      const pets = await prisma.pets.findMany({
-        where: {
-          userId: {
-            in: petIds
-          }
-        },
-        select: {
-          userId: true, // Make sure to select fields you need
-          name: true,
-          imageUrl: true,
-          // Include additional fields as necessary
-        }
-      });
-  
-      // Merge leaderboard aggregate data with pets info
-      const leaderboard = leaderboardAggregate.map(item => {
-        const petInfo = pets.find(pet => pet.userId === item.petId);
-        return {
-          petId: item.petId,
-          cardCount: item._count.cardId,
-          name: petInfo?.name,
-          imageUrl: petInfo?.imageUrl
-        };
-      });
-            return res.status(200).json(leaderboard);
-        } else {
-            return res.status(405).json({ message: 'Méthode non autorisée' });
-        }
-    } catch (err) {
-        onError(err, res);
+    if (req.method !== 'GET') {
+      return res.status(405).json({ message: 'Méthode non autorisée' });
     }
+
+    const nextToken = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+    if (!nextToken) return res.status(401).json({ message: 'Utilisateur non authentifié' });
+
+    const signature = await verifySignature(req);
+    if (!signature) return res.status(400).json({ message: 'Signature invalide' });
+
+    // 1. Récupérer toutes les playercards sauf les bannis
+    const allCards = await prisma.playercards.findMany({
+      where: {
+        petId: {
+          notIn: ['165781486', '75524984']
+        }
+      },
+      select: {
+        petId: true,
+        isGold: true,
+      }
+    });
+
+    // 2. Grouper par petId et compter total et gold
+    const playerMap = new Map();
+
+    for (const { petId, isGold } of allCards) {
+      if (!playerMap.has(petId)) {
+        playerMap.set(petId, { cardCount: 0, goldCardCount: 0 });
+      }
+      const data = playerMap.get(petId);
+      data.cardCount += 1;
+      if (isGold) data.goldCardCount += 1;
+    }
+
+    const petIds = Array.from(playerMap.keys());
+
+    // 3. Récupérer les infos des joueurs
+    const pets = await prisma.pets.findMany({
+      where: { userId: { in: petIds } },
+      select: { userId: true, name: true, imageUrl: true }
+    });
+
+    // 4. Fusionner les données
+    const leaderboard = petIds.map(petId => {
+      const petInfo = pets.find(p => p.userId === petId);
+      const { cardCount, goldCardCount } = playerMap.get(petId);
+      return {
+        petId,
+        name: petInfo?.name,
+        imageUrl: petInfo?.imageUrl,
+        cardCount,
+        goldCardCount,
+      };
+    }).sort((a, b) => b.cardCount - a.cardCount); // tri décroissant
+
+    return res.status(200).json(leaderboard);
+  } catch (err) {
+    onError(err, res);
+  }
 }

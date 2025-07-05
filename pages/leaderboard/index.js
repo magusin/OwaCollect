@@ -12,6 +12,7 @@ import Footer from "C/footer";
 import Head from 'next/head';
 
 export default function Leaderboard({ totalPoints, errorServer, leaderboard }) {
+    console.log('Leaderboard data:', leaderboard);
     const [error, setError] = React.useState(errorServer || null);
     const { data: session, status } = useSession();
     const router = useRouter();
@@ -151,7 +152,7 @@ export default function Leaderboard({ totalPoints, errorServer, leaderboard }) {
                     {displayedLeaderboard.length > 0 ? (
                         <div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                             {displayedLeaderboard.map((player, index) => (
-                                <div key={index} className={`flex flex-col items-center p-4 ${darkMode ? 'bg-gray-700' : 'bg-white'} gray rounded-lg shadow`}>
+                                <div key={index} className={`flex flex-col items-center p-4 ${!darkMode ? 'bg-white': ''} gray rounded-lg shadow`} style={{ backgroundColor: darkMode ? '#384151' : '' }}>
                                     <div className="flex items-center justify-center relative">
                                         <div className="flex absolute left-0 justify-center items-center" style={{ height: '200px', width: '50px', marginLeft: '-60px' }}>
                                             <span className="font-bold text-xl">#{player.rank}</span>
@@ -167,6 +168,7 @@ export default function Leaderboard({ totalPoints, errorServer, leaderboard }) {
                                     </div>
                                     <p className="mt-2 font-semibold">{player.name}</p>
                                     <p className="">{player.cardCount} cartes</p>
+                                    <p className="text-orange-500">{player.goldCardCount} cartes en or</p>
                                 </div>
                             ))}
                         </div>
