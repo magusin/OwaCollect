@@ -286,7 +286,7 @@ export default function Collection({ cards, totalPoints, errorServer }) {
                             isGold: updatedPlayerCard.isGold,
                             picture: updatedPlayerCard.picture,
                             picture_gold: updatedPlayerCard.picture_gold,
-                            evolveCost: updatedPlayerCard.evolveCost
+                            evolveCost: updatedPlayerCard.evolveCost,
                         }));
                     }
                     setAlertMessage(
@@ -415,6 +415,8 @@ export default function Collection({ cards, totalPoints, errorServer }) {
         )
     }
 
+    console.log('Filtered Cards:', filteredCards);
+
     if (session) {
         return (
             <>
@@ -506,6 +508,7 @@ export default function Collection({ cards, totalPoints, errorServer }) {
                             </span>
                         </div>
                         <div className="flex flex-wrap justify-center">
+                            
 
                             {filteredCards.map((card) => (
                                 <div key={card.id} onClick={() => handleCardClick(card)} className="text-black relative flex flex-col items-center justify-center m-4 cursor-pointer">
@@ -546,6 +549,7 @@ export default function Collection({ cards, totalPoints, errorServer }) {
                                         <span className="tooltip-text absolute hidden group-hover:block bg-gray-700 text-white text-xs rounded p-2 -ml-5 -mb-6 bottom-12 left-6 md:text-base w-[100px] sm:w-[100px] md:w-[150px] lg:w-[200px] xl:w-[250px] 2xl:w-[300px]">
                                             {card.id === 117 || card.id === 51 || card.id === 101 || card.id === 222 || card.id === 74 ? "S'obtient via un événement"
                                                 : card.id === 66 ? "S'obtient en résolvant Enigma"
+                                                : (card.id === 100 || card.id === 99 || card.id === 230) ? "Vendu par un mystérieux marchand"
                                                     : card.isDraw === true
                                                         ? `S'obtient via la boutique ${card.evolveCost ? "et peut level Up" : ""}`
                                                         : (card.evolvedId)
