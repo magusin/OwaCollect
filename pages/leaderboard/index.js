@@ -12,16 +12,12 @@ import Footer from "C/footer";
 import Head from 'next/head';
 
 export default function Leaderboard({ totalPoints, errorServer, leaderboard }) {
-    console.log('Leaderboard data:', leaderboard);
     const [error, setError] = React.useState(errorServer || null);
     const { data: session, status } = useSession();
     const router = useRouter();
     const [loading, setLoading] = React.useState(false);
     const [points, setPoints] = React.useState(totalPoints || 0);
-    const [showInput, setShowInput] = React.useState(false);
     const inputRef = React.useRef(null);
-    const [code, setCode] = React.useState('');
-    const [message, setMessage] = React.useState('');
     const { darkMode } = useDarkMode();
     const [searchTerm, setSearchTerm] = React.useState('');
     const [displayedLeaderboard, setDisplayedLeaderboard] = React.useState([]);

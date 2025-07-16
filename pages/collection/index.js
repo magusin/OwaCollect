@@ -286,6 +286,7 @@ export default function Collection({ cards, totalPoints, errorServer }) {
                             isGold: updatedPlayerCard.isGold,
                             picture: updatedPlayerCard.picture,
                             picture_gold: updatedPlayerCard.picture_gold,
+                            evolveCost: updatedPlayerCard.evolveCost
                         }));
                     }
                     setAlertMessage(
@@ -543,7 +544,7 @@ export default function Collection({ cards, totalPoints, errorServer }) {
                                     <span className="absolute bottom-2 left-2 text-black bg-white rounded-full font-bold text-xl cursor-pointer group w-5 h-5 flex items-center justify-center">
                                         ?
                                         <span className="tooltip-text absolute hidden group-hover:block bg-gray-700 text-white text-xs rounded p-2 -ml-5 -mb-6 bottom-12 left-6 md:text-base w-[100px] sm:w-[100px] md:w-[150px] lg:w-[200px] xl:w-[250px] 2xl:w-[300px]">
-                                            {card.id === 117 || card.id === 51 || card.id === 101 || card.id === 222 ? "S'obtient via un événement"
+                                            {card.id === 117 || card.id === 51 || card.id === 101 || card.id === 222 || card.id === 74 ? "S'obtient via un événement"
                                                 : card.id === 66 ? "S'obtient en résolvant Enigma"
                                                     : card.isDraw === true
                                                         ? `S'obtient via la boutique ${card.evolveCost ? "et peut level Up" : ""}`
@@ -597,6 +598,7 @@ export default function Collection({ cards, totalPoints, errorServer }) {
                                             />
                                         </div>
                                     </div>
+                                    
                                     {/* Button next card */}
                                     <button className="w-20 xl:w-auto md:w-24">
                                         <Image onClick={nextCard} src="/images/next.png" alt="next card" objectFit="contain" objectPosition="center" width={130} height={100} loading="lazy" />
