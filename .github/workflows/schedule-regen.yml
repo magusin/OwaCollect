@@ -1,0 +1,15 @@
+name: Schedule Regen
+
+on:
+  schedule:
+    - cron: '0 * * * *'  # toutes les heures (UTC)
+  workflow_dispatch:
+
+jobs:
+  call-api:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Appeler l'API schedule-regen
+        run: |
+          curl -X GET "https://owarida.fr/api/cron/schedule-regen" \
+            -H "Authorization: Bearer valefor"

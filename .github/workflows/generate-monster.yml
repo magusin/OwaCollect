@@ -1,0 +1,15 @@
+name: Generate Monster
+
+on:
+  schedule:
+    - cron: '0 */2 * * *'  # toutes les 2 heures UTC
+  workflow_dispatch:
+
+jobs:
+  generate-monster:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Appeler l'API /generate-monster
+        run: |
+          curl -X GET "https://owarida.fr/api/cron/generate-monster" \
+            -H "Authorization: Bearer valefor"
