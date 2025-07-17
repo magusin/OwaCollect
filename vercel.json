@@ -9,16 +9,8 @@
     },
   "crons": [
     {
-      "path": "/api/cron/schedule-regen",
-      "schedule": "0 * * * *"
-    },
-    {
       "path": "/api/cron/delete-expired-messages",
       "schedule": "0 0 * * *"
-    },
-    {
-      "path": "/api/cron/generate-monster",
-      "schedule": "0 */2 * * *"
     }
   ]
 }
