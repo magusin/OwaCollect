@@ -162,7 +162,7 @@ export default function Header({ points, player }) {
                 onClick={() => setIsRuelleOpen(!isRuelleOpen)}
               >
                 Ruelle</div>
-              <Link href="/war" className="hover:text-gray-300">Guerre</Link>
+              {/* <Link href="/war" className="hover:text-gray-300">Guerre</Link> */}
             </nav>
             <div className='flex items-center'>
               <button onClick={toggleDarkMode} className="hidden lg:block text-white py-2 px-4 rounded mr-4">
@@ -193,7 +193,7 @@ export default function Header({ points, player }) {
               <Link href="/alley9-3/4" className="text-center hover:text-gray-300 block">Ruelle</Link>
               <Link href="/secretShop/tr74g4in" className="text-center hover:text-gray-300 block">Marchand</Link>
               <Link href="/scribe" className="text-center hover:text-gray-300 block">Scribe</Link>
-              <Link href="/war" className="text-center hover:text-gray-300 block">Guerre</Link>
+              {/* <Link href="/war" className="text-center hover:text-gray-300 block">Guerre</Link> */}
               <button onClick={toggleDarkMode} className="w-full py-2 px-4 rounded flex justify-center items-center">
                 <DarkModeToggleSVG isDarkMode={darkMode} />
               </button>
