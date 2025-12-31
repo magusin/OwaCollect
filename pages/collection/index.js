@@ -354,6 +354,65 @@ export default function Collection({ cards, totalPoints, errorServer }) {
         setSelectedCard(null);
     };
 
+    // function bannière
+    function BannerCard({ src, alt, onClick }) {
+        return (
+            <div
+                onClick={onClick}
+                className="
+              cursor-pointer w-full max-w-[400px]
+              rounded-2xl overflow-hidden
+              shadow-lg hover:shadow-2xl transition
+              hover:-translate-y-1 active:translate-y-0
+              border border-black/10 bg-black/5
+            "
+            >
+                {/* ratio 16:9 fixe */}
+                <div className="relative w-full aspect-[16/9]">
+                    <Image
+                        src={src}
+                        alt={alt}
+                        layout="fill"
+                        objectFit="cover"
+                        sizes="(max-width: 1024px) 95vw, 400px"
+                        priority
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/15 via-transparent to-transparent pointer-events-none" />
+                </div>
+            </div>
+        );
+    }
+
+
+    // Fonction pour switch category
+    function CategoryBanner({ active, src, alt, onClick }) {
+        return (
+            <div
+                onClick={onClick}
+                className={`
+              cursor-pointer w-full max-w-[400px]
+              rounded-2xl overflow-hidden
+              shadow-md hover:shadow-xl transition
+              border border-black/10 bg-black/5
+              ${active ? "opacity-100" : "opacity-55 hover:opacity-80"}
+            `}
+            >
+                {/* ratio 3:1 */}
+                <div className="relative w-full aspect-[3/1]">
+                    <Image
+                        src={src}
+                        alt={alt}
+                        layout="fill"
+                        objectFit="cover"
+                        sizes="(max-width: 1024px) 90vw, 400px"
+                        priority
+                    />
+                </div>
+            </div>
+        );
+    }
+
+
     useEffect(() => {
 
         localStorage.setItem('points', points);
@@ -422,43 +481,45 @@ export default function Collection({ cards, totalPoints, errorServer }) {
                 <div className="flex flex-col h-screen" style={{ marginTop: "80px" }}>
                     <Header points={points} />
                     <div className="flex-grow flex flex-col items-center">
-                        <div className="cursor-pointer relative w-16 w-[200px] h-[200px] sm:w-[250px] md:w-[300px] lg:w-[350px] xl:w-[400px] 2xl:w-[450px] m-4" onClick={() => router.push('/leaderboard')} >
-                            <Image
-                                src="/images/bannière-leaderboard.webp"
-                                alt="Leaderboard Banner"
-                                layout="fill"
-                                objectFit="contain"
-                                sizes="100%"
-                                priority={true}
-                            />
-                        </div>
-                        {!selectedCategory && (
-                            <h1 className="flex flex-wrap justify-center font-bold text-xl m-4">
-                                Sélectionnez une catégorie
-                            </h1>
-                        )}
-                        <div className="flex flex-wrap justify-center">
-                            <div className={`cursor-pointer relative w-16 w-[200px] h-[100px] sm:w-[250px] md:w-[300px] lg:w-[350px] xl:w-[400px] 2xl:w-[450px] m-4 ${selectedCategory === 'Elden Ring' ? 'opacity-100' : 'opacity-50'}`} onClick={() => handleCategoryChange('Elden Ring')} >
-                                <Image
+                        {/* SECTION TOP BANNERS */}
+                        <section className="w-full flex justify-center pt-6 sm:pt-10">
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-10 w-full max-w-6xl px-4 place-items-center">
+                                <BannerCard
+                                    onClick={() => router.push("/leaderboard")}
+                                    src="/images/bannière-leaderboard.webp"
+                                    alt="Leaderboard Banner"
+                                />
+                                <BannerCard
+                                    onClick={() => router.push("/blacksmith")}
+                                    src="/images/bannière-forge.webp"
+                                    alt="Forge Banner"
+                                />
+                            </div>
+                        </section>
+
+                        {/* SECTION CATEGORIES */}
+                        <section className="w-full flex flex-col items-center my-8 sm:mt-10">
+                            {!selectedCategory && (
+                                <h1 className="font-bold text-xl mb-4">
+                                    Sélectionnez une catégorie
+                                </h1>
+                            )}
+
+                            <div className="w-full flex flex-wrap justify-center gap-5 px-4">
+                                <CategoryBanner
+                                    active={selectedCategory === "Elden Ring"}
+                                    onClick={() => handleCategoryChange("Elden Ring")}
                                     src="/images/elden-ring-banner.webp"
                                     alt="Elden Ring Banner"
-                                    layout="fill"
-                                    objectFit="contain"
-                                    sizes="100%"
-                                    priority={true}
                                 />
-                            </div>
-                            <div className={`cursor-pointer relative w-[200px] h-[100px] sm:w-[250px]  md:w-[300px] lg:w-[350px] xl:w-[400px] 2xl:w-[450px] m-4 ${selectedCategory === 'Dark Souls' ? 'opacity-100' : 'opacity-50'}`} onClick={() => handleCategoryChange('Dark Souls')}>
-                                <Image
+                                <CategoryBanner
+                                    active={selectedCategory === "Dark Souls"}
+                                    onClick={() => handleCategoryChange("Dark Souls")}
                                     src="/images/dark-souls-banner.webp"
                                     alt="Dark Souls Banner"
-                                    layout="fill"
-                                    objectFit="contain"
-                                    sizes="100%"
-                                    priority={true}
                                 />
                             </div>
-                        </div>
+                        </section>
                         {selectedCategory && (
                             <div>
                                 {/* Ajout des filter ici (opacity pour définir sélection) */}
@@ -506,7 +567,7 @@ export default function Collection({ cards, totalPoints, errorServer }) {
                             </span>
                         </div>
                         <div className="flex flex-wrap justify-center">
-                            
+
 
                             {filteredCards.map((card) => (
                                 <div key={card.id} onClick={() => handleCardClick(card)} className="text-black relative flex flex-col items-center justify-center m-4 cursor-pointer">
@@ -547,15 +608,15 @@ export default function Collection({ cards, totalPoints, errorServer }) {
                                         <span className="tooltip-text absolute hidden group-hover:block bg-gray-700 text-white text-xs rounded p-2 -ml-5 -mb-6 bottom-12 left-6 md:text-base w-[100px] sm:w-[100px] md:w-[150px] lg:w-[200px] xl:w-[250px] 2xl:w-[300px]">
                                             {card.id === 117 || card.id === 51 || card.id === 101 || card.id === 222 || card.id === 74 ? "S'obtient via un événement"
                                                 : card.id === 66 ? "S'obtient en résolvant Enigma"
-                                                : (card.id === 100 || card.id === 99 || card.id === 230) ? "Vendu par un mystérieux marchand"
-                                                    : card.isDraw === true
-                                                        ? `S'obtient via la boutique ${card.evolveCost ? "et peut level Up" : ""}`
-                                                        : (card.evolvedId)
-                                                            ? "Vendu par un mystérieux marchand"
-                                                            : `S'obtient via le level Up de ${card.owned
-                                                                ? playerCardMap.get(card.id - 1)?.name || "Carte précédente"
-                                                                : card.number - 1
-                                                            }`
+                                                    : (card.id === 100 || card.id === 99 || card.id === 230) ? "Vendu par un mystérieux marchand"
+                                                        : card.isDraw === true
+                                                            ? `S'obtient via la boutique ${card.evolveCost ? "et peut level Up" : ""}`
+                                                            : (card.evolvedId)
+                                                                ? "Vendu par un mystérieux marchand"
+                                                                : `S'obtient via le level Up de ${card.owned
+                                                                    ? playerCardMap.get(card.id - 1)?.name || "Carte précédente"
+                                                                    : card.number - 1
+                                                                }`
                                             }
                                         </span>
                                     </span>
@@ -580,7 +641,7 @@ export default function Collection({ cards, totalPoints, errorServer }) {
                                                         rarety={selectedCard.rarety}
                                                         isFull={true}
                                                     />
-                                                   
+
                                                     <ParticlesGold isFull={true} />
                                                 </>
                                             )}
@@ -600,7 +661,7 @@ export default function Collection({ cards, totalPoints, errorServer }) {
                                             />
                                         </div>
                                     </div>
-                                    
+
                                     {/* Button next card */}
                                     <button className="w-20 xl:w-auto md:w-24">
                                         <Image onClick={nextCard} src="/images/next.png" alt="next card" objectFit="contain" objectPosition="center" width={130} height={100} loading="lazy" />

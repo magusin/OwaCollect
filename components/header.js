@@ -185,6 +185,7 @@ export default function Header({ points, player }) {
                   {isRuelleOpen && (
                     <div className="absolute right-0 mt-2 w-56 rounded-2xl bg-[#2B2D42] border border-white/10 shadow-2xl overflow-hidden">
                       <Link href="/alley9-3/4" className="block px-4 py-3 hover:bg-white/10">Ruelle</Link>
+                      <Link href="/blacksmith" className="block px-4 py-3 hover:bg-white/10">Forgeron</Link>
                       <Link href="/secretShop/tr74g4in" className="block px-4 py-3 hover:bg-white/10">Marchand</Link>
                       <Link href="/scribe" className="block px-4 py-3 hover:bg-white/10">Scribe</Link>
                       <Link href="/scribe/enigma" className="block px-4 py-3 hover:bg-white/10">Enigma</Link>
