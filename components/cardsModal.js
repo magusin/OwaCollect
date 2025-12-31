@@ -104,91 +104,105 @@ export default function CardsModal({ cards, onClose }) {
     };
 
     return (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-70 flex justify-center items-center z-40 px-4 py-6">
-            <div className="bg-white p-4 rounded-lg shadow-lg max-w-full sm:max-w-3/4 md:max-w-2/3 lg:max-w-1/2 xl:max-w-1/3 mx-auto max-h-screen overflow-y-auto relative">
-                <div className="flex items-center justify-between mb-3">
-                    <div className="text-sm text-gray-600">
-                        Page {currentPage + 1}/{totalPages}
-                    </div>
+        <div className="fixed inset-0 z-40 bg-black/60 flex items-center justify-center p-4 sm:p-6">
+  <div className="w-[min(1400px,96vw)] h-[min(900px,92vh)] bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col">
+    
+    {/* Header */}
+    <div className="flex items-center justify-between px-6 py-4 border-b">
+      <div className="text-sm text-gray-600">
+        Page {currentPage + 1}/{totalPages}
+      </div>
 
-                    <button
-                        onClick={skipAll}
-                        className="text-sm px-3 py-1 rounded bg-black/10 hover:bg-black/20"
-                    >
-                        Skip
-                    </button>
-                </div>
+      <button
+        onClick={skipAll}
+        className="text-sm px-4 py-2 rounded-xl bg-black/10 hover:bg-black/20 transition"
+      >
+        Skip
+      </button>
+    </div>
 
-                <div className="grid grid-cols-2 gap-4 mb-4">
-                    {currentCards.slice(0, 2).map((card, idx) => (
-                        <Card
-                            key={card.pullId ?? `${currentPage}-a-${idx}`}
-                            card={card}
-                            // phase gate : si pas "revealing/recap", on force back
-                            flipped={phase === "idle" ? false : !!flippedCards[idx]}
-                            revealTick={revealTicks[idx] ?? 0}
-                            freezeFlip={freezeFlip}
-                            onClick={() => {
-                                setIsAutoRevealing(false);
-                                setPhase("revealing");
-                                setFlippedCards((prev) => {
-                                    const copy = [...prev];
-                                    copy[idx] = !copy[idx];
-                                    return copy;
-                                });
-                                setRevealTicks((prev) => {
-                                    const copy = [...prev];
-                                    copy[idx] = (copy[idx] ?? 0) + 1;
-                                    return copy;
-                                });
-                            }}
-                        />
-                    ))}
-                </div>
-
-                <div className="grid grid-cols-3 gap-4">
-                    {currentCards.slice(2).map((card, i) => {
-                        const idx = i + 2;
-                        return (
-                            <Card
-                                freezeFlip={freezeFlip}
-                                key={card.pullId ?? `${currentPage}-b-${idx}`}
-                                card={card}
-                                flipped={phase === "idle" ? false : !!flippedCards[idx]}
-                                revealTick={revealTicks[idx] ?? 0}
-
-                                onClick={() => {
-                                    setIsAutoRevealing(false);
-                                    setPhase("revealing");
-                                    setFlippedCards((prev) => {
-                                        const copy = [...prev];
-                                        copy[idx] = !copy[idx];
-                                        return copy;
-                                    });
-                                    setRevealTicks((prev) => {
-                                        const copy = [...prev];
-                                        copy[idx] = (copy[idx] ?? 0) + 1;
-                                        return copy;
-                                    });
-                                }}
-                            />
-                        );
-                    })}
-                </div>
-
-                <div className="flex justify-center mt-4">
-                    {currentPage === totalPages - 1 ? (
-                        <button onClick={onClose} className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700 transition duration-200">
-                            Fermer
-                        </button>
-                    ) : (
-                        <button onClick={handleNextPage} className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700 transition duration-200">
-                            Suivant
-                        </button>
-                    )}
-                </div>
-            </div>
+    {/* Content (scroll si besoin) */}
+    <div className="flex-1 overflow-auto px-6 py-6">
+      {/* Desktop: 2 cards top, 3 bottom. Mobile: 1 colonne */}
+      <div className="grid gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 justify-items-center">
+          {currentCards.slice(0, 2).map((card, idx) => (
+            <Card
+              key={card.pullId ?? `${currentPage}-a-${idx}`}
+              card={card}
+              flipped={phase === "idle" ? false : !!flippedCards[idx]}
+              revealTick={revealTicks[idx] ?? 0}
+              freezeFlip={freezeFlip}
+              onClick={() => {
+                setIsAutoRevealing(false);
+                setPhase("revealing");
+                setFlippedCards((prev) => {
+                  const copy = [...prev];
+                  copy[idx] = !copy[idx];
+                  return copy;
+                });
+                setRevealTicks((prev) => {
+                  const copy = [...prev];
+                  copy[idx] = (copy[idx] ?? 0) + 1;
+                  return copy;
+                });
+              }}
+            />
+          ))}
         </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 justify-items-center">
+          {currentCards.slice(2).map((card, i) => {
+            const idx = i + 2;
+            return (
+              <Card
+                key={card.pullId ?? `${currentPage}-b-${idx}`}
+                card={card}
+                flipped={phase === "idle" ? false : !!flippedCards[idx]}
+                revealTick={revealTicks[idx] ?? 0}
+                freezeFlip={freezeFlip}
+                onClick={() => {
+                  setIsAutoRevealing(false);
+                  setPhase("revealing");
+                  setFlippedCards((prev) => {
+                    const copy = [...prev];
+                    copy[idx] = !copy[idx];
+                    return copy;
+                  });
+                  setRevealTicks((prev) => {
+                    const copy = [...prev];
+                    copy[idx] = (copy[idx] ?? 0) + 1;
+                    return copy;
+                  });
+                }}
+              />
+            );
+          })}
+        </div>
+      </div>
+    </div>
+
+    {/* Footer */}
+    <div className="px-6 py-4 border-t flex justify-center">
+      {currentPage === totalPages - 1 ? (
+        <button
+          onClick={onClose}
+          className="bg-blue-500 text-white py-3 px-8 rounded-xl hover:bg-blue-700 transition duration-200"
+        >
+          Fermer
+        </button>
+      ) : (
+        <button
+          onClick={handleNextPage}
+          className="bg-blue-500 text-white py-3 px-8 rounded-xl hover:bg-blue-700 transition duration-200"
+        >
+          Suivant
+        </button>
+      )}
+    </div>
+  </div>
+</div>
+
     );
 }
 
@@ -208,8 +222,10 @@ function Card({ card, flipped, onClick, revealTick, freezeFlip = false }) {
     const frontSrc = card.isGold && card.picture_gold ? card.picture_gold : card.picture;
   
     return (
-      <div
-        className="card relative mx-auto cursor-pointer w-[100px] h-[100px] sm:w-[150px] sm:h-[150px] md:w-[200px] md:h-[200px] lg:w-[250px] lg:h-[250px] xl:w-[300px] xl:h-[300px] 2xl:w-[300px] 2xl:h-[300px]"
+        <div
+        className={`card relative mx-auto cursor-pointer
+        w-[100px] h-[100px] sm:w-[150px] sm:h-[150px] md:w-[200px] md:h-[200px] lg:w-[250px] lg:h-[250px] xl:w-[300px] xl:h-[300px] 2xl:w-[320px] 2xl:h-[320px]
+        ${flipped && card.isGold ? "shakeGold" : ""}`}
         onClick={onClick}
         data-tier={tier}
       >

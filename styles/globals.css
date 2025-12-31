@@ -177,6 +177,9 @@ body {
    rgb(var(--background-start-rgb));  */
 }
 
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
 .card {
   perspective: 1000px;
   /* Ajoutez une perspective pour un effet 3D */
@@ -763,5 +766,18 @@ body {
   0%{ opacity:0; transform: scale(.6); }
   25%{ opacity:1; transform: scale(1); }
   100%{ opacity:0; transform: scale(1.25); }
+}
+
+.shakeGold{
+  animation: goldShake 260ms ease-out 1;
+}
+
+@keyframes goldShake{
+  0%{ transform: translate3d(0,0,0) rotate(0deg) scale(1); }
+  20%{ transform: translate3d(-2px, 1px,0) rotate(-0.6deg) scale(1.01); }
+  40%{ transform: translate3d(2px, -1px,0) rotate(0.6deg) scale(1.01); }
+  60%{ transform: translate3d(-1px, -1px,0) rotate(-0.3deg) scale(1.01); }
+  80%{ transform: translate3d(1px, 1px,0) rotate(0.3deg) scale(1.01); }
+  100%{ transform: translate3d(0,0,0) rotate(0deg) scale(1); }
 }
 
