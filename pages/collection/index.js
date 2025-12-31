@@ -415,8 +415,6 @@ export default function Collection({ cards, totalPoints, errorServer }) {
         )
     }
 
-    console.log('Filtered Cards:', filteredCards);
-
     if (session) {
         return (
             <>

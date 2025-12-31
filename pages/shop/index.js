@@ -55,7 +55,6 @@ export default function Shop({ productsData, totalPoints, errorServer }) {
                 // if response status is 200 then set cards in state and show modal
                 if (response.status === 200) {
                     const data = await response.data;
-                    console.log('Achat réussi:', data);
                     // await editUserPoints(selectedProduct);
                     localStorage.setItem('userOC', JSON.stringify(data.userData));
                     const totalPoints = calculatePoints(data.userData);
