@@ -9,8 +9,9 @@
   --background-start-rgb: 217, 219, 220;
   --background-end-rgb: 255, 255, 255;
 }
+
 /* préférance du jeux de couleur */
- @media (prefers-color-scheme: dark) {
+@media (prefers-color-scheme: dark) {
   :root {
     --foreground-rgb: 255, 255, 255;
     --background-start-rgb: 38, 40, 42;
@@ -69,8 +70,8 @@
     color: black !important;
   }
 
-  
-} 
+
+}
 
 .dark-mode {
   --foreground-rgb: 255, 255, 255;
@@ -164,11 +165,9 @@
 
 body {
   color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-    to bottom,
-    rgb(var(--background-start-rgb)) 0%,
-    rgb(var(--background-end-rgb)) 100%
-  );
+  background: linear-gradient(to bottom,
+      rgb(var(--background-start-rgb)) 0%,
+      rgb(var(--background-end-rgb)) 100%);
   background-attachment: fixed;
   /* background: linear-gradient(
       to bottom,
@@ -179,11 +178,12 @@ body {
 }
 
 .card {
-  perspective: 1000px; /* Ajoutez une perspective pour un effet 3D */
+  perspective: 1000px;
+  /* Ajoutez une perspective pour un effet 3D */
 }
 
 .card-inner {
-  transition: transform 1s;
+  transition: transform 850ms;
   transform-style: preserve-3d;
   position: relative;
   height: 100%;
@@ -193,7 +193,8 @@ body {
   transform: rotateY(180deg);
 }
 
-.card-front, .card-back {
+.card-front,
+.card-back {
   backface-visibility: hidden;
   position: absolute;
   top: 0;
@@ -207,19 +208,21 @@ body {
 }
 
 .tooltip-text {
-  visibility: hidden; 
+  visibility: hidden;
   position: absolute;
-  z-index: 100; 
+  z-index: 100;
   color: white;
-  
+
 }
 
 .dark-mode .tooltip-text {
-  color: black; /* Couleur du texte de la tooltip en mode sombre */
+  color: black;
+  /* Couleur du texte de la tooltip en mode sombre */
 }
 
 .group:hover .tooltip-text {
-  visibility: visible; /* Visible au survol */
+  visibility: visible;
+  /* Visible au survol */
 }
 
 .swiper {
@@ -246,7 +249,8 @@ body {
 .aspect-w-16::before {
   content: '';
   display: block;
-  padding-top: 56.25%; /* 16:9 Aspect Ratio */
+  padding-top: 56.25%;
+  /* 16:9 Aspect Ratio */
 }
 
 .aspect-w-16 img {
@@ -255,14 +259,16 @@ body {
   left: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover; /* S'assure que l'image couvre la zone sans être déformée */
+  object-fit: cover;
+  /* S'assure que l'image couvre la zone sans être déformée */
 }
 
 .swiper-button-prev {
   z-index: 90;
 }
 
-.menu-item, .menu-open-button {
+.menu-item,
+.menu-open-button {
   background: #e91e63;
   border-radius: 100%;
   width: 80px;
@@ -306,13 +312,15 @@ body {
   transform: translate3d(0, 8px, 0);
 }
 
-.menu-open:checked + .menu-open-button .hamburger-1 {
+.menu-open:checked+.menu-open-button .hamburger-1 {
   transform: translate3d(0, 0, 0) rotate(45deg);
 }
-.menu-open:checked + .menu-open-button .hamburger-2 {
+
+.menu-open:checked+.menu-open-button .hamburger-2 {
   transform: translate3d(0, 0, 0) scale(0.1, 1);
 }
-.menu-open:checked + .menu-open-button .hamburger-3 {
+
+.menu-open:checked+.menu-open-button .hamburger-3 {
   transform: translate3d(0, 0, 0) rotate(-45deg);
 }
 
@@ -322,8 +330,8 @@ body {
   margin-left: -190px;
   padding-top: 20px;
   padding-left: 190px;
-  
-  
+
+
   box-sizing: border-box;
   font-size: 20px;
   text-align: left;
@@ -333,24 +341,31 @@ body {
   background: white;
   color: #e91e63;
 }
+
 .menu-item:nth-child(3) {
   transition-duration: 180ms;
 }
+
 .menu-item:nth-child(4) {
   transition-duration: 180ms;
 }
+
 .menu-item:nth-child(5) {
   transition-duration: 180ms;
 }
+
 .menu-item:nth-child(6) {
   transition-duration: 180ms;
 }
+
 .menu-item:nth-child(7) {
   transition-duration: 180ms;
 }
+
 .menu-item:nth-child(8) {
   transition-duration: 180ms;
 }
+
 .menu-item:nth-child(9) {
   transition-duration: 180ms;
 }
@@ -361,47 +376,53 @@ body {
   transition-duration: 400ms;
   transform: scale(1.1, 1.1) translate3d(0, 0, 0);
   cursor: pointer;
-  
+
 }
 
 .menu-open-button:hover {
   transform: scale(1.2, 1.2) translate3d(0, 0, 0);
 }
 
-.menu-open:checked + .menu-open-button {
+.menu-open:checked+.menu-open-button {
   transition-timing-function: linear;
   transition-duration: 200ms;
   transform: scale(0.8, 0.8) translate3d(0, 0, 0);
 }
 
-.menu-open:checked ~ .menu-item {
+.menu-open:checked~.menu-item {
   transition-timing-function: cubic-bezier(0.935, 0, 0.34, 1.33);
 }
+
 /* .menu-open:checked ~ .menu-item:nth-child(3) {
   transition-duration: 180ms;
   transform: translate3d(0.08361px, -104.99997px, 0);
 }*/
-.menu-open:checked ~ .menu-item:nth-child(4) {
+.menu-open:checked~.menu-item:nth-child(4) {
   transition-duration: 280ms;
   transform: translate3d(165.9466px, -12.47586px, 0);
-} 
-.menu-open:checked ~ .menu-item:nth-child(5) {
+}
+
+.menu-open:checked~.menu-item:nth-child(5) {
   transition-duration: 380ms;
   transform: translate3d(90.9466px, 52.47586px, 0);
 }
-.menu-open:checked ~ .menu-item:nth-child(6) {
+
+.menu-open:checked~.menu-item:nth-child(6) {
   transition-duration: 480ms;
   transform: translate3d(0.08361px, 104.99997px, 0);
 }
-.menu-open:checked ~ .menu-item:nth-child(7) {
+
+.menu-open:checked~.menu-item:nth-child(7) {
   transition-duration: 580ms;
   transform: translate3d(-90.86291px, 52.62064px, 0);
 }
-.menu-open:checked ~ .menu-item:nth-child(8) {
+
+.menu-open:checked~.menu-item:nth-child(8) {
   transition-duration: 680ms;
   transform: translate3d(-165.03006px, -12.33095px, 0);
-} 
-.menu-open:checked ~ .menu-item:nth-child(9) {
+}
+
+.menu-open:checked~.menu-item:nth-child(9) {
   transition-duration: 780ms;
   transform: translate3d(-0.25084px, -104.9997px, 0);
 }
@@ -410,11 +431,12 @@ body {
   .menu {
     left: 50%;
     margin-left: -150px;
-    
+
     padding-left: 150px;
   }
 
-  .menu-item, .menu-open-button {
+  .menu-item,
+  .menu-open-button {
     width: 60px;
     height: 60px;
     line-height: 60px;
@@ -427,27 +449,32 @@ body {
     margin-top: -1px;
   }
 
-  .menu-open:checked ~ .menu-item:nth-child(4) {
+  .menu-open:checked~.menu-item:nth-child(4) {
     transition-duration: 280ms;
     transform: translate3d(85.9466px, -12.47586px, 0);
-  } 
-  .menu-open:checked ~ .menu-item:nth-child(5) {
+  }
+
+  .menu-open:checked~.menu-item:nth-child(5) {
     transition-duration: 380ms;
     transform: translate3d(60.9466px, 52.47586px, 0);
   }
-  .menu-open:checked ~ .menu-item:nth-child(6) {
+
+  .menu-open:checked~.menu-item:nth-child(6) {
     transition-duration: 480ms;
     transform: translate3d(0.08361px, 84.99997px, 0);
   }
-  .menu-open:checked ~ .menu-item:nth-child(7) {
+
+  .menu-open:checked~.menu-item:nth-child(7) {
     transition-duration: 580ms;
     transform: translate3d(-60.86291px, 52.62064px, 0);
   }
-  .menu-open:checked ~ .menu-item:nth-child(8) {
+
+  .menu-open:checked~.menu-item:nth-child(8) {
     transition-duration: 680ms;
     transform: translate3d(-85.03006px, -12.33095px, 0);
-  } 
-  .menu-open:checked ~ .menu-item:nth-child(9) {
+  }
+
+  .menu-open:checked~.menu-item:nth-child(9) {
     transition-duration: 780ms;
     transform: translate3d(-0.25084px, -104.9997px, 0);
   }
@@ -458,7 +485,7 @@ body {
   .menu {
     left: 50%;
     margin-left: -170px;
-    
+
     padding-left: 170px;
   }
 }
@@ -468,7 +495,7 @@ body {
   .menu {
     left: 50%;
     margin-left: -190px;
-   
+
     padding-left: 190px;
   }
 }
@@ -478,6 +505,7 @@ body {
     transform: translateY(0) scale(1);
     opacity: 0.9;
   }
+
   100% {
     transform: translateY(-60px) scale(0.5);
     opacity: 0;
@@ -488,7 +516,7 @@ body {
   position: absolute;
   width: 4px;
   height: 4px;
-  background: radial-gradient(circle, rgba(255,223,100,1) 0%, rgba(255,215,0,0.5) 60%, transparent 100%);
+  background: radial-gradient(circle, rgba(255, 223, 100, 1) 0%, rgba(255, 215, 0, 0.5) 60%, transparent 100%);
   border-radius: 50%;
   animation: sparkle 1.6s ease-out forwards;
   pointer-events: none;
@@ -499,7 +527,7 @@ body {
   position: absolute;
   width: 12px;
   height: 12px;
-  background: radial-gradient(circle, rgba(255,223,100,1) 0%, rgba(255,215,0,0.5) 60%, transparent 100%);
+  background: radial-gradient(circle, rgba(255, 223, 100, 1) 0%, rgba(255, 215, 0, 0.5) 60%, transparent 100%);
   border-radius: 50%;
   animation: sparkle 1.6s ease-out forwards;
   pointer-events: none;
@@ -510,12 +538,10 @@ body {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background: linear-gradient(
-    130deg,
-    rgba(255, 255, 255, 0.1) 0%,
-    rgba(255, 255, 255, 0.3) 50%,
-    rgba(255, 255, 255, 0.1) 100%
-  );
+  background: linear-gradient(130deg,
+      rgba(255, 255, 255, 0.1) 0%,
+      rgba(255, 255, 255, 0.3) 50%,
+      rgba(255, 255, 255, 0.1) 100%);
   background-size: 200% 200%;
   animation: shine 3s linear infinite;
   mix-blend-mode: overlay;
@@ -526,6 +552,7 @@ body {
   0% {
     background-position: -200% 0;
   }
+
   100% {
     background-position: 200% 0;
   }
@@ -556,7 +583,185 @@ body {
 }
 
 @keyframes sparkleFrame {
-  0% { opacity: 0; transform: scale(0.5); }
-  50% { opacity: 1; transform: scale(1.2); }
-  100% { opacity: 0; transform: scale(0.5); }
+  0% {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1.2);
+  }
+
+  100% {
+    opacity: 0;
+    transform: scale(0.5);
+  }
 }
+
+/* Badge NEW petit glow */
+.newBadge {
+  animation: newPop 900ms ease-out 1;
+}
+
+/* --- Fix anti "glimpse" quand on change de page --- */
+.noFlip{
+  transition: none !important;
+}
+
+/* --- Important : clipper tous les FX dans la carte --- */
+.card-face{
+  position:absolute;
+  inset:0;
+  border-radius: 8px;
+  overflow: hidden;          /* ✅ empêche l'effet de déborder */
+  transform: translateZ(0);  /* stabilité */
+}
+
+/* NEW badge */
+.newBadge{
+  animation: newPop 900ms ease-out 1;
+}
+@keyframes newPop{
+  0%{ transform: scale(.85); filter: brightness(.9); }
+  60%{ transform: scale(1.08); filter: brightness(1.15); }
+  100%{ transform: scale(1); }
+}
+
+/* ============ REVEAL FX (clean mais violent) ============ */
+.revealFX{
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  border-radius: inherit;
+  overflow:hidden;
+}
+
+/* 1) Flash court (léger, ne lave pas l'image) */
+.revealFX .flash{
+  position:absolute;
+  inset:0;
+  background: radial-gradient(circle at 50% 45%,
+    rgba(255,255,255,.35),
+    rgba(255,255,255,0) 65%);
+  opacity:0;
+  animation: flash 180ms ease-out 1;
+  mix-blend-mode: screen;
+}
+@keyframes flash{
+  0%{ opacity:0; transform: scale(.98); }
+  30%{ opacity:1; }
+  100%{ opacity:0; transform: scale(1.02); }
+}
+
+/* 2) Shockwave ring (lisible, ne masque pas) */
+.revealFX .ring{
+  position:absolute;
+  left:50%;
+  top:45%;
+  width:40%;
+  aspect-ratio: 1/1;
+  transform: translate(-50%,-50%) scale(.6);
+  border-radius: 999px;
+  border: 3px solid rgba(255,255,255,.75);
+  opacity:0;
+  filter: blur(.2px);
+  animation: ring 520ms ease-out 1;
+}
+@keyframes ring{
+  0%{ opacity:0; transform: translate(-50%,-50%) scale(.55); }
+  20%{ opacity:1; }
+  100%{ opacity:0; transform: translate(-50%,-50%) scale(2.35); }
+}
+
+/* 3) Outline glow (contour seulement) */
+.revealFX .outline{
+  position:absolute;
+  inset:0;
+  border-radius: inherit;
+  box-shadow:
+    0 0 0 2px rgba(255,255,255,.35) inset,
+    0 0 22px rgba(255,255,255,.18);
+  opacity:0;
+  animation: outline 650ms ease-out 1;
+}
+@keyframes outline{
+  0%{ opacity:0; transform: scale(.99); }
+  18%{ opacity:1; }
+  100%{ opacity:0; transform: scale(1.01); }
+}
+
+/* 4) Sparks (discrets mais "pètent") */
+.revealFX .sparks{
+  position:absolute;
+  inset:0;
+  opacity:0;
+  animation: sparks 650ms ease-out 1;
+}
+@keyframes sparks{
+  0%{ opacity:0; }
+  20%{ opacity:1; }
+  100%{ opacity:0; }
+}
+
+/* Sparks via box-shadow pour éviter un gros overlay */
+.revealFX .sparks::before{
+  content:"";
+  position:absolute;
+  left: 18%;
+  top: 22%;
+  width: 4px;
+  height: 4px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.95);
+  box-shadow:
+    120px 30px rgba(255,255,255,.9),
+    40px 120px rgba(255,255,255,.85),
+    190px 110px rgba(255,255,255,.8),
+    240px 50px rgba(255,255,255,.75),
+    70px 190px rgba(255,255,255,.7),
+    210px 200px rgba(255,255,255,.8);
+  filter: blur(.2px);
+  transform: scale(.6);
+  animation: sparkMove 650ms ease-out 1;
+}
+@keyframes sparkMove{
+  0%{ opacity:0; transform: scale(.4) translateY(8px); }
+  25%{ opacity:1; }
+  100%{ opacity:0; transform: scale(1.1) translateY(-18px); }
+}
+
+/* ============ Couleurs par tier ============ */
+.revealFX.rare .ring{ border-color: rgba(120,200,255,.88); }
+.revealFX.rare .outline{ box-shadow: 0 0 0 2px rgba(120,200,255,.35) inset, 0 0 26px rgba(140,120,255,.18); }
+.revealFX.rare .sparks::before{ background: rgba(180,220,255,.95); }
+
+.revealFX.epic .ring{ border-color: rgba(255,80,210,.88); }
+.revealFX.epic .outline{ box-shadow: 0 0 0 2px rgba(255,80,210,.32) inset, 0 0 30px rgba(0,220,255,.16); }
+.revealFX.epic .sparks::before{ background: rgba(255,160,230,.95); }
+
+.revealFX.gold .ring{ border-color: rgba(255,210,80,.92); animation-duration: 720ms; }
+.revealFX.gold .outline{ box-shadow: 0 0 0 2px rgba(255,210,80,.38) inset, 0 0 42px rgba(255,210,80,.22); }
+.revealFX.gold .sparks::before{ background: rgba(255,235,180,.95); }
+
+/* FX NEW localisé bas-droite */
+.newFx{
+  position:absolute;
+  right: 10px;
+  bottom: 10px;
+  width: 90px;
+  height: 90px;
+  border-radius: 999px;
+  pointer-events:none;
+  background: radial-gradient(circle,
+    rgba(34,197,94,.50),
+    rgba(34,197,94,0) 70%);
+  mix-blend-mode: screen;
+  animation: newPulse 850ms ease-out 1;
+}
+@keyframes newPulse{
+  0%{ opacity:0; transform: scale(.6); }
+  25%{ opacity:1; transform: scale(1); }
+  100%{ opacity:0; transform: scale(1.25); }
+}
+
