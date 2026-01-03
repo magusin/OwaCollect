@@ -21,6 +21,7 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'static-cdn.jtvnw.net',
       },
+      { protocol: "https", hostname: "cdn.jsdelivr.net", pathname: "/**" },
     ],
   },
   async redirects() {
